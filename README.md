@@ -16,7 +16,11 @@ What works now:
 | `src/index.js` | The API (create/read/edit events, cover upload, media serving) |
 | `public/` | The three pages and the shared stylesheet |
 
-## One-time setup (about 10 minutes)
+## Deploying
+
+The repo is connected to Cloudflare Workers Builds: every push to `main` deploys automatically (about a minute). Check progress in the Cloudflare dashboard under Workers & Pages → wedding-album → Deployments. `/version.txt` shows when the live copy was built.
+
+## One-time setup (already done for the live site)
 
 You need Node.js 20+ and a Cloudflare account.
 
