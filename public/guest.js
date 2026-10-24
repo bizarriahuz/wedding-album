@@ -1,0 +1,559 @@
+// Guest page: name, camera/gallery pickers, upload queue that survives bad signal, live gallery.
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const slug = location.pathname.split('/')[2] || '';
+  const API = `/api/events/${slug}`;
+  const MAX_BYTES = 95 * 1024 * 1024;
+  const POLL_MS = 6000;
+  const STALL_MS = 45000; // abort an upload that makes no progress for this long
+  const TYPES = { nikah: 'Majlis Akad Nikah', sanding: 'Majlis Persandingan', tandang: 'Majlis Bertandang', other: 'Celebration' };
+
+  // ---------- per-device state ----------
+  const storeKey = `ga:${slug}`;
+  const state = loadState();
+  const urlToken = new URLSearchParams(location.search).get('t');
+  if (urlToken) state.token = urlToken;
+  if (!state.deviceId) state.deviceId = uuid();
+  saveState();
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(storeKey)) || {}; } catch { return {}; }
+  }
+  function saveState() {
+    try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch {}
+  }
+  function uuid() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    const b = crypto.getRandomValues(new Uint8Array(16));
+    b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+    const h = [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  }
+
+  const api = (path, opts = {}) =>
+    fetch(API + path, { ...opts, headers: { 'X-Guest-Token': state.token || '', ...(opts.headers || {}) } })
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw Object.assign(new Error(data.error || 'Request failed'), { status: r.status, code: data.code });
+        return data;
+      });
+
+  // ---------- small UI helpers ----------
+  const show = (el, on = true) => el.classList.toggle('hidden', !on);
+  let toastTimer;
+  function toast(text) {
+    $('toast').textContent = text;
+    show($('toast'));
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => show($('toast'), false), 4500);
+  }
+  function problem(text) {
+    $('problem').textContent = text;
+    show($('problem'));
+    show($('join'), false);
+    show($('share'), false);
+  }
+
+  // ---------- start ----------
+  async function start() {
+    let ev;
+    // Weak signal is common at halls: retry a few times before giving up
+    for (let attempt = 0; attempt < 4 && !ev; attempt++) {
+      try {
+        const r = await fetch(API, { cache: 'no-store' });
+        if (r.status === 404) {
+          $('title').textContent = 'Album not found';
+          $('subtitle').textContent = 'Check the QR code or link and try again.';
+          return;
+        }
+        if (!r.ok) throw new Error('server');
+        ev = await r.json();
+      } catch {
+        if (attempt < 3) {
+          $('title').textContent = 'Connecting…';
+          await new Promise((res) => setTimeout(res, 1500 * (attempt + 1)));
+        }
+      }
+    }
+    if (!ev) {
+      $('title').textContent = "Can't connect right now";
+      $('subtitle').innerHTML = 'Check your signal or Wi-Fi, then <button type="button" class="link-btn" id="retry">try again</button>.';
+      $('retry').onclick = () => { $('subtitle').textContent = ''; start(); };
+      return;
+    }
+    document.title = `${ev.couple_names} · Guest Album`;
+    $('title').textContent = ev.couple_names;
+    const d = new Date(ev.event_date + 'T00:00:00');
+    $('subtitle').textContent = `${TYPES[ev.event_type] || 'Celebration'} · ${d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    if (ev.cover_url) {
+      $('cover').style.backgroundImage = `url("${ev.cover_url}")`;
+      show($('cover'));
+    }
+
+    if (!state.token) return problem('Please scan the QR code on your table to join this album.');
+    if (state.guestId && state.name && !entered) enterShare();
+    else show($('join'));
+  }
+
+  // ---------- join ----------
+  $('join').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    const msg = $('join-msg');
+    btn.disabled = true;
+    msg.className = 'msg'; msg.textContent = '';
+    try {
+      await join($('name').value);
+      enterShare();
+    } catch (err) {
+      if (err.code === 'bad_token') return problem('This link has expired. Please scan the QR code on your table again.');
+      msg.className = 'msg err';
+      msg.textContent = err.status ? err.message : 'No connection. Check your signal and try again.';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  async function join(name) {
+    const data = await api('/guests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, device_id: state.deviceId }),
+    });
+    state.guestId = data.guest_id;
+    state.name = data.name;
+    saveState();
+  }
+
+  let entered = false;
+  function enterShare() {
+    entered = true;
+    show($('join'), false);
+    show($('share'));
+    $('who-name').textContent = state.name;
+    loadGallery();
+    resumeQueue();
+  }
+
+  $('change-name').onclick = () => {
+    $('name').value = state.name || '';
+    show($('share'), false);
+    show($('join'));
+    $('name').focus();
+  };
+
+  // ---------- pickers ----------
+  document.querySelectorAll('[data-pick]').forEach((b) => (b.onclick = () => $(b.dataset.pick).click()));
+  ['pick-photo', 'pick-video', 'pick-gallery'].forEach((id) => {
+    $(id).addEventListener('change', async (e) => {
+      const files = [...e.target.files];
+      e.target.value = '';
+      for (const f of files) await addFile(f);
+    });
+  });
+
+  function guessType(file) {
+    if (file.type) return file.type.toLowerCase();
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    return { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif',
+             mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm' }[ext] || '';
+  }
+
+  // ---------- preparing files ----------
+  function drawToBlob(src, w, h, maxSide, quality) {
+    const scale = Math.min(1, maxSide / Math.max(w, h));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * scale));
+    c.height = Math.max(1, Math.round(h * scale));
+    c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+    return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error('encode'))), 'image/jpeg', quality));
+  }
+
+  async function preparePhoto(file, type) {
+    try {
+      const bmp = await createImageBitmap(file);
+      const out = {
+        blob: await drawToBlob(bmp, bmp.width, bmp.height, 2000, 0.82),
+        thumb: await drawToBlob(bmp, bmp.width, bmp.height, 480, 0.7),
+        w: Math.round(bmp.width * Math.min(1, 2000 / Math.max(bmp.width, bmp.height))),
+        h: Math.round(bmp.height * Math.min(1, 2000 / Math.max(bmp.width, bmp.height))),
+      };
+      bmp.close && bmp.close();
+      return out;
+    } catch {
+      // Browser can't decode it (e.g. HEIC outside Safari): send the original, no preview
+      return { blob: file, thumb: null, w: null, h: null, type };
+    }
+  }
+
+  function prepareVideo(file) {
+    return new Promise((resolve) => {
+      const v = document.createElement('video');
+      const src = URL.createObjectURL(file);
+      let settled = false;
+      const finish = (thumb) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        const out = { blob: file, thumb, w: v.videoWidth || null, h: v.videoHeight || null };
+        v.removeAttribute('src'); v.load();
+        URL.revokeObjectURL(src);
+        resolve(out);
+      };
+      const timer = setTimeout(() => finish(null), 6000);
+      v.muted = true; v.playsInline = true; v.preload = 'auto';
+      v.onloadeddata = () => { v.currentTime = Math.min(0.5, (v.duration || 1) / 2); };
+      v.onseeked = () => {
+        if (!v.videoWidth) return finish(null);
+        drawToBlob(v, v.videoWidth, v.videoHeight, 480, 0.7).then(finish, () => finish(null));
+      };
+      v.onerror = () => finish(null);
+      v.src = src;
+      v.load();
+    });
+  }
+
+  async function addFile(file) {
+    const type = guessType(file);
+    const kind = type.startsWith('image/') ? 'photo' : type.startsWith('video/') ? 'video' : null;
+    if (!kind) return toast(`"${file.name}" isn't a photo or video.`);
+    if (kind === 'video' && file.size > MAX_BYTES) return toast('That video is too large. Try a clip under 45 seconds.');
+
+    preparing++;
+    renderStatus();
+    try {
+      const p = kind === 'photo' ? await preparePhoto(file, type) : await prepareVideo(file);
+      const item = {
+        id: uuid(), slug, kind,
+        blob: p.blob, type: p.blob.type || p.type || type, thumb: p.thumb,
+        w: p.w, h: p.h, tries: 0, added: Date.now(),
+      };
+      if (item.blob.size > MAX_BYTES) return toast('That file is too large to share.');
+      await qPut(item);
+      queue.push(item);
+    } catch (err) {
+      console.error(err);
+      toast('Could not read that file. Please try another.');
+    } finally {
+      preparing--;
+      renderStatus();
+      pump();
+    }
+  }
+
+  // ---------- upload queue (IndexedDB, survives reloads) ----------
+  let queue = [];
+  let preparing = 0;
+  let busy = false;
+  let progress = 0;
+  let waitingUntil = 0;
+  let wakeTimer;
+  let sharedThisVisit = 0;
+
+  const dbp = new Promise((res, rej) => {
+    if (!('indexedDB' in window)) return res(null);
+    const r = indexedDB.open('guest-album', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('queue', { keyPath: 'id' });
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => res(null); // private mode etc.: queue lives in memory only
+  });
+  async function tx(mode, fn) {
+    const db = await dbp;
+    if (!db) return undefined;
+    return new Promise((res, rej) => {
+      const t = db.transaction('queue', mode);
+      const out = fn(t.objectStore('queue'));
+      t.oncomplete = () => res(out && out.result);
+      t.onerror = () => rej(t.error);
+    });
+  }
+  const qPut = (item) => tx('readwrite', (s) => s.put(item)).catch(() => {});
+  const qDel = (id) => tx('readwrite', (s) => s.delete(id)).catch(() => {});
+  const qAll = () => tx('readonly', (s) => s.getAll()).catch(() => []);
+
+  async function resumeQueue() {
+    const saved = (await qAll()) || [];
+    const known = new Set(queue.map((q) => q.id));
+    saved.filter((q) => q.slug === slug && !known.has(q.id)).forEach((q) => queue.push(q));
+    queue.sort((a, b) => a.added - b.added);
+    renderStatus();
+    pump();
+  }
+
+  function put(url, blob, onProgress) {
+    return new Promise((resolve, reject) => {
+      const x = new XMLHttpRequest();
+      let last = Date.now();
+      const watchdog = setInterval(() => {
+        if (Date.now() - last > STALL_MS) { clearInterval(watchdog); x.abort(); reject(new Error('stalled')); }
+      }, 5000);
+      x.open('PUT', url);
+      x.setRequestHeader('X-Guest-Token', state.token);
+      x.setRequestHeader('Content-Type', blob.type || 'application/octet-stream');
+      x.upload.onprogress = (e) => { last = Date.now(); if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total); };
+      x.onload = () => {
+        clearInterval(watchdog);
+        let data = {};
+        try { data = JSON.parse(x.responseText); } catch {}
+        resolve({ status: x.status, data });
+      };
+      x.onerror = () => { clearInterval(watchdog); reject(new Error('network')); };
+      x.onabort = () => { clearInterval(watchdog); reject(new Error('aborted')); };
+      x.send(blob);
+    });
+  }
+
+  async function uploadOne(item) {
+    const blob = item.blob.type ? item.blob : new Blob([item.blob], { type: item.type });
+    if (item.thumb) {
+      const t = await put(`${API}/thumbs/${item.id}`, item.thumb);
+      if (t.status >= 500) throw new Error('server');
+      if (t.status >= 400 && t.status !== 413) return t; // let the media call report the real problem
+    }
+    const q = new URLSearchParams({ guest: state.guestId });
+    if (item.w) q.set('w', item.w);
+    if (item.h) q.set('h', item.h);
+    return put(`${API}/media/${item.id}?${q}`, blob, (p) => { progress = p; renderStatus(); });
+  }
+
+  async function pump() {
+    if (busy || !queue.length || !state.guestId) return;
+    if (Date.now() < waitingUntil) return;
+    busy = true;
+    const item = queue[0];
+    progress = 0;
+    renderStatus();
+    try {
+      const res = await uploadOne(item);
+      if (res.status < 300) {
+        await done(item, true);
+      } else if (res.data.code === 'no_guest') {
+        await join(state.name); // device forgot by the server: re-register and retry
+      } else if (res.data.code === 'bad_token' || res.data.code === 'closed') {
+        queue = []; // nothing more can be sent
+        toast(res.data.error);
+      } else if (res.status >= 400 && res.status < 500) {
+        await done(item, false);
+        toast(res.data.error || 'That file could not be shared.');
+      } else {
+        throw new Error('server');
+      }
+      item.tries = 0;
+      waitingUntil = 0;
+    } catch {
+      // No signal, timeout or server hiccup: wait and try again, longer each time
+      item.tries = (item.tries || 0) + 1;
+      const wait = Math.min(30000, 2000 * 2 ** Math.min(item.tries - 1, 4));
+      waitingUntil = Date.now() + wait;
+      clearTimeout(wakeTimer);
+      wakeTimer = setTimeout(() => { waitingUntil = 0; pump(); }, wait);
+    } finally {
+      busy = false;
+      renderStatus();
+      if (!waitingUntil) setTimeout(pump, 0);
+    }
+  }
+
+  async function done(item, ok) {
+    queue = queue.filter((q) => q.id !== item.id);
+    await qDel(item.id);
+    if (ok) {
+      sharedThisVisit++;
+      state.sharedCount = (state.sharedCount || 0) + 1;
+      saveState();
+      pollFeed();
+    }
+  }
+
+  // Signal back, or the guest returns to the page: try straight away
+  const wake = () => { waitingUntil = 0; clearTimeout(wakeTimer); pump(); };
+  window.addEventListener('online', wake);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { wake(); pollFeed(); } });
+
+  function renderStatus() {
+    const box = $('status');
+    const pending = queue.length;
+    if (!pending && !preparing) {
+      if (sharedThisVisit) {
+        box.className = 'status done';
+        $('status-main').textContent = `Shared, thank you!`;
+        $('status-sub').textContent = `${state.sharedCount} from you so far`;
+        $('status-bar').style.width = '100%';
+      } else {
+        show(box, false);
+      }
+      return;
+    }
+    show(box);
+    if (preparing && !pending) {
+      box.className = 'status';
+      $('status-main').textContent = 'Getting your photos ready…';
+      $('status-sub').textContent = '';
+      $('status-bar').style.width = '0%';
+    } else if (waitingUntil && !busy) {
+      box.className = 'status waiting';
+      $('status-main').textContent = navigator.onLine === false ? 'No signal right now' : 'Connection is weak';
+      $('status-sub').textContent = `${pending} waiting · will send automatically`;
+      $('status-bar').style.width = '0%';
+    } else {
+      box.className = 'status';
+      const pct = Math.round(progress * 100);
+      $('status-main').textContent = pending === 1 ? `Sharing… ${pct}%` : `Sharing 1 of ${pending}… ${pct}%`;
+      $('status-sub').textContent = 'Keep this page open until it finishes';
+      $('status-bar').style.width = `${pct}%`;
+    }
+  }
+
+  // ---------- gallery ----------
+  const items = new Map(); // id -> item
+  let order = [];          // ids, newest first
+  let newest = null, oldest = null, pollTimer, polling = false;
+
+  async function loadGallery() {
+    try {
+      const data = await api('/feed');
+      merge(data.items);
+      show($('more'), data.has_more);
+      setCount(data.total);
+    } catch (err) {
+      if (err.code === 'bad_token') return problem('This link has expired. Please scan the QR code on your table again.');
+    }
+    render();
+    clearInterval(pollTimer);
+    pollTimer = setInterval(() => { if (!document.hidden) pollFeed(); }, POLL_MS);
+  }
+
+  async function pollFeed() {
+    if (polling || !state.guestId) return;
+    polling = true;
+    try {
+      const data = await api(`/feed${newest ? `?since=${encodeURIComponent(newest)}` : ''}`);
+      if (merge(data.items)) render();
+      setCount(data.total);
+    } catch {} finally { polling = false; }
+  }
+
+  $('more').onclick = async () => {
+    $('more').disabled = true;
+    try {
+      const data = await api(`/feed?before=${encodeURIComponent(oldest)}`);
+      merge(data.items);
+      show($('more'), data.has_more);
+      render();
+    } catch { toast('Could not load more. Check your signal.'); }
+    $('more').disabled = false;
+  };
+
+  function merge(list) {
+    let added = false;
+    for (const it of list) {
+      if (items.has(it.id)) continue;
+      items.set(it.id, it);
+      added = true;
+      if (!newest || it.created_at > newest) newest = it.created_at;
+      if (!oldest || it.created_at < oldest) oldest = it.created_at;
+    }
+    if (added) order = [...items.values()].sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).map((i) => i.id);
+    return added;
+  }
+
+  function setCount(n) {
+    $('count').textContent = n ? `${n} shared` : '';
+  }
+
+  function render() {
+    const grid = $('grid');
+    show($('empty'), order.length === 0);
+    // Add tiles that aren't on the page yet, keeping newest first
+    const existing = new Set([...grid.children].map((c) => c.dataset.id));
+    let prevEl = null;
+    order.forEach((id) => {
+      let el = existing.has(id) ? grid.querySelector(`[data-id="${id}"]`) : null;
+      if (!el) {
+        el = tile(items.get(id));
+        if (prevEl) prevEl.after(el); else grid.prepend(el);
+      }
+      prevEl = el;
+    });
+  }
+
+  function tile(it) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `tile ${it.kind}`;
+    b.dataset.id = it.id;
+    b.setAttribute('aria-label', `${it.kind === 'video' ? 'Video' : 'Photo'} shared by ${it.guest_name}`);
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.alt = '';
+    img.src = it.thumb_url;
+    img.onerror = () => {
+      img.onerror = null;
+      if (it.kind === 'photo') img.src = it.url; // no preview made: use the photo itself
+      else img.remove();                         // video without preview: plain tile with play badge
+    };
+    b.append(img);
+    if (it.kind === 'video') b.insertAdjacentHTML('beforeend', '<span class="play" aria-hidden="true"></span>');
+    b.onclick = () => openViewer(it.id);
+    return b;
+  }
+
+  // ---------- viewer ----------
+  let current = null;
+  function openViewer(id) {
+    current = id;
+    show($('viewer'));
+    document.body.style.overflow = 'hidden';
+    paintViewer();
+  }
+  function closeViewer() {
+    show($('viewer'), false);
+    $('v-stage').innerHTML = '';
+    document.body.style.overflow = '';
+    current = null;
+  }
+  function step(dir) {
+    const i = order.indexOf(current) + dir;
+    if (i >= 0 && i < order.length) { current = order[i]; paintViewer(); }
+  }
+  function paintViewer() {
+    const it = items.get(current);
+    const stage = $('v-stage');
+    stage.innerHTML = '';
+    let media;
+    if (it.kind === 'video') {
+      media = document.createElement('video');
+      media.controls = true; media.playsInline = true; media.autoplay = true;
+      media.poster = it.thumb_url;
+    } else {
+      media = document.createElement('img');
+      media.alt = `Photo shared by ${it.guest_name}`;
+    }
+    media.src = it.url;
+    stage.append(media);
+    $('v-caption').textContent = `Shared by ${it.guest_name}`;
+    const i = order.indexOf(current);
+    $('v-prev').disabled = i <= 0;
+    $('v-next').disabled = i >= order.length - 1;
+  }
+  $('v-close').onclick = closeViewer;
+  $('v-prev').onclick = () => step(-1);
+  $('v-next').onclick = () => step(1);
+  $('viewer').addEventListener('click', (e) => { if (e.target.id === 'viewer' || e.target.id === 'v-stage') closeViewer(); });
+  document.addEventListener('keydown', (e) => {
+    if (current === null) return;
+    if (e.key === 'Escape') closeViewer();
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
+  let touchX = null;
+  $('viewer').addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+  $('viewer').addEventListener('touchend', (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) step(dx < 0 ? 1 : -1);
+    touchX = null;
+  });
+
+  start();
+})();

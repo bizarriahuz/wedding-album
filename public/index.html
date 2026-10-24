@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Create an album · Guest Album</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <div class="brand">Guest Album</div>
+    <h1>Create an album</h1>
+    <p class="sub">One album per event. You'll get a private admin link for the couple and a guest link for the QR codes.</p>
+
+    <form id="create" class="card" autocomplete="off">
+      <label for="names">Couple's names</label>
+      <input id="names" name="couple_names" placeholder="Aina &amp; Hakim" required maxlength="80">
+
+      <div class="row">
+        <div>
+          <label for="type">Event</label>
+          <select id="type" name="event_type">
+            <option value="nikah">Nikah</option>
+            <option value="sanding" selected>Sanding</option>
+            <option value="tandang">Tandang</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="date">Date</label>
+          <input id="date" name="event_date" type="date" required>
+        </div>
+      </div>
+
+      <label for="venue">Venue <span class="hint">(optional)</span></label>
+      <input id="venue" name="venue" placeholder="Void deck, Blk 123 Tampines St 11" maxlength="120">
+
+      <label for="key">Creator key</label>
+      <input id="key" name="key" type="password" required autocomplete="current-password">
+      <p class="hint">Your own password, so only you can create albums.</p>
+
+      <button class="full" type="submit">Create album</button>
+      <div id="msg" class="msg" role="status"></div>
+    </form>
+
+    <section id="done" class="card hidden">
+      <h2>Album created</h2>
+
+      <label>Couple's admin link</label>
+      <div class="linkbox"><input id="admin-url" class="link" readonly><button type="button" data-copy>Copy</button><button type="button" data-share>Share</button></div>
+      <div class="warn">Save this link now. It's the only way into the admin page, and it can't be shown again.</div>
+
+      <label>Guest link (goes on the QR codes)</label>
+      <div class="linkbox"><input id="guest-url" class="link" readonly><button type="button" data-copy>Copy</button><button type="button" data-share>Share</button></div>
+
+      <p class="center" style="margin-top:20px"><a id="open-admin" class="btn ghost" href="#">Open admin page</a></p>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('create');
+    const msg = document.getElementById('msg');
+
+    // Remember the creator key on this device only
+    try { form.key.value = localStorage.getItem('creatorKey') || ''; } catch {}
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button');
+      btn.disabled = true;
+      msg.className = 'msg';
+      msg.textContent = 'Creating…';
+
+      try {
+        const res = await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Create-Key': form.key.value },
+          body: JSON.stringify({
+            couple_names: form.couple_names.value,
+            event_type: form.event_type.value,
+            event_date: form.event_date.value,
+            venue: form.venue.value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not create the album');
+
+        try { localStorage.setItem('creatorKey', form.key.value); } catch {}
+        document.getElementById('admin-url').value = data.admin_url;
+        document.getElementById('guest-url').value = data.guest_url;
+        document.getElementById('open-admin').href = data.admin_url;
+        form.classList.add('hidden');
+        document.getElementById('done').classList.remove('hidden');
+      } catch (err) {
+        msg.className = 'msg err';
+        msg.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+  <script src="/links.js"></script>
+</body>
+</html>

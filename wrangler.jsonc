@@ -1,0 +1,32 @@
+{
+  // One Worker serves the site (public/) and the API (src/index.js).
+  "name": "wedding-album",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // API, media and pretty guest/admin URLs go to the Worker first; everything else is a static file.
+    "run_worker_first": ["/api/*", "/media/*", "/e/*", "/admin/*"]
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "wedding-album",
+      "database_id": "02ddac25-a980-4a46-a189-ee003c633948"
+    }
+  ],
+
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "wedding-album-media"
+    }
+  ]
+
+  // Secret (not stored here): CREATE_KEY, your own password for creating events.
+  //   local: put CREATE_KEY=... in .dev.vars
+  //   live:  npx wrangler secret put CREATE_KEY
+}
