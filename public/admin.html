@@ -64,6 +64,11 @@
         </div>
         <label for="venue">Venue</label>
         <input id="venue" name="venue" maxlength="120">
+        <label for="theme">Look of the guest page</label>
+        <select id="theme" name="theme">
+          <option value="sapphire">Sapphire night</option>
+          <option value="ha-florals">Invitation florals (Harris &amp; Aqilah)</option>
+        </select>
         <button class="full" type="submit">Save changes</button>
         <div id="details-msg" class="msg" role="status"></div>
       </form>
@@ -108,6 +113,7 @@
       f.event_type.value = ev.event_type;
       f.event_date.value = ev.event_date;
       f.venue.value = ev.venue || '';
+      f.theme.value = ev.theme || 'sapphire';
       $('app').classList.remove('hidden');
     }
 
@@ -150,6 +156,7 @@
             event_type: f.event_type.value,
             event_date: f.event_date.value,
             venue: f.venue.value,
+            theme: f.theme.value,
           }),
         });
         render(ev);

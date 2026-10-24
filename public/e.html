@@ -8,19 +8,29 @@
   <title>Guest Album</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400&family=Ephesis&family=Figtree:wght@400;500;600&family=Marcellus&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
+  <script>
+    // Apply this album's look before the page paints, if this phone has seen it before
+    try { var t = JSON.parse(localStorage.getItem('ga:' + location.pathname.split('/')[2]) || '{}').theme;
+          if (t) document.documentElement.className = 'theme-' + t; } catch (e) {}
+  </script>
 </head>
 <body class="guest">
   <main class="wrap">
     <header class="hero" id="hero">
+      <div class="deco top left" aria-hidden="true"></div>
+      <div class="deco top right" aria-hidden="true"></div>
       <div class="songket" aria-hidden="true"></div>
+      <p class="pre">The wedding of</p>
       <p class="occasion" id="occasion">&nbsp;</p>
       <h1 class="names" id="names"><span id="title">Loading…</span></h1>
       <p class="when" id="when"></p>
       <p class="where" id="where"></p>
       <div class="arch hidden" id="arch" role="img" aria-label="The couple"><span class="monogram" id="monogram"></span></div>
       <div class="songket flip" aria-hidden="true"></div>
+      <div class="deco bottom left" aria-hidden="true"></div>
+      <div class="deco bottom right" aria-hidden="true"></div>
     </header>
 
     <!-- Shown when the link is broken or the token is missing -->
@@ -73,7 +83,12 @@
       <p class="center"><button type="button" class="hidden" id="more">Show older photos</button></p>
     </section>
 
-    <footer class="foot"><div class="songket" aria-hidden="true"></div></footer>
+    <footer class="foot">
+      <div class="songket" aria-hidden="true"></div>
+      <div class="deco bottom left" aria-hidden="true"></div>
+      <div class="deco bottom right" aria-hidden="true"></div>
+      <div class="foot-mark" role="img" aria-label="Jazakallahu khairan"></div>
+    </footer>
   </main>
 
   <!-- Full-screen viewer -->

@@ -88,12 +88,25 @@
     else show($('join'));
   }
 
+  function applyTheme(theme) {
+    const t = theme || 'sapphire';
+    document.documentElement.className = `theme-${t}`;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = getComputedStyle(document.body).getPropertyValue('--g-bg').trim() || '#0a1d49';
+    if (state.theme !== t) { state.theme = t; saveState(); }
+  }
+
   function paintHero(ev) {
     document.title = `${ev.couple_names} · Guest Album`;
     // "Harris & Aqilah" -> two names stacked around a gold ampersand
     const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i);
+    applyTheme(ev.theme);
     const names = $('names');
     names.textContent = '';
+    const mono = document.createElement('span');
+    mono.className = 'names-mono';
+    mono.setAttribute('aria-hidden', 'true');
+    names.append(mono);
     if (parts.length === 2) {
       const [a, b] = parts.map((p) => p.trim());
       const mk = (text, cls) => { const s = document.createElement('span'); s.textContent = text; if (cls) s.className = cls; return s; };

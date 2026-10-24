@@ -15,6 +15,22 @@
 //   GET  /admin/:slug                couple's admin page (static admin.html)
 
 const EVENT_TYPES = ['nikah', 'sanding', 'tandang', 'other'];
+const THEMES = ['sapphire', 'ha-florals'];
+
+// Schema changes the live database needs, applied by the Worker itself on first use.
+// Each must be safe to run again: a "duplicate column" error means it's already done.
+const MIGRATIONS = [
+  "ALTER TABLE events ADD COLUMN theme TEXT NOT NULL DEFAULT 'sapphire'",
+];
+let schemaReady = false;
+async function ensureSchema(env) {
+  if (schemaReady) return;
+  for (const sql of MIGRATIONS) {
+    try { await env.DB.prepare(sql).run(); }
+    catch (err) { if (!/duplicate column/i.test(String(err?.message || err))) throw err; }
+  }
+  schemaReady = true;
+}
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_COVER_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_MEDIA_BYTES = 95 * 1024 * 1024; // free Workers plan accepts up to 100 MB per request
@@ -39,6 +55,8 @@ export default {
       if (path.startsWith('/admin/')) return env.ASSETS.fetch(new URL('/admin', url));
 
       if (path.startsWith('/media/')) return serveMedia(path.slice(7), env);
+
+      if (path.startsWith('/api/')) await ensureSchema(env);
 
       if (path === '/api/events' && request.method === 'POST') return createEvent(request, env, url);
 
@@ -113,7 +131,7 @@ async function createEvent(request, env, url) {
 
 async function publicEvent(slug, env) {
   const ev = await env.DB.prepare(
-    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, status
+    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, status, theme
        FROM events WHERE slug = ?`
   ).bind(slug).first();
   if (!ev) return json({ error: 'Album not found' }, 404);
@@ -151,8 +169,8 @@ async function updateEvent(slug, request, env, url) {
   if (fields.error) return json({ error: fields.error }, 400);
 
   await env.DB.prepare(
-    `UPDATE events SET couple_names = ?, event_type = ?, event_date = ?, venue = ? WHERE id = ?`
-  ).bind(fields.couple_names, fields.event_type, fields.event_date, fields.venue, ev.id).run();
+    `UPDATE events SET couple_names = ?, event_type = ?, event_date = ?, venue = ?, theme = ? WHERE id = ?`
+  ).bind(fields.couple_names, fields.event_type, fields.event_date, fields.venue, fields.theme, ev.id).run();
 
   return adminEvent(slug, request, env, url);
 }
@@ -336,12 +354,14 @@ function validateEventFields(b, isNew) {
   const event_type = String(b?.event_type ?? 'sanding').trim();
   const event_date = String(b?.event_date ?? '').trim();
   const venue = String(b?.venue ?? '').trim() || null;
+  const theme = String(b?.theme ?? 'sapphire').trim();
 
+  if (!THEMES.includes(theme)) return { error: 'Pick a look from the list' };
   if (couple_names.length < 3 || couple_names.length > 80) return { error: 'Enter the couple\'s names (3 to 80 characters)' };
   if (!EVENT_TYPES.includes(event_type)) return { error: 'Pick nikah, sanding, tandang or other' };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(event_date) || isNaN(Date.parse(event_date))) return { error: 'Enter a valid date' };
   if (venue && venue.length > 120) return { error: 'Venue is too long (120 characters max)' };
-  return { couple_names, event_type, event_date, venue };
+  return { couple_names, event_type, event_date, venue, theme };
 }
 
 function withCoverUrl(ev) {
