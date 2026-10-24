@@ -6,7 +6,7 @@
   const MAX_BYTES = 95 * 1024 * 1024;
   const POLL_MS = 6000;
   const STALL_MS = 45000; // abort an upload that makes no progress for this long
-  const TYPES = { nikah: 'Majlis Akad Nikah', sanding: 'Majlis Persandingan', tandang: 'Majlis Bertandang', other: 'Celebration' };
+  const TYPES = { nikah: 'Majlis Akad Nikah', sanding: 'Majlis Persandingan', tandang: 'Majlis Bertandang', other: 'Majlis' };
 
   // ---------- per-device state ----------
   const storeKey = `ga:${slug}`;
@@ -63,7 +63,7 @@
         const r = await fetch(API, { cache: 'no-store' });
         if (r.status === 404) {
           $('title').textContent = 'Album not found';
-          $('subtitle').textContent = 'Check the QR code or link and try again.';
+          $('when').textContent = 'Check the QR code or link and try again.';
           return;
         }
         if (!r.ok) throw new Error('server');
@@ -77,22 +77,52 @@
     }
     if (!ev) {
       $('title').textContent = "Can't connect right now";
-      $('subtitle').innerHTML = 'Check your signal or Wi-Fi, then <button type="button" class="link-btn" id="retry">try again</button>.';
-      $('retry').onclick = () => { $('subtitle').textContent = ''; start(); };
+      $('when').innerHTML = 'Check your signal or Wi-Fi, then <button type="button" class="link-btn" id="retry">try again</button>.';
+      $('retry').onclick = () => { $('when').textContent = ''; start(); };
       return;
     }
-    document.title = `${ev.couple_names} · Guest Album`;
-    $('title').textContent = ev.couple_names;
-    const d = new Date(ev.event_date + 'T00:00:00');
-    $('subtitle').textContent = `${TYPES[ev.event_type] || 'Celebration'} · ${d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-    if (ev.cover_url) {
-      $('cover').style.backgroundImage = `url("${ev.cover_url}")`;
-      show($('cover'));
-    }
+    paintHero(ev);
 
     if (!state.token) return problem('Please scan the QR code on your table to join this album.');
     if (state.guestId && state.name && !entered) enterShare();
     else show($('join'));
+  }
+
+  function paintHero(ev) {
+    document.title = `${ev.couple_names} · Guest Album`;
+    // "Harris & Aqilah" -> two names stacked around a gold ampersand
+    const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i);
+    const names = $('names');
+    names.textContent = '';
+    if (parts.length === 2) {
+      const [a, b] = parts.map((p) => p.trim());
+      const mk = (text, cls) => { const s = document.createElement('span'); s.textContent = text; if (cls) s.className = cls; return s; };
+      names.append(mk(a), mk('&', 'amp'), mk(b));
+      $('monogram').textContent = `${a[0] || ''}${b[0] || ''}`.toUpperCase();
+    } else {
+      const s = document.createElement('span');
+      s.textContent = ev.couple_names;
+      names.append(s);
+      $('monogram').textContent = (ev.couple_names[0] || '').toUpperCase();
+    }
+    names.setAttribute('aria-label', ev.couple_names);
+
+    $('occasion').textContent = TYPES[ev.event_type] || 'Majlis';
+    const d = new Date(ev.event_date + 'T00:00:00');
+    let when;
+    try { when = d.toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+    catch { when = d.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+    $('when').textContent = when;
+    $('where').textContent = ev.venue || '';
+
+    const arch = $('arch');
+    if (ev.cover_url) {
+      arch.style.backgroundImage = `url("${ev.cover_url}")`;
+      arch.classList.add('has-photo');
+    }
+    arch.setAttribute('aria-label', `${ev.couple_names}${ev.cover_url ? '' : ' monogram'}`);
+    show(arch);
+    $('hero').classList.add('ready');
   }
 
   // ---------- join ----------
@@ -128,6 +158,7 @@
   let entered = false;
   function enterShare() {
     entered = true;
+    $('hero').classList.add('compact');
     show($('join'), false);
     show($('share'));
     $('who-name').textContent = state.name;
@@ -136,6 +167,7 @@
   }
 
   $('change-name').onclick = () => {
+    $('hero').classList.remove('compact');
     $('name').value = state.name || '';
     show($('share'), false);
     show($('join'));
@@ -393,7 +425,7 @@
     } else if (waitingUntil && !busy) {
       box.className = 'status waiting';
       $('status-main').textContent = navigator.onLine === false ? 'No signal right now' : 'Connection is weak';
-      $('status-sub').textContent = `${pending} waiting · will send automatically`;
+      $('status-sub').textContent = `${pending} waiting, will send when the signal is back`;
       $('status-bar').style.width = '0%';
     } else {
       box.className = 'status';
@@ -531,7 +563,9 @@
     }
     media.src = it.url;
     stage.append(media);
-    $('v-caption').textContent = `Shared by ${it.guest_name}`;
+    const cap = $('v-caption'), who = document.createElement('b');
+    who.textContent = it.guest_name;
+    cap.replaceChildren('Shared by ', who);
     const i = order.indexOf(current);
     $('v-prev').disabled = i <= 0;
     $('v-next').disabled = i >= order.length - 1;

@@ -2,22 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="theme-color" content="#f4f6fc">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex">
   <title>Album admin · Guest Album</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <main class="wrap">
-    <div class="brand">Guest Album · Admin</div>
+    <div class="brand" aria-hidden="true"><div class="songket"></div></div>
 
     <div id="error" class="card hidden center"></div>
 
     <div id="app" class="hidden">
       <h1 id="title"></h1>
-      <p class="sub" id="subtitle"></p>
+      <p class="sub" id="subtitle" style="white-space:pre-line"></p>
 
       <section class="card">
         <div class="stats">
@@ -94,7 +95,7 @@
     function render(ev) {
       $('title').textContent = ev.couple_names;
       const date = new Date(ev.event_date + 'T00:00:00');
-      $('subtitle').textContent = `${TYPES[ev.event_type]} · ${date.toLocaleDateString('en-SG', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}` + (ev.venue ? ` · ${ev.venue}` : '');
+      $('subtitle').textContent = `${TYPES[ev.event_type]}, ${date.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}` + (ev.venue ? `\n${ev.venue}` : '');
       $('n-guests').textContent = ev.counts.guests;
       $('n-media').textContent = ev.counts.media;
       $('n-wishes').textContent = ev.counts.wishes;
