@@ -42,7 +42,7 @@
         <h2>Guest link</h2>
         <div class="linkbox"><input id="guest-url" class="link" readonly><button type="button" data-copy>Copy</button><button type="button" data-share>Share</button></div>
         <p class="hint">This goes on the table QR codes. Printable cards come in a later update.</p>
-        <p style="margin:12px 0 0"><a id="open-album" class="btn ghost" href="#" target="_blank" rel="noopener">Open the album</a></p>
+        <p style="margin:12px 0 0"><a id="open-album" class="btn ghost" href="#" target="_blank" rel="noopener">View all photos</a></p>
       </section>
 
       <section class="card">
@@ -83,6 +83,11 @@
         </div>
         <label for="venue">Venue</label>
         <input id="venue" name="venue" maxlength="120">
+        <label for="privacy">Who can see the photos</label>
+        <select id="privacy" name="privacy">
+          <option value="public">Everyone sees all guests' photos</option>
+          <option value="private">Guests see only their own (you see all)</option>
+        </select>
         <label for="theme">Look of the guest page</label>
         <select id="theme" name="theme">
           <option value="sapphire">Sapphire night</option>
@@ -131,7 +136,7 @@
       $('n-media').textContent = ev.counts.media;
       $('n-wishes').textContent = ev.counts.wishes;
       $('guest-url').value = ev.guest_url;
-      $('open-album').href = ev.guest_url;
+      $('open-album').href = `${ev.guest_url}#couple=${token}`;
       document.querySelectorAll('[data-print]').forEach((a) => (a.href = `/print/${slug}?layout=${a.dataset.print}#${token}`));
       setCover(ev.cover_url);
 
@@ -141,6 +146,7 @@
       f.event_date.value = ev.event_date;
       f.venue.value = ev.venue || '';
       f.theme.value = ev.theme || 'sapphire';
+      f.privacy.value = ev.privacy || 'public';
       $('app').classList.remove('hidden');
     }
 
@@ -184,6 +190,7 @@
             event_date: f.event_date.value,
             venue: f.venue.value,
             theme: f.theme.value,
+            privacy: f.privacy.value,
           }),
         });
         render(ev);

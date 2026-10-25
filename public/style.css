@@ -291,6 +291,7 @@ body.guest .link-btn:hover { background: none; opacity: .85; }
 body.guest .muted { color: var(--g-muted); }
 body.guest #empty { padding: 28px 16px; border: 1px dashed var(--g-field-line); border-radius: 14px; color: var(--g-muted); }
 
+.privacy-note { margin: -4px 0 14px; font-size: 13px; color: var(--g-muted); }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin: 0 -13px; }
 .tile, body.guest .tile {
   position: relative; display: block;

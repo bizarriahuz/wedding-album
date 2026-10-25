@@ -17,6 +17,7 @@
 
 const EVENT_TYPES = ['nikah', 'sanding', 'tandang', 'other'];
 const THEMES = ['sapphire', 'ha-florals'];
+const PRIVACY = ['public', 'private']; // private: each guest sees only their own uploads; the couple sees all
 
 // Schema changes the live database needs, applied by the Worker itself on first use.
 // Each must be safe to run again: a "duplicate column" error means it's already done.
@@ -133,7 +134,7 @@ async function createEvent(request, env, url) {
 
 async function publicEvent(slug, env) {
   const ev = await env.DB.prepare(
-    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, status, theme
+    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, status, theme, privacy
        FROM events WHERE slug = ?`
   ).bind(slug).first();
   if (!ev) return json({ error: 'Album not found' }, 404);
@@ -171,8 +172,8 @@ async function updateEvent(slug, request, env, url) {
   if (fields.error) return json({ error: fields.error }, 400);
 
   await env.DB.prepare(
-    `UPDATE events SET couple_names = ?, event_type = ?, event_date = ?, venue = ?, theme = ? WHERE id = ?`
-  ).bind(fields.couple_names, fields.event_type, fields.event_date, fields.venue, fields.theme, ev.id).run();
+    `UPDATE events SET couple_names = ?, event_type = ?, event_date = ?, venue = ?, theme = ?, privacy = ? WHERE id = ?`
+  ).bind(fields.couple_names, fields.event_type, fields.event_date, fields.venue, fields.theme, fields.privacy, ev.id).run();
 
   return adminEvent(slug, request, env, url);
 }
@@ -277,6 +278,15 @@ async function feed(slug, request, env, url) {
   const before = url.searchParams.get('before');
   let where = 'm.event_id = ? AND m.approved = 1';
   const args = [ev.id];
+
+  // Private albums: a guest only gets their own uploads back; the couple (admin token) gets everything
+  const adminToken = request.headers.get('X-Admin-Token') || '';
+  const isCouple = !!adminToken && (await safeEqual(await sha256(adminToken), ev.admin_token_hash));
+  if (ev.privacy === 'private' && !isCouple) {
+    where += ' AND m.guest_id = ?';
+    args.push(request.headers.get('X-Guest-Id') || '-');
+  }
+  const countArgs = [...args];
   // since uses >= because several uploads can share a timestamp; the page drops duplicates by id
   if (since) { where += ' AND m.created_at >= ?'; args.push(since); }
   if (before) { where += ' AND m.created_at < ?'; args.push(before); }
@@ -290,10 +300,15 @@ async function feed(slug, request, env, url) {
     ).bind(...args),
   ];
   // Counting the whole album reads every row, so only do it on the first load, not on each "anything new?" check
-  if (!since) queries.push(env.DB.prepare('SELECT COUNT(*) AS n FROM media WHERE event_id = ? AND approved = 1').bind(ev.id));
+  if (!since) {
+    const countWhere = where.replace(/ AND m\.created_at [<>]=? \?/g, '');
+    queries.push(env.DB.prepare(`SELECT COUNT(*) AS n FROM media m WHERE ${countWhere}`).bind(...countArgs));
+  }
   const [rows, total] = await env.DB.batch(queries);
 
   return json({
+    privacy: ev.privacy,
+    couple_view: isCouple,
     total: total ? total.results[0].n : null,
     has_more: !since && rows.results.length === FEED_PAGE,
     items: rows.results.map((r) => ({
@@ -335,7 +350,7 @@ async function authorizeAdmin(slug, request, env) {
 
 async function authorizeGuest(slug, request, env, forUpload = false) {
   const token = request.headers.get('X-Guest-Token') || '';
-  const ev = await env.DB.prepare('SELECT id, guest_token, status FROM events WHERE slug = ?').bind(slug).first();
+  const ev = await env.DB.prepare('SELECT id, guest_token, admin_token_hash, status, privacy FROM events WHERE slug = ?').bind(slug).first();
   if (!ev) return json({ error: 'Album not found' }, 404);
   if (!token || !(await safeEqual(token, ev.guest_token))) {
     return json({ error: 'Please scan the QR code again', code: 'bad_token' }, 401);
@@ -359,13 +374,15 @@ function validateEventFields(b, isNew) {
   const event_date = String(b?.event_date ?? '').trim();
   const venue = String(b?.venue ?? '').trim() || null;
   const theme = String(b?.theme ?? 'sapphire').trim();
+  const privacy = String(b?.privacy ?? 'public').trim();
 
   if (!THEMES.includes(theme)) return { error: 'Pick a look from the list' };
+  if (!PRIVACY.includes(privacy)) return { error: 'Pick who can see the photos' };
   if (couple_names.length < 3 || couple_names.length > 80) return { error: 'Enter the couple\'s names (3 to 80 characters)' };
   if (!EVENT_TYPES.includes(event_type)) return { error: 'Pick nikah, sanding, tandang or other' };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(event_date) || isNaN(Date.parse(event_date))) return { error: 'Enter a valid date' };
   if (venue && venue.length > 120) return { error: 'Venue is too long (120 characters max)' };
-  return { couple_names, event_type, event_date, venue, theme };
+  return { couple_names, event_type, event_date, venue, theme, privacy };
 }
 
 function withCoverUrl(ev) {

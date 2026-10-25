@@ -14,6 +14,12 @@
   const state = loadState();
   const urlToken = new URLSearchParams(location.search).get('t');
   if (urlToken) state.token = urlToken;
+  // The couple's "View all photos" link carries their admin token after #couple=; keep it, then hide it from the address bar
+  const coupleMatch = location.hash.match(/couple=([a-z0-9]+)/);
+  if (coupleMatch) {
+    state.coupleToken = coupleMatch[1];
+    history.replaceState(null, '', location.pathname + location.search);
+  }
   if (!state.deviceId) state.deviceId = uuid();
   saveState();
 
@@ -32,7 +38,12 @@
   }
 
   const api = (path, opts = {}) =>
-    fetch(API + path, { ...opts, headers: { 'X-Guest-Token': state.token || '', ...(opts.headers || {}) } })
+    fetch(API + path, { ...opts, headers: {
+      'X-Guest-Token': state.token || '',
+      ...(state.guestId ? { 'X-Guest-Id': state.guestId } : {}),
+      ...(state.coupleToken ? { 'X-Admin-Token': state.coupleToken } : {}),
+      ...(opts.headers || {}),
+    } })
       .then(async (r) => {
         const data = await r.json().catch(() => ({}));
         if (!r.ok) throw Object.assign(new Error(data.error || 'Request failed'), { status: r.status, code: data.code });
@@ -85,6 +96,15 @@
     paintHero(ev);
 
     if (!state.token) return problem('Please scan the QR code on your table to join this album.');
+    // The couple skip the name step: anything they share is labelled with their names
+    if (state.coupleToken) {
+      // Only a real couple link counts: check it against the admin API before trusting it
+      const ok = await fetch(`/api/admin/${slug}`, { headers: { 'X-Admin-Token': state.coupleToken } }).then((r) => r.ok, () => true);
+      if (!ok) { delete state.coupleToken; saveState(); }
+    }
+    if (state.coupleToken && !(state.guestId && state.name)) {
+      try { await join(ev.couple_names); } catch {}
+    }
     if (state.guestId && state.name && !entered) enterShare();
     else show($('join'));
   }
@@ -128,6 +148,9 @@
     catch { when = d.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
     $('when').textContent = when;
     $('where').textContent = ev.venue || '';
+    if (ev.privacy === 'private') {
+      document.querySelector('#join .lead').textContent = "Share your photos and videos with the couple. Only they will see them. What's your name?";
+    }
 
     const arch = $('arch');
     if (ev.cover_url) {
@@ -455,9 +478,27 @@
   let order = [];          // ids, newest first
   let newest = null, oldest = null, pollTimer, polling = false;
 
+  let ownOnly = false;
+  function applyPrivacy(data) {
+    ownOnly = data.privacy === 'private' && !data.couple_view;
+    const note = $('privacy-note');
+    if (data.couple_view) {
+      $('gallery-title').textContent = "All guests' photos";
+      note.textContent = data.privacy === 'private'
+        ? 'Guests only see their own photos. You two see everything.'
+        : 'You are viewing as the couple.';
+    } else if (ownOnly) {
+      $('gallery-title').textContent = 'Your photos';
+      note.textContent = 'Only you and the couple can see the photos you share.';
+      $('empty').textContent = 'Photos you share will appear here.';
+    }
+    show(note, !!(data.couple_view || ownOnly));
+  }
+
   async function loadGallery() {
     try {
       const data = await api('/feed');
+      applyPrivacy(data);
       merge(data.items);
       show($('more'), data.has_more);
       setCount(data.total);
@@ -519,7 +560,7 @@
   let total = 0;
   function setCount(n) {
     total = n || 0;
-    $('count').textContent = total ? `${total} shared` : '';
+    $('count').textContent = total ? `${total} shared${ownOnly ? ' by you' : ''}` : '';
   }
 
   function render() {
