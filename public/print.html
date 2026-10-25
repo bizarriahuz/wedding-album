@@ -56,7 +56,17 @@
     .card6 { width: 105mm; height: 148mm; padding: 0 12mm; }
     .poster { width: 210mm; height: 297mm; padding: 0 26mm; }
 
-    .p-deco, .p-band { position: absolute; pointer-events: none; }
+    .p-deco, .p-band, .p-frame { position: absolute; pointer-events: none; }
+    .p-frame { display: none; }
+    .p-names .nm, .p-names .amp { position: relative; }
+    .p-date span { display: block; }
+    .p-date span + span { margin-top: .5em; }
+    .p-sparkle { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+    .p-sparkle .glint { fill: var(--p-glint); opacity: .9; }
+    .p-sparkle .dot { fill: var(--p-glint); opacity: .7; }
+    .p-qr { position: relative; z-index: 2; }
+    .p-pre, .p-quote, .p-date { position: relative; z-index: 2; }
+    .p-names { z-index: 2; }
     .p-names { margin: 0; font-weight: 400; color: var(--p-names); position: relative; isolation: isolate; line-height: 1; }
     .p-quote { color: var(--p-ink); margin: 0; text-wrap: balance; }
     .p-qr { background: #fff; display: grid; place-items: center; }
@@ -88,7 +98,7 @@
 
     /* ---------- look: sapphire ---------- */
     .theme-sapphire .card6, .theme-sapphire .poster {
-      --p-bg: #0a1d49; --p-ink: #eef2fb; --p-soft: #a3b3d9; --p-names: #eef2fb; --p-accent: #d6b56e;
+      --p-bg: #0a1d49; --p-ink: #eef2fb; --p-soft: #a3b3d9; --p-names: #eef2fb; --p-accent: #d6b56e; --p-glint: #e6c987;
     }
     .theme-sapphire .p-band { left: 0; right: 0; background: var(--songket) center / 24px 18px repeat-x; background-origin: content-box; border-top: .3mm solid rgba(214, 181, 110, .6); border-bottom: .3mm solid rgba(214, 181, 110, .6); }
     .theme-sapphire .card6 .p-band { height: 7mm; padding: .8mm 0; background-size: 6.4mm 4.8mm; }
@@ -108,7 +118,7 @@
 
     /* ---------- look: invitation florals ---------- */
     .theme-ha-florals .card6, .theme-ha-florals .poster {
-      --p-bg: #efeeec; --p-ink: #430011; --p-soft: #7d5a63; --p-names: #a86f84; --p-accent: #8c3a57;
+      --p-bg: #efeeec; --p-ink: #430011; --p-soft: #7d5a63; --p-names: #a86f84; --p-accent: #8c3a57; --p-glint: #c9a35e;
       background-image: url("/themes/ha-florals/linen.webp"); background-repeat: repeat;
     }
     .theme-ha-florals .card6 { background-size: 34mm; }
@@ -125,7 +135,22 @@
     .theme-ha-florals .poster .p-deco.bl, .theme-ha-florals .poster .p-deco.br { width: 46mm; }
     .theme-ha-florals .poster .p-deco.tl, .theme-ha-florals .poster .p-deco.bl { left: -10mm; }
     .theme-ha-florals .poster .p-deco.tr, .theme-ha-florals .poster .p-deco.br { right: -10mm; }
-    .theme-ha-florals .p-band { display: none; }
+    .theme-ha-florals .p-band, .theme-ha-florals .p-deco { display: none; }
+    .theme-ha-florals .p-frame { display: block; inset: 0; background-repeat: no-repeat; background-size: auto 100%; }
+    .theme-ha-florals .p-frame.left { background-image: url("/themes/ha-florals/frame-left.webp"); background-position: left center; }
+    .theme-ha-florals .p-frame.right { background-image: url("/themes/ha-florals/frame-right.webp"); background-position: right center; }
+    .theme-ha-florals .p-names .nm, .theme-ha-florals .p-names .amp { display: block; }
+    .theme-ha-florals .p-names .amp { font-size: .5em; line-height: 1.15; padding: 0; }
+    .theme-ha-florals .card6 { padding: 0 25mm; }
+    .theme-ha-florals .poster { padding: 0 50mm; }
+    .theme-ha-florals .card6 .p-pre { font-size: 6pt; margin-top: 0; }
+    .theme-ha-florals .card6 .p-quote { font-size: 8.6pt; max-width: 52mm; margin-top: 2.5mm; }
+    .theme-ha-florals .card6 .p-qr { width: 40mm; height: 40mm; margin-top: 4mm; }
+    .theme-ha-florals .card6 .p-date { font-size: 5.8pt; margin-top: 4mm; }
+    .theme-ha-florals .poster .p-pre { font-size: 11pt; margin-top: 0; }
+    .theme-ha-florals .poster .p-quote { font-size: 16pt; max-width: 104mm; margin-top: 5mm; }
+    .theme-ha-florals .poster .p-qr { width: 84mm; height: 84mm; margin-top: 8mm; }
+    .theme-ha-florals .poster .p-date { font-size: 10pt; margin-top: 8mm; }
     .theme-ha-florals .p-pre, .theme-ha-florals .p-date, .theme-ha-florals .p-quote, .theme-ha-florals .p-steps b { font-family: "Marcellus", var(--serif); }
     .theme-ha-florals .p-names { font-family: "Ephesis", cursive; }
     .theme-ha-florals .p-names::before {
@@ -135,15 +160,15 @@
     .theme-ha-florals .p-names .amp { padding: 0 .28em; }
     .theme-ha-florals .p-qr { box-shadow: 0 0 0 .3mm rgba(140, 58, 87, .45); }
     .theme-ha-florals .poster .p-qr { box-shadow: 0 0 0 .5mm rgba(140, 58, 87, .45); }
-    .theme-ha-florals .card6 .p-names { font-size: 27pt; margin-top: 4mm; padding: 3.5mm 0; }
-    .theme-ha-florals .poster .p-names { font-size: 64pt; padding: 8mm 0; }
+    .theme-ha-florals .card6 .p-names { font-size: 26pt; margin-top: 2mm; padding: 2mm 0; }
+    .theme-ha-florals .poster .p-names { font-size: 54pt; margin-top: 4mm; padding: 5mm 0; }
+    .theme-ha-florals .p-names::before { inset: 4% -10%; }
   </style>
 </head>
 <body class="print">
   <nav class="toolbar" id="toolbar">
-    <a href="#" data-layout="sheet">Table cards, 4 per A4</a>
-    <a href="#" data-layout="card">Single card (A6)</a>
-    <a href="#" data-layout="poster">Entrance poster (A4)</a>
+    <a href="#" data-layout="poster">Poster (A4)</a>
+    <a href="#" data-layout="card">Table card (A6)</a>
     <button type="button" id="print-btn">Print or save as PDF</button>
     <p class="tip" id="tip"></p>
   </nav>
@@ -152,6 +177,7 @@
 
   <template id="t-card">
     <article class="card6">
+      <div class="p-frame left"></div><div class="p-frame right"></div>
       <div class="p-band top"></div>
       <div class="p-deco tl"></div><div class="p-deco tr"></div>
       <p class="p-pre">The wedding of</p>
@@ -166,17 +192,13 @@
 
   <template id="t-poster">
     <article class="poster">
+      <div class="p-frame left"></div><div class="p-frame right"></div>
       <div class="p-band top"></div>
       <div class="p-deco tl"></div><div class="p-deco tr"></div>
       <p class="p-pre">The wedding of</p>
       <h1 class="p-names"></h1>
       <p class="p-quote"></p>
       <div class="p-qr"></div>
-      <ol class="p-steps">
-        <li><b>Scan</b>the code with your phone camera</li>
-        <li><b>Type</b>your name, nothing to install</li>
-        <li><b>Share</b>photos, videos and wishes</li>
-      </ol>
       <p class="p-date"></p>
       <div class="p-deco bl"></div><div class="p-deco br"></div>
       <div class="p-band bottom"></div>
@@ -189,13 +211,12 @@
     const slug = location.pathname.split('/')[2];
     const token = location.hash.slice(1);
     const params = new URLSearchParams(location.search);
-    const layout = ['card', 'sheet', 'poster'].includes(params.get('layout')) ? params.get('layout') : 'sheet';
+    const layout = params.get('layout') === 'card' ? 'card' : 'poster';
     const $ = (id) => document.getElementById(id);
 
     const TIPS = {
-      sheet: 'Print on A4 at 100% (actual size), then cut along the dashed lines. Thick card stock (250 gsm or more) stands best.',
-      card: 'One A6 card per page. Send this PDF to a print shop and ask for A6 on thick card stock.',
-      poster: 'A4 poster for the entrance or a standee. A print shop can enlarge it to A3 without losing sharpness.',
+      card: 'One A6 card per page for the tables. Ask a print shop for A6 on thick card stock (250 gsm or more).',
+      poster: 'One A4 poster for the entrance or a standee. Print at 100% (actual size) on thick paper.',
     };
 
     document.querySelectorAll('[data-layout]').forEach((a) => {
@@ -219,22 +240,33 @@
       return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n + 2 * q} ${n + 2 * q}" shape-rendering="crispEdges" role="img" aria-label="QR code to the guest album"><path fill="${color}" d="${d}"/></svg>`;
     }
 
+    // Glints: [x, y, size] in a 100 x 141.4 box (A-series proportions). Kept clear of the QR code.
+    const GLINTS = [
+      [27, 26, 2.6], [73, 29, 1.9], [24, 37, 1.4], [77, 40, 2.4], [31, 45, 1.2], [69, 47, 1.5],
+      [21, 60, 1.8], [80, 66, 1.3], [22, 79, 1.1], [79, 84, 2.1], [30, 92, 1.5], [70, 95, 1.2],
+    ];
+    const DOTS = [[35, 22], [64, 24], [29, 52], [72, 55], [26, 70], [75, 74], [33, 98], [66, 101], [50, 18], [45, 104], [56, 33], [41, 31]];
+    function sparkleSvg() {
+      const star = (x, y, r) => `<path transform="translate(${x} ${y}) scale(${r})" d="M0-1C.12-.12.12-.12 1 0C.12.12.12.12 0 1C-.12.12-.12.12-1 0C-.12-.12-.12-.12 0-1Z"/>`;
+      return `<svg class="p-sparkle" viewBox="0 0 100 141.4" aria-hidden="true">
+        <g class="glint">${GLINTS.map(([x, y, r]) => star(x, y, r)).join('')}</g>
+        <g class="dot">${DOTS.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? .28 : .42}"/>`).join('')}</g>
+      </svg>`;
+    }
+
     function fill(node, ev) {
       const names = node.querySelector('.p-names');
       const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i);
-      if (parts.length === 2) {
-        const amp = document.createElement('span');
-        amp.className = 'amp';
-        amp.textContent = '&';
-        names.append(parts[0].trim(), amp, parts[1].trim());
-      } else {
-        names.textContent = ev.couple_names;
-      }
+      const span = (text, cls) => { const e = document.createElement('span'); e.textContent = text; if (cls) e.className = cls; return e; };
+      if (parts.length === 2) names.append(span(parts[0].trim(), 'nm'), span('&', 'amp'), span(parts[1].trim(), 'nm'));
+      else names.append(span(ev.couple_names, 'nm'));
       node.querySelector('.p-quote').textContent = QUOTE;
       const d = new Date(ev.event_date + 'T00:00:00');
-      node.querySelector('.p-date').textContent =
-        d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' }) + (ev.venue ? `, ${ev.venue}` : '');
+      const date = node.querySelector('.p-date');
+      date.append(span(d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' })));
+      if (ev.venue) date.append(span(ev.venue));
       node.querySelector('.p-qr').innerHTML = qrSvg(ev.guest_url);
+      node.insertAdjacentHTML('beforeend', sparkleSvg());
       return node;
     }
 
@@ -247,13 +279,9 @@
       const pages = $('pages');
       if (layout === 'card') {
         const s = document.createElement('section'); s.className = 'sheet s-a6'; s.append(card()); pages.append(s);
-      } else if (layout === 'poster') {
+      } else {
         const s = document.createElement('section'); s.className = 'sheet s-a4';
         s.append(fill($('t-poster').content.firstElementChild.cloneNode(true), ev)); pages.append(s);
-      } else {
-        const s = document.createElement('section'); s.className = 'sheet s-a4 grid4';
-        for (let i = 0; i < 4; i++) { const c = document.createElement('div'); c.className = 'cell'; c.append(card()); s.append(c); }
-        pages.append(s);
       }
       document.fonts.ready.then(() => document.body.dataset.ready = '1');
     }
