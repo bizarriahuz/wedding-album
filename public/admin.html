@@ -46,6 +46,16 @@
       </section>
 
       <section class="card">
+        <h2>QR cards to print</h2>
+        <p class="hint" style="margin:0 0 14px">Ready-to-print cards in the same look as the album. Each opens as a page you can print or save as a PDF.</p>
+        <div class="print-links">
+          <a class="btn ghost" data-print="sheet" href="#" target="_blank" rel="noopener">Table cards, 4 per A4</a>
+          <a class="btn ghost" data-print="card" href="#" target="_blank" rel="noopener">Single card (A6)</a>
+          <a class="btn ghost" data-print="poster" href="#" target="_blank" rel="noopener">Entrance poster (A4)</a>
+        </div>
+      </section>
+
+      <section class="card">
         <h2>Cover photo</h2>
         <div id="cover" class="cover">No cover yet</div>
         <input id="cover-file" type="file" accept="image/jpeg,image/png,image/webp" class="hidden">
@@ -123,6 +133,7 @@
       $('n-wishes').textContent = ev.counts.wishes;
       $('guest-url').value = ev.guest_url;
       $('open-album').href = ev.guest_url;
+      document.querySelectorAll('[data-print]').forEach((a) => (a.href = `/print/${slug}?layout=${a.dataset.print}#${token}`));
       setCover(ev.cover_url);
 
       const f = $('details');

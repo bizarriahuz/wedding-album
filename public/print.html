@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>QR cards · Guest Album</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400&family=Ephesis&family=Figtree:wght@400;500;600&family=Marcellus&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style id="page-size">@page { size: 210mm 297mm; margin: 0; }</style>
+  <style>
+    /* ---------- screen chrome (never printed) ---------- */
+    body.print { background: #d9dce3; margin: 0; overflow-x: auto; }
+    .toolbar {
+      position: sticky; top: 0; z-index: 5;
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center;
+      padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--line);
+      font: 14px var(--sans);
+    }
+    .toolbar a { padding: 8px 12px; border-radius: 8px; color: var(--ink); text-decoration: none; }
+    .toolbar a[aria-current="page"] { background: var(--paper); font-weight: 600; box-shadow: inset 0 0 0 1px var(--line); }
+    .toolbar button { margin-left: 8px; }
+    .toolbar .tip { flex-basis: 100%; text-align: center; color: var(--ink-soft); font-size: 13px; }
+    .pages { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 24px 12px 60px; }
+    .sheet { background: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, .18); position: relative; overflow: hidden; }
+    #error { max-width: 420px; margin: 40px auto; }
+
+    @media print {
+      body.print { background: none; }
+      .toolbar { display: none; }
+      .pages { padding: 0; gap: 0; display: block; }
+      .sheet { box-shadow: none; break-after: page; }
+      .sheet:last-child { break-after: auto; }
+    }
+
+    /* ---------- sizes ---------- */
+    .s-a6 { width: 105mm; height: 148mm; }
+    .s-a4 { width: 210mm; height: 297mm; }
+    .grid4 { display: grid; grid-template-columns: 105mm 105mm; grid-template-rows: 148.5mm 148.5mm; }
+    .grid4 .cell { position: relative; display: grid; place-items: center; }
+    .grid4 .cell .card6 { transform: scale(.94); }       /* leaves room for home-printer margins */
+    .grid4::before, .grid4::after { content: ""; position: absolute; background: none; border: 0 dashed #b9b9b9; pointer-events: none; }
+    .grid4::before { left: 50%; top: 0; bottom: 0; border-left-width: .2mm; }
+    .grid4::after { top: 50%; left: 0; right: 0; border-top-width: .2mm; }
+
+    /* ---------- shared design (A6 card; poster scales it up) ---------- */
+    .card6, .poster {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+      background: var(--p-bg); color: var(--p-ink);
+      font-family: var(--sans);
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .card6 { width: 105mm; height: 148mm; padding: 0 12mm; }
+    .poster { width: 210mm; height: 297mm; padding: 0 26mm; }
+
+    .p-deco, .p-band { position: absolute; pointer-events: none; }
+    .p-names { margin: 0; font-weight: 400; color: var(--p-names); position: relative; isolation: isolate; line-height: 1; }
+    .p-quote { color: var(--p-ink); margin: 0; text-wrap: balance; }
+    .p-qr { background: #fff; display: grid; place-items: center; }
+    .p-qr svg { display: block; width: 100%; height: 100%; }
+    .p-how { color: var(--p-soft); margin: 0; }
+    .p-date { color: var(--p-ink); margin: 0; letter-spacing: .14em; text-transform: uppercase; }
+    .p-pre { margin: 0; letter-spacing: .18em; text-transform: uppercase; color: var(--p-ink); }
+    .p-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; color: var(--p-ink); }
+    .p-steps b { display: block; }
+    .p-steps li { text-wrap: balance; }
+
+    /* card spacing */
+    .card6 .p-pre { font-size: 6.6pt; margin-top: 6mm; }
+    .card6 .p-names { font-size: 25pt; margin-top: 2.5mm; padding: 2mm 0; }
+    .card6 .p-quote { font-size: 9.4pt; line-height: 1.35; margin-top: 3mm; max-width: 66mm; }
+    .card6 .p-qr { width: 46mm; height: 46mm; margin-top: 4.5mm; padding: 2.4mm; border-radius: 2.5mm; }
+    .card6 .p-how { font-size: 7pt; line-height: 1.45; margin-top: 3mm; }
+    .card6 .p-date { font-size: 6.4pt; margin-top: 2.6mm; }
+
+    /* poster spacing */
+    .poster .p-pre { font-size: 12pt; margin-top: 14mm; }
+    .poster .p-names { font-size: 58pt; margin-top: 5mm; padding: 4mm 0; }
+    .poster .p-quote { font-size: 19pt; line-height: 1.3; margin-top: 6mm; max-width: 140mm; }
+    .poster .p-qr { width: 92mm; height: 92mm; margin-top: 10mm; padding: 5mm; border-radius: 5mm; }
+    .poster .p-steps { margin-top: 10mm; width: 150mm; font-size: 10.5pt; line-height: 1.35; gap: 6mm; }
+    .poster .p-steps b { font-size: 12.5pt; margin-bottom: 1mm; }
+    .poster .p-how { font-size: 10pt; margin-top: 6mm; }
+    .poster .p-date { font-size: 10.5pt; margin-top: 4mm; }
+
+    /* ---------- look: sapphire ---------- */
+    .theme-sapphire .card6, .theme-sapphire .poster {
+      --p-bg: #0a1d49; --p-ink: #eef2fb; --p-soft: #a3b3d9; --p-names: #eef2fb; --p-accent: #d6b56e;
+    }
+    .theme-sapphire .p-band { left: 0; right: 0; background: var(--songket) center / 24px 18px repeat-x; background-origin: content-box; border-top: .3mm solid rgba(214, 181, 110, .6); border-bottom: .3mm solid rgba(214, 181, 110, .6); }
+    .theme-sapphire .card6 .p-band { height: 7mm; padding: .8mm 0; background-size: 6.4mm 4.8mm; }
+    .theme-sapphire .poster .p-band { height: 12mm; padding: 1.5mm 0; background-size: 10mm 7.5mm; }
+    .theme-sapphire .card6 .p-band.top { top: 9mm; }
+    .theme-sapphire .card6 .p-band.bottom { bottom: 9mm; transform: scaleY(-1); }
+    .theme-sapphire .poster .p-band.top { top: 18mm; }
+    .theme-sapphire .poster .p-band.bottom { bottom: 18mm; transform: scaleY(-1); }
+    .theme-sapphire .p-pre { color: var(--p-accent); letter-spacing: .14em; }
+    .theme-sapphire .p-names { font-family: var(--serif); letter-spacing: -.01em; }
+    .theme-sapphire .p-names .amp { font-style: italic; color: var(--p-accent); font-size: .7em; padding: 0 .22em; }
+    .theme-sapphire .p-quote { font-family: var(--serif); font-style: italic; }
+    .theme-sapphire .p-qr { outline: .3mm solid var(--p-accent); outline-offset: 1.6mm; }
+    .theme-sapphire .poster .p-qr { outline-width: .5mm; outline-offset: 3mm; }
+    .theme-sapphire .p-steps b { color: var(--p-accent); }
+
+
+    /* ---------- look: invitation florals ---------- */
+    .theme-ha-florals .card6, .theme-ha-florals .poster {
+      --p-bg: #efeeec; --p-ink: #430011; --p-soft: #7d5a63; --p-names: #a86f84; --p-accent: #8c3a57;
+      background-image: url("/themes/ha-florals/linen.webp"); background-repeat: repeat;
+    }
+    .theme-ha-florals .card6 { background-size: 34mm; }
+    .theme-ha-florals .poster { background-size: 60mm; }
+    .theme-ha-florals .p-deco { background: center / contain no-repeat; }
+    .theme-ha-florals .p-deco.tl, .theme-ha-florals .p-deco.tr { top: -1mm; aspect-ratio: 292 / 331; background-image: url("/themes/ha-florals/corner-top.webp"); }
+    .theme-ha-florals .p-deco.bl, .theme-ha-florals .p-deco.br { bottom: -1mm; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
+    .theme-ha-florals .p-deco.tr, .theme-ha-florals .p-deco.br { transform: scaleX(-1); }
+    .theme-ha-florals .card6 .p-deco.tl, .theme-ha-florals .card6 .p-deco.tr { width: 33mm; }
+    .theme-ha-florals .card6 .p-deco.bl, .theme-ha-florals .card6 .p-deco.br { width: 22mm; }
+    .theme-ha-florals .card6 .p-deco.tl, .theme-ha-florals .card6 .p-deco.bl { left: -6mm; }
+    .theme-ha-florals .card6 .p-deco.tr, .theme-ha-florals .card6 .p-deco.br { right: -6mm; }
+    .theme-ha-florals .poster .p-deco.tl, .theme-ha-florals .poster .p-deco.tr { width: 64mm; }
+    .theme-ha-florals .poster .p-deco.bl, .theme-ha-florals .poster .p-deco.br { width: 46mm; }
+    .theme-ha-florals .poster .p-deco.tl, .theme-ha-florals .poster .p-deco.bl { left: -10mm; }
+    .theme-ha-florals .poster .p-deco.tr, .theme-ha-florals .poster .p-deco.br { right: -10mm; }
+    .theme-ha-florals .p-band { display: none; }
+    .theme-ha-florals .p-pre, .theme-ha-florals .p-date, .theme-ha-florals .p-quote, .theme-ha-florals .p-steps b { font-family: "Marcellus", var(--serif); }
+    .theme-ha-florals .p-names { font-family: "Ephesis", cursive; }
+    .theme-ha-florals .p-names::before {
+      content: ""; position: absolute; inset: -18% 0; z-index: -1;
+      background: url("/themes/ha-florals/monogram.webp") center / contain no-repeat; opacity: .38;
+    }
+    .theme-ha-florals .p-names .amp { padding: 0 .28em; }
+    .theme-ha-florals .p-qr { box-shadow: 0 0 0 .3mm rgba(140, 58, 87, .45); }
+    .theme-ha-florals .poster .p-qr { box-shadow: 0 0 0 .5mm rgba(140, 58, 87, .45); }
+    .theme-ha-florals .card6 .p-names { font-size: 27pt; margin-top: 4mm; padding: 3.5mm 0; }
+    .theme-ha-florals .poster .p-names { font-size: 64pt; padding: 8mm 0; }
+  </style>
+</head>
+<body class="print">
+  <nav class="toolbar" id="toolbar">
+    <a href="#" data-layout="sheet">Table cards, 4 per A4</a>
+    <a href="#" data-layout="card">Single card (A6)</a>
+    <a href="#" data-layout="poster">Entrance poster (A4)</a>
+    <button type="button" id="print-btn">Print or save as PDF</button>
+    <p class="tip" id="tip"></p>
+  </nav>
+  <div id="error" class="card center hidden"></div>
+  <main class="pages" id="pages"></main>
+
+  <template id="t-card">
+    <article class="card6">
+      <div class="p-band top"></div>
+      <div class="p-deco tl"></div><div class="p-deco tr"></div>
+      <p class="p-pre">The wedding of</p>
+      <h1 class="p-names"></h1>
+      <p class="p-quote"></p>
+      <div class="p-qr"></div>
+      <p class="p-how">Scan with your phone camera<br>No app needed, just your name</p>
+      <p class="p-date"></p>
+      <div class="p-deco bl"></div><div class="p-deco br"></div>
+      <div class="p-band bottom"></div>
+    </article>
+  </template>
+
+  <template id="t-poster">
+    <article class="poster">
+      <div class="p-band top"></div>
+      <div class="p-deco tl"></div><div class="p-deco tr"></div>
+      <p class="p-pre">The wedding of</p>
+      <h1 class="p-names"></h1>
+      <p class="p-quote"></p>
+      <div class="p-qr"></div>
+      <ol class="p-steps">
+        <li><b>Scan</b>the code with your phone camera</li>
+        <li><b>Type</b>your name, nothing to install</li>
+        <li><b>Share</b>photos, videos and wishes</li>
+      </ol>
+      <p class="p-date"></p>
+      <div class="p-deco bl"></div><div class="p-deco br"></div>
+      <div class="p-band bottom"></div>
+    </article>
+  </template>
+
+  <script src="/vendor/qrcode-generator-1.4.4.js"></script>
+  <script>
+    const QUOTE = 'Share your moments & wishes with the couple';
+    const slug = location.pathname.split('/')[2];
+    const token = location.hash.slice(1);
+    const params = new URLSearchParams(location.search);
+    const layout = ['card', 'sheet', 'poster'].includes(params.get('layout')) ? params.get('layout') : 'sheet';
+    const $ = (id) => document.getElementById(id);
+
+    const TIPS = {
+      sheet: 'Print on A4 at 100% (actual size), then cut along the dashed lines. Thick card stock (250 gsm or more) stands best.',
+      card: 'One A6 card per page. Send this PDF to a print shop and ask for A6 on thick card stock.',
+      poster: 'A4 poster for the entrance or a standee. A print shop can enlarge it to A3 without losing sharpness.',
+    };
+
+    document.querySelectorAll('[data-layout]').forEach((a) => {
+      a.href = `/print/${slug}?layout=${a.dataset.layout}#${token}`;
+      if (a.dataset.layout === layout) a.setAttribute('aria-current', 'page');
+      a.addEventListener('click', (e) => { e.preventDefault(); location.replace(a.href); location.reload(); });
+    });
+    $('tip').textContent = TIPS[layout];
+    // exact sizes: Chrome doesn't know the A6 keyword
+    $('page-size').textContent = `@page { size: ${layout === 'card' ? '105mm 148mm' : '210mm 297mm'}; margin: 0; }`;
+    $('print-btn').onclick = () => window.print();
+
+    function qrSvg(text) {
+      const qr = qrcode(0, 'Q');
+      qr.addData(text);
+      qr.make();
+      const n = qr.getModuleCount(), q = 2; // 2-module quiet zone inside the white box
+      let d = '';
+      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) d += `M${c + q} ${r + q}h1v1h-1z`;
+      const color = getComputedStyle(document.documentElement).getPropertyValue('--qr-ink').trim() || '#111';
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n + 2 * q} ${n + 2 * q}" shape-rendering="crispEdges" role="img" aria-label="QR code to the guest album"><path fill="${color}" d="${d}"/></svg>`;
+    }
+
+    function fill(node, ev) {
+      const names = node.querySelector('.p-names');
+      const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i);
+      if (parts.length === 2) {
+        const amp = document.createElement('span');
+        amp.className = 'amp';
+        amp.textContent = '&';
+        names.append(parts[0].trim(), amp, parts[1].trim());
+      } else {
+        names.textContent = ev.couple_names;
+      }
+      node.querySelector('.p-quote').textContent = QUOTE;
+      const d = new Date(ev.event_date + 'T00:00:00');
+      node.querySelector('.p-date').textContent =
+        d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' }) + (ev.venue ? `, ${ev.venue}` : '');
+      node.querySelector('.p-qr').innerHTML = qrSvg(ev.guest_url);
+      return node;
+    }
+
+    function build(ev) {
+      const t = ev.theme || 'sapphire';
+      document.documentElement.className = `theme-${t}`;
+      document.documentElement.style.setProperty('--qr-ink', t === 'ha-florals' ? '#430011' : '#0a1d49');
+      document.title = `QR cards · ${ev.couple_names}`;
+      const card = () => fill($('t-card').content.firstElementChild.cloneNode(true), ev);
+      const pages = $('pages');
+      if (layout === 'card') {
+        const s = document.createElement('section'); s.className = 'sheet s-a6'; s.append(card()); pages.append(s);
+      } else if (layout === 'poster') {
+        const s = document.createElement('section'); s.className = 'sheet s-a4';
+        s.append(fill($('t-poster').content.firstElementChild.cloneNode(true), ev)); pages.append(s);
+      } else {
+        const s = document.createElement('section'); s.className = 'sheet s-a4 grid4';
+        for (let i = 0; i < 4; i++) { const c = document.createElement('div'); c.className = 'cell'; c.append(card()); s.append(c); }
+        pages.append(s);
+      }
+      document.fonts.ready.then(() => document.body.dataset.ready = '1');
+    }
+
+    function showError(text) {
+      $('error').textContent = text;
+      $('error').classList.remove('hidden');
+      $('toolbar').classList.add('hidden');
+    }
+
+    if (!slug || !token) showError('Open this page from the album admin page.');
+    else fetch(`/api/admin/${slug}`, { headers: { 'X-Admin-Token': token } })
+      .then((r) => r.json().then((d) => (r.ok ? d : Promise.reject(new Error(d.error)))))
+      .then(build)
+      .catch((e) => showError(e.message || 'Could not load this album.'));
+  </script>
+</body>
+</html>

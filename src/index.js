@@ -13,6 +13,7 @@
 //   GET  /media/<key>                serve a file from R2
 //   GET  /e/:slug                    guest page (static e.html)
 //   GET  /admin/:slug                couple's admin page (static admin.html)
+//   GET  /print/:slug                printable QR cards and poster (static print.html, needs admin token in #)
 
 const EVENT_TYPES = ['nikah', 'sanding', 'tandang', 'other'];
 const THEMES = ['sapphire', 'ha-florals'];
@@ -53,6 +54,7 @@ export default {
       // Pretty page URLs -> static HTML
       if (path.startsWith('/e/')) return env.ASSETS.fetch(new URL('/e', url));
       if (path.startsWith('/admin/')) return env.ASSETS.fetch(new URL('/admin', url));
+      if (path.startsWith('/print/')) return env.ASSETS.fetch(new URL('/print', url));
 
       if (path.startsWith('/media/')) return serveMedia(path.slice(7), env);
 

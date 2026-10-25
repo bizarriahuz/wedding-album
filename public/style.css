@@ -391,6 +391,9 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 }
 .foot-mark { display: none; }
 
+.print-links { display: flex; flex-direction: column; gap: 8px; }
+.print-links .btn { justify-content: flex-start; }
+
 /* ---------- admin page follows the album's look ---------- */
 .admin-hero { position: relative; text-align: center; }
 .admin-label { margin: 0 0 6px; font-size: 13px; color: var(--ink-soft); }

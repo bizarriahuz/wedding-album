@@ -8,7 +8,7 @@
     "directory": "./public",
     "binding": "ASSETS",
     // API, media and pretty guest/admin URLs go to the Worker first; everything else is a static file.
-    "run_worker_first": ["/api/*", "/media/*", "/e/*", "/admin/*"]
+    "run_worker_first": ["/api/*", "/media/*", "/e/*", "/admin/*", "/print/*"]
   },
 
   "d1_databases": [
