@@ -4,7 +4,8 @@
   const slug = location.pathname.split('/')[2] || '';
   const API = `/api/events/${slug}`;
   const MAX_BYTES = 95 * 1024 * 1024;
-  const POLL_MS = 6000;
+  const POLL_MS = 12000;          // check for new photos every 12 s while the page is on screen
+  const IDLE_MS = 10 * 60 * 1000;  // and pause after 10 min without a tap or scroll
   const STALL_MS = 45000; // abort an upload that makes no progress for this long
   const TYPES = { nikah: 'Majlis Akad Nikah', sanding: 'Majlis Persandingan', tandang: 'Majlis Bertandang', other: 'Majlis' };
 
@@ -465,16 +466,29 @@
     }
     render();
     clearInterval(pollTimer);
-    pollTimer = setInterval(() => { if (!document.hidden) pollFeed(); }, POLL_MS);
+    pollTimer = setInterval(() => {
+      if (!document.hidden && Date.now() - lastActive < IDLE_MS) pollFeed();
+    }, POLL_MS);
   }
+
+  // A phone left open on a table shouldn't keep checking all afternoon
+  let lastActive = Date.now();
+  const wasIdle = () => Date.now() - lastActive >= IDLE_MS;
+  ['pointerdown', 'scroll', 'keydown'].forEach((t) => window.addEventListener(t, () => {
+    const idle = wasIdle();
+    lastActive = Date.now();
+    if (idle) pollFeed(); // catch up straight away when someone picks the phone back up
+  }, { passive: true }));
 
   async function pollFeed() {
     if (polling || !state.guestId) return;
     polling = true;
     try {
       const data = await api(`/feed${newest ? `?since=${encodeURIComponent(newest)}` : ''}`);
-      if (merge(data.items)) render();
-      setCount(data.total);
+      const added = merge(data.items);
+      if (added) render();
+      if (data.total != null) setCount(data.total);
+      else if (added) setCount(total + added);
     } catch {} finally { polling = false; }
   }
 
@@ -490,11 +504,11 @@
   };
 
   function merge(list) {
-    let added = false;
+    let added = 0;
     for (const it of list) {
       if (items.has(it.id)) continue;
       items.set(it.id, it);
-      added = true;
+      added++;
       if (!newest || it.created_at > newest) newest = it.created_at;
       if (!oldest || it.created_at < oldest) oldest = it.created_at;
     }
@@ -502,8 +516,10 @@
     return added;
   }
 
+  let total = 0;
   function setCount(n) {
-    $('count').textContent = n ? `${n} shared` : '';
+    total = n || 0;
+    $('count').textContent = total ? `${total} shared` : '';
   }
 
   function render() {

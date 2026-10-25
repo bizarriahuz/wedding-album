@@ -281,18 +281,20 @@ async function feed(slug, request, env, url) {
   if (since) { where += ' AND m.created_at >= ?'; args.push(since); }
   if (before) { where += ' AND m.created_at < ?'; args.push(before); }
 
-  const [rows, total] = await env.DB.batch([
+  const queries = [
     env.DB.prepare(
       `SELECT m.id, m.kind, m.r2_key, m.width, m.height, m.created_at, g.display_name AS guest_name
          FROM media m LEFT JOIN guests g ON g.id = m.guest_id
         WHERE ${where}
         ORDER BY m.created_at DESC LIMIT ${FEED_PAGE}`
     ).bind(...args),
-    env.DB.prepare('SELECT COUNT(*) AS n FROM media WHERE event_id = ? AND approved = 1').bind(ev.id),
-  ]);
+  ];
+  // Counting the whole album reads every row, so only do it on the first load, not on each "anything new?" check
+  if (!since) queries.push(env.DB.prepare('SELECT COUNT(*) AS n FROM media WHERE event_id = ? AND approved = 1').bind(ev.id));
+  const [rows, total] = await env.DB.batch(queries);
 
   return json({
-    total: total.results[0].n,
+    total: total ? total.results[0].n : null,
     has_more: !since && rows.results.length === FEED_PAGE,
     items: rows.results.map((r) => ({
       id: r.id,
