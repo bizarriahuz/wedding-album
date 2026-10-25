@@ -7,18 +7,28 @@
   <meta name="robots" content="noindex">
   <title>Album admin · Guest Album</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400&family=Ephesis&family=Figtree:wght@400;500;600&family=Marcellus&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
+  <script>
+    // Same look as the album's guest page, applied before paint when this phone has seen it
+    try { var t = localStorage.getItem('ga-admin-theme:' + location.pathname.split('/')[2]);
+          if (t) document.documentElement.className = 'theme-' + t; } catch (e) {}
+  </script>
 </head>
-<body>
+<body class="admin">
   <main class="wrap">
-    <div class="brand" aria-hidden="true"><div class="songket"></div></div>
 
     <div id="error" class="card hidden center"></div>
 
     <div id="app" class="hidden">
-      <h1 id="title"></h1>
-      <p class="sub" id="subtitle" style="white-space:pre-line"></p>
+      <header class="admin-hero">
+        <div class="deco top left" aria-hidden="true"></div>
+        <div class="deco top right" aria-hidden="true"></div>
+        <div class="brand" aria-hidden="true"><div class="songket"></div></div>
+        <p class="admin-label">Album admin</p>
+        <h1 id="title"></h1>
+        <p class="sub" id="subtitle" style="white-space:pre-line"></p>
+      </header>
 
       <section class="card">
         <div class="stats">
@@ -97,7 +107,14 @@
       $('app').classList.add('hidden');
     }
 
+    function applyTheme(theme) {
+      const t = theme || 'sapphire';
+      document.documentElement.className = `theme-${t}`;
+      try { localStorage.setItem('ga-admin-theme:' + slug, t); } catch {}
+    }
+
     function render(ev) {
+      applyTheme(ev.theme);
       $('title').textContent = ev.couple_names;
       const date = new Date(ev.event_date + 'T00:00:00');
       $('subtitle').textContent = `${TYPES[ev.event_type]}, ${date.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}` + (ev.venue ? `\n${ev.venue}` : '');
