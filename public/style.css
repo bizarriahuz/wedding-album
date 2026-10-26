@@ -697,11 +697,11 @@ body.admin .strip-pick.has-photo span { display: none; }
 .theme-ha-florals .hero .deco.bottom { display: none; }
 .theme-ha-florals body.guest .hero .pre { padding-top: 118px; }
 
-/* photo booth screen: a small magical butterfly */
-.ent-scene > .ent-fly { position: absolute; left: 0; top: 0; z-index: 3; width: 42px; height: 34px; pointer-events: none; will-change: transform; }
-.ent-fly svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 5px rgba(255, 226, 170, .95)) drop-shadow(0 1px 2px rgba(90, 60, 50, .35)); }
-.ent-fly .bf-wing { transform-box: view-box; transform-origin: 20px 16px; animation: bf-flap .3s ease-in-out infinite; }
-@keyframes bf-flap { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.22); } }
+/* photo booth screen: the hand-drawn butterfly, on its own layer so it can never move the page */
+.ent-scene > .ent-fly-layer { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; contain: strict; }
+.ent-fly { position: absolute; left: 0; top: 0; width: 56px; will-change: transform; filter: drop-shadow(0 0 4px rgba(255, 238, 205, .9)); }
+.ent-fly img { display: block; width: 100%; height: auto; transform-origin: 78% 50%; animation: bf-flap .34s ease-in-out infinite; user-select: none; -webkit-user-drag: none; }
+@keyframes bf-flap { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.3); } }
 .ent-spark {
   position: absolute; z-index: 2; width: 13px; height: 13px; pointer-events: none;
   background: radial-gradient(circle, #fffdf6 0 16%, #f0c978 42%, rgba(226, 163, 180, .7) 60%, transparent 72%);

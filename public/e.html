@@ -68,26 +68,8 @@
         <button type="button" class="ent-knob" id="ent-knob" aria-label="Press the button to see the couple's photo"></button>
       </div>
       <p class="ent-hint" id="ent-hint">Tap the button</p>
-      <div class="ent-fly" id="ent-fly" aria-hidden="true" hidden>
-        <svg viewBox="-20 -16 40 32">
-          <defs>
-            <linearGradient id="bf-wing" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#fbe9e4"/><stop offset=".45" stop-color="#e2a3b4"/><stop offset="1" stop-color="#b9894f"/>
-            </linearGradient>
-          </defs>
-          <g class="bf-wing">
-            <path d="M-1 -1C-6 -14 -19 -15 -18 -6C-17 0 -9 2 -1 0Z" fill="url(#bf-wing)" stroke="#8a5a4e" stroke-width=".7"/>
-            <path d="M-1 1C-9 2 -15 8 -12 13C-9 16 -4 10 -1 2Z" fill="url(#bf-wing)" stroke="#8a5a4e" stroke-width=".7"/>
-            <circle cx="-12" cy="-7" r="1.4" fill="#fff" opacity=".8"/><circle cx="-8" cy="7" r="1" fill="#fff" opacity=".7"/>
-          </g>
-          <g transform="scale(-1 1)"><g class="bf-wing">
-            <path d="M-1 -1C-6 -14 -19 -15 -18 -6C-17 0 -9 2 -1 0Z" fill="url(#bf-wing)" stroke="#8a5a4e" stroke-width=".7"/>
-            <path d="M-1 1C-9 2 -15 8 -12 13C-9 16 -4 10 -1 2Z" fill="url(#bf-wing)" stroke="#8a5a4e" stroke-width=".7"/>
-            <circle cx="-12" cy="-7" r="1.4" fill="#fff" opacity=".8"/><circle cx="-8" cy="7" r="1" fill="#fff" opacity=".7"/>
-          </g></g>
-          <path d="M0 -6C1 -2 1 6 0 10C-1 6 -1 -2 0 -6Z" fill="#5a4636"/>
-          <path d="M0 -6C-2 -11 -4 -13 -6 -14M0 -6C2 -11 4 -13 6 -14" stroke="#5a4636" stroke-width=".7" fill="none" stroke-linecap="round"/>
-        </svg>
+      <div class="ent-fly-layer" id="ent-fly-layer" aria-hidden="true">
+        <div class="ent-fly" id="ent-fly" hidden><img src="/themes/ha-florals/butterfly.webp" alt="" draggable="false"></div>
       </div>
     </section>
 
