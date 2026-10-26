@@ -364,13 +364,13 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 
 /* flowers around the borders: every corner of the first screen and the foot */
 .theme-ha-florals .deco { display: none; position: absolute; pointer-events: none; background: center / contain no-repeat; opacity: .94; }
-/* side garlands from the invitation framing the first screen; they scroll away with the page */
+/* side garlands from the invitation, repeated down both edges of the whole page and scrolling with it */
 .theme-ha-florals body.guest::before, .theme-ha-florals body.guest::after {
-  content: ""; position: absolute; top: 0; height: 100vh; height: 100svh; max-height: 1000px; min-height: 560px; width: auto; aspect-ratio: 162 / 975; z-index: 0;
-  pointer-events: none; background: no-repeat; background-size: auto 100%; opacity: .96;
+  content: ""; position: absolute; top: 0; bottom: 0; width: min(140px, 36vw); z-index: 0;
+  pointer-events: none; background-repeat: repeat-y; background-size: calc(min(140px, 36vw) / .54) auto; opacity: .96;
 }
-.theme-ha-florals body.guest::before { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); background-position: right top; }
-.theme-ha-florals body.guest::after { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); background-position: left top; }
+.theme-ha-florals body.guest::before { left: 0; background-image: url("/themes/ha-florals/garland-left-tile.webp"); background-position: right top; }
+.theme-ha-florals body.guest::after { right: 0; background-image: url("/themes/ha-florals/garland-right-tile.webp"); background-position: left top; }
 .theme-ha-florals body.guest > main { position: relative; z-index: 1; }
 .theme-ha-florals .hero .deco.top { display: none; }
 .theme-ha-florals .hero > :not(.deco) { position: relative; z-index: 1; }
@@ -476,8 +476,8 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 }
 .ent-flower { position: absolute; pointer-events: none; background: center / contain no-repeat; opacity: .94; }
 .ent-flower.tl, .ent-flower.tr { top: 0; height: 100%; max-height: 980px; width: auto; aspect-ratio: 162 / 975; background-size: auto 100%; }
-.ent-flower.tl { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); background-position: right top; }
-.ent-flower.tr { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); background-position: left top; }
+.ent-flower.tl { left: 0; background-image: url("/themes/ha-florals/garland-left-tile.webp"); background-position: right top; }
+.ent-flower.tr { right: 0; background-image: url("/themes/ha-florals/garland-right-tile.webp"); background-position: left top; }
 .ent-scene > :not(.ent-flower) { position: relative; z-index: 1; }
 .ent-flower.bl, .ent-flower.br { bottom: 0; width: 88px; z-index: 1; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
 .ent-flower.bl { left: 0; }
@@ -601,11 +601,11 @@ body.guest .v-delete.armed:hover { background: #c62f26; }
 /* admin + create pages: the same side garlands as the guest page, on the first screen */
 .theme-ha-florals body.admin::before, .theme-ha-florals body.admin::after,
 .theme-ha-florals body.create::before, .theme-ha-florals body.create::after {
-  content: ""; position: absolute; top: 0; height: 100vh; height: 100svh; max-height: 1000px; min-height: 560px; width: auto; aspect-ratio: 162 / 975; z-index: 0;
-  pointer-events: none; background: no-repeat; background-size: auto 100%; opacity: .96;
+  content: ""; position: absolute; top: 0; bottom: 0; width: min(140px, 36vw); z-index: 0;
+  pointer-events: none; background-repeat: repeat-y; background-size: calc(min(140px, 36vw) / .54) auto; opacity: .96;
 }
-.theme-ha-florals body.admin::before, .theme-ha-florals body.create::before { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); background-position: right top; }
-.theme-ha-florals body.admin::after, .theme-ha-florals body.create::after { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); background-position: left top; }
+.theme-ha-florals body.admin::before, .theme-ha-florals body.create::before { left: 0; background-image: url("/themes/ha-florals/garland-left-tile.webp"); background-position: right top; }
+.theme-ha-florals body.admin::after, .theme-ha-florals body.create::after { right: 0; background-image: url("/themes/ha-florals/garland-right-tile.webp"); background-position: left top; }
 .theme-ha-florals body.admin > main, .theme-ha-florals body.create > main { position: relative; z-index: 1; }
 .theme-ha-florals body.admin .admin-hero .deco.top { display: none !important; }
 .theme-ha-florals body.admin .admin-hero, .theme-ha-florals body.create .wrap > h1, .theme-ha-florals body.create .wrap > .sub,
@@ -688,3 +688,5 @@ body.admin .strip-pick.has-photo span { display: none; }
   font-family: var(--caps, "Cormorant Garamond", Georgia, serif); font-weight: 500; font-size: 15px; letter-spacing: .14em;
   color: var(--iv-ink-soft, #6f645c);
 }
+.theme-ha-florals body.guest, .theme-ha-florals body.admin, .theme-ha-florals body.create { position: relative; }
+.theme-ha-florals .foot .deco.bottom { display: none; }
