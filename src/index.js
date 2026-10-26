@@ -9,6 +9,7 @@
 //   POST /api/events/:slug/guests    guest joins with a name (needs X-Guest-Token)
 //   PUT  /api/events/:slug/thumbs/:id  small preview image, sent before its media (needs X-Guest-Token)
 //   PUT  /api/events/:slug/media/:id   a photo or video, raw body; safe to retry (needs X-Guest-Token)
+//   DELETE /api/events/:slug/media/:id remove an upload: the guest who shared it (X-Guest-Id) or the couple (X-Admin-Token)
 //   GET  /api/events/:slug/feed      gallery items, ?since= newer or ?before= older (needs X-Guest-Token)
 //   PUT  /api/events/:slug/wishes/:id  a wish: JSON {body} for written, raw audio for voice; safe to retry (needs X-Guest-Token)
 //   GET  /api/admin/:slug/wishes     every wish, for the couple (needs X-Admin-Token)
@@ -86,6 +87,7 @@ export default {
 
       m = path.match(/^\/api\/events\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})$/);
       if (m && request.method === 'PUT') return uploadMedia(m[1], m[2], request, env, url);
+      if (m && request.method === 'DELETE') return deleteMedia(m[1], m[2], request, env);
 
       m = path.match(/^\/api\/events\/([a-z0-9-]+)\/feed$/);
       if (m && request.method === 'GET') return feed(m[1], request, env, url);
@@ -343,6 +345,26 @@ async function uploadMedia(slug, id, request, env, url) {
   return json({ ok: true }, 201);
 }
 
+async function isCoupleRequest(request, ev) {
+  const t = request.headers.get('X-Admin-Token') || '';
+  return !!t && (await safeEqual(await sha256(t), ev.admin_token_hash));
+}
+
+async function deleteMedia(slug, id, request, env) {
+  const ev = await authorizeGuest(slug, request, env);
+  if (ev instanceof Response) return ev;
+  const row = await env.DB.prepare('SELECT id, guest_id, r2_key FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
+  if (!row) return json({ ok: true, gone: true }); // already deleted: nothing to do
+  const isCouple = await isCoupleRequest(request, ev);
+  const guestId = request.headers.get('X-Guest-Id') || '';
+  if (!isCouple && (!guestId || row.guest_id !== guestId)) {
+    return json({ error: 'You can only delete photos you shared' }, 403);
+  }
+  await env.DB.prepare('DELETE FROM media WHERE id = ?').bind(id).run();
+  await env.MEDIA.delete([row.r2_key, thumbKey(ev.id, id)]);
+  return json({ ok: true });
+}
+
 async function feed(slug, request, env, url) {
   const ev = await authorizeGuest(slug, request, env);
   if (ev instanceof Response) return ev;
@@ -353,8 +375,8 @@ async function feed(slug, request, env, url) {
   const args = [ev.id];
 
   // Private albums: a guest only gets their own uploads back; the couple (admin token) gets everything
-  const adminToken = request.headers.get('X-Admin-Token') || '';
-  const isCouple = !!adminToken && (await safeEqual(await sha256(adminToken), ev.admin_token_hash));
+  const isCouple = await isCoupleRequest(request, ev);
+  const viewerGuestId = request.headers.get('X-Guest-Id') || '';
   if (ev.privacy === 'private' && !isCouple) {
     where += ' AND m.guest_id = ?';
     args.push(request.headers.get('X-Guest-Id') || '-');
@@ -366,7 +388,7 @@ async function feed(slug, request, env, url) {
 
   const queries = [
     env.DB.prepare(
-      `SELECT m.id, m.kind, m.r2_key, m.width, m.height, m.created_at, g.display_name AS guest_name
+      `SELECT m.id, m.guest_id, m.kind, m.r2_key, m.width, m.height, m.created_at, g.display_name AS guest_name
          FROM media m LEFT JOIN guests g ON g.id = m.guest_id
         WHERE ${where}
         ORDER BY m.created_at DESC LIMIT ${FEED_PAGE}`
@@ -393,6 +415,7 @@ async function feed(slug, request, env, url) {
       height: r.height,
       guest_name: r.guest_name || 'A guest',
       created_at: r.created_at,
+      can_delete: isCouple || (!!viewerGuestId && r.guest_id === viewerGuestId),
     })),
   });
 }

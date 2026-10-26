@@ -501,6 +501,17 @@ body.guest .v-close, body.guest .v-nav, .v-close, .v-nav {
   font-size: 28px; line-height: 1; font-weight: 400;
 }
 .v-close { top: max(12px, env(safe-area-inset-top)); right: 12px; }
+body.guest .v-delete, .v-delete {
+  position: absolute; z-index: 2; top: max(12px, env(safe-area-inset-top)); left: 12px;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 44px; padding: 0 14px; border-radius: 22px;
+  background: rgba(6, 10, 20, .6); color: #fff; font-size: 14px; font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25);
+}
+.v-delete svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+body.guest .v-delete.armed { background: #b3261e; box-shadow: none; }
+body.guest .v-delete:hover { background: rgba(6, 10, 20, .75); }
+body.guest .v-delete.armed:hover { background: #c62f26; }
 .v-nav { top: 50%; transform: translateY(-50%); }
 .v-prev { left: 8px; }
 .v-next { right: 8px; }

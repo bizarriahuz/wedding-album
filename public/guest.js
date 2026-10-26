@@ -750,6 +750,50 @@
     const i = order.indexOf(current);
     $('v-prev').disabled = i <= 0;
     $('v-next').disabled = i >= order.length - 1;
+    disarmDelete();
+    show($('v-delete'), !!it.can_delete);
+  }
+
+  // Delete: first tap arms the button, second tap within 4 s deletes
+  let deleteArmed = null;
+  function disarmDelete() {
+    clearTimeout(deleteArmed); deleteArmed = null;
+    $('v-delete').classList.remove('armed');
+    $('v-delete-label').textContent = 'Delete';
+  }
+  $('v-delete').onclick = async () => {
+    if (!deleteArmed) {
+      $('v-delete').classList.add('armed');
+      $('v-delete-label').textContent = 'Tap again to delete';
+      deleteArmed = setTimeout(disarmDelete, 4000);
+      return;
+    }
+    const id = current;
+    disarmDelete();
+    $('v-delete').disabled = true;
+    try {
+      await api(`/media/${id}`, { method: 'DELETE' });
+      removeItem(id);
+      toast('Deleted.');
+    } catch (err) {
+      toast(err.status ? err.message : 'Deleting needs a connection. Try again when you have signal.');
+    } finally {
+      $('v-delete').disabled = false;
+    }
+  };
+
+  function removeItem(id) {
+    const i = order.indexOf(id);
+    items.delete(id);
+    order = order.filter((x) => x !== id);
+    const tileEl = $('grid').querySelector(`[data-id="${id}"]`);
+    if (tileEl) tileEl.remove();
+    setCount(Math.max(0, total - 1));
+    show($('empty'), order.length === 0);
+    if (current === id) {
+      if (!order.length) closeViewer();
+      else { current = order[Math.min(i, order.length - 1)]; paintViewer(); }
+    }
   }
   $('v-close').onclick = closeViewer;
   $('v-prev').onclick = () => step(-1);
