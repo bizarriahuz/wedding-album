@@ -247,3 +247,7 @@ textarea { min-height: 120px; resize: vertical; }
   .s-exp-pansy, .s-exp-fern, .s-faq-daisy, .s-faq-hpink, .s-con-cosmos, .s-con-babys { width: 62px; top: 4px; }
 }
 .s-exp-note { top: -26px; }
+/* random scatter (site/scatter.js): base tilt + a random extra tilt, nudge, size and mirror */
+.page { position: relative; }
+.st { transform: translate(var(--dx, 0px), var(--dy, 0px)) rotate(calc(var(--r, 0deg) + var(--jr, 0deg))) scale(var(--s, 1)) scaleX(var(--fx, 1)); }
+.st-x { z-index: 0; opacity: .97; }
