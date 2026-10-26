@@ -166,3 +166,84 @@ textarea { min-height: 120px; resize: vertical; }
   .orchid.foot-l { left: -26px; } .orchid.foot-r { right: -26px; }
 }
 @media (max-width: 560px) { .fc-title { font-size: 21px; letter-spacing: .22em; } .caps-title { gap: 14px; letter-spacing: .24em; } }
+
+/* ---------- scrapbook: real pressed flowers, washi tape and paper scraps ---------- */
+.page { overflow: hidden; }            /* stickers may hang off a section, never off the page */
+.block, .plans, .demo-wrap, .sec-title.has-st { position: relative; }
+.feature-card { overflow: visible; }
+.st { position: absolute; z-index: 2; height: auto; pointer-events: none; user-select: none;
+  filter: drop-shadow(0 1.5px 1.5px rgba(70, 52, 36, .22)) drop-shadow(0 8px 14px rgba(70, 52, 36, .12));
+  transform: rotate(var(--r, 0deg)); }
+.orchid { display: none; }
+
+/* home: around the arch card */
+.s-hero-tape   { width: 150px; top: -14px; left: 50%; margin-left: -75px; --r: -2deg; z-index: 3; }
+.s-hero-stamp  { width: 92px; top: 34px; left: 5%; --r: -9deg; }
+.s-hero-leaves { width: 120px; bottom: 6px; left: 1%; --r: -28deg; z-index: 1; }
+.s-hero-cosmos { width: 180px; bottom: -64px; left: 6%; --r: -8deg; }
+.s-hero-babys  { width: 190px; bottom: -40px; right: 4%; --r: 9deg; }
+.s-hero-hpink  { width: 118px; top: 60px; right: 6%; --r: 14deg; }
+.side-script { top: 196px; right: 9%; }
+.side-list { top: 168px; }
+
+/* packages */
+.s-plan-daisy { width: 92px; top: -58px; left: -26px; --r: -14deg; }
+.s-plan-fern  { width: 104px; top: -64px; left: 50%; margin-left: -170px; --r: -16deg; z-index: 0; }
+.s-plan-rose  { width: 96px; top: -52px; right: -22px; --r: 12deg; }
+
+/* experience */
+.s-exp-pansy  { width: 120px; top: 6px; left: 2%; --r: -12deg; }
+.s-exp-fern   { width: 110px; top: -6px; right: 3%; --r: 14deg; }
+.s-exp-sketch { width: 120px; top: -60px; right: 4%; --r: 7deg; }
+.demo-wrap { padding-top: 34px; }
+.s-exp-note   { width: 270px; top: -6px; left: 3%; --r: -3deg; z-index: 3; }
+.s-card-statice { width: 140px; right: 16px; bottom: -36px; --r: 10deg; }
+.feature-card.sage .fc-phone { margin-right: 130px; }
+
+/* faq */
+.s-faq-daisy { width: 92px; top: 4px; left: 4%; --r: -12deg; }
+.s-faq-hpink { width: 110px; top: 16px; right: 5%; --r: 16deg; }
+.s-faq-cream { width: 120px; right: -26px; top: -40px; --r: 12deg; }
+
+/* contact */
+.s-form-tape  { width: 140px; top: -22px; left: 50%; margin-left: -70px; --r: 3deg; z-index: 3; }
+.s-con-cosmos { width: 150px; top: 150px; left: -10px; --r: -10deg; }
+.s-con-babys  { width: 160px; top: 140px; right: -6px; --r: 10deg; }
+.s-con-stamp  { width: 84px; top: 0; right: 7%; --r: 8deg; }
+
+/* footer */
+.foot { overflow: visible; }
+.s-foot-lav    { width: 70px; bottom: 10px; left: calc(50% - 360px); --r: -16deg; }
+.s-foot-leaves { width: 120px; bottom: 0; left: calc(50% - 300px); --r: 12deg; z-index: 1; }
+.s-foot-hyd    { width: 150px; bottom: -20px; right: calc(50% - 360px); --r: 10deg; }
+.s-foot-cream  { width: 96px; bottom: 30px; right: calc(50% - 230px); --r: -10deg; }
+
+@media (max-width: 760px) {
+  .s-hero-stamp { width: 64px; top: 30px; left: 3%; }
+  .s-hero-hpink { width: 78px; top: 34px; right: 2%; }
+  .s-hero-cosmos { width: 122px; bottom: -40px; left: 2%; }
+  .s-hero-babys { width: 132px; bottom: -26px; right: 0; }
+  .s-hero-leaves { width: 84px; left: -10px; }
+  .s-hero-tape { width: 110px; margin-left: -55px; }
+  .s-plan-daisy { width: 70px; top: -46px; left: -8px; }
+  .s-plan-fern { display: none; }
+  .s-plan-rose { width: 70px; top: -40px; right: -6px; }
+  .s-exp-pansy, .s-exp-fern, .s-faq-daisy, .s-faq-hpink, .s-con-cosmos, .s-con-babys { width: 70px; top: -6px; }
+  .s-exp-pansy, .s-faq-daisy, .s-con-cosmos { left: -6px; } .s-exp-fern, .s-faq-hpink, .s-con-babys { right: -6px; }
+  .s-exp-sketch { width: 80px; top: -48px; right: -4px; }
+  .s-exp-note { width: 190px; left: 0; }
+  .s-card-statice { width: 96px; right: -6px; bottom: -30px; }
+  .s-con-stamp { display: none; }
+  .s-faq-cream { width: 80px; right: -10px; }
+  .foot { padding-bottom: 150px; }
+  .s-foot-lav { width: 50px; left: 6px; bottom: 6px; } .s-foot-leaves { width: 84px; left: 34px; bottom: -6px; }
+  .s-foot-hyd { width: 104px; right: 4px; bottom: -14px; } .s-foot-cream { width: 66px; right: 92px; bottom: 16px; }
+}
+/* phones: keep stickers clear of the headings */
+@media (max-width: 760px) {
+  .block.first { padding-top: 78px; }
+  .s-hero-stamp { display: none; }
+  .s-hero-hpink { top: 10px; width: 66px; }
+  .s-exp-pansy, .s-exp-fern, .s-faq-daisy, .s-faq-hpink, .s-con-cosmos, .s-con-babys { width: 62px; top: 4px; }
+}
+.s-exp-note { top: -26px; }
