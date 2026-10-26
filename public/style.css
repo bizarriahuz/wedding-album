@@ -364,22 +364,22 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 
 /* flowers around the borders: every corner of the first screen and the foot */
 .theme-ha-florals .deco { display: none; position: absolute; pointer-events: none; background: center / contain no-repeat; opacity: .94; }
-/* side garlands from the invitation, fixed to both edges of the screen the whole way down the page */
+/* side garlands from the invitation framing the first screen; they scroll away with the page */
 .theme-ha-florals body.guest::before, .theme-ha-florals body.guest::after {
-  content: ""; position: fixed; top: 0; height: 100%; max-height: 1100px; width: auto; aspect-ratio: 300 / 975; z-index: 0;
-  pointer-events: none; background: center / contain no-repeat; opacity: .96;
+  content: ""; position: absolute; top: 0; height: 100vh; height: 100svh; max-height: 1000px; min-height: 560px; width: auto; aspect-ratio: 162 / 975; z-index: 0;
+  pointer-events: none; background: no-repeat; background-size: auto 100%; opacity: .96;
 }
-.theme-ha-florals body.guest::before { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); transform: translateX(-46%); }
-.theme-ha-florals body.guest::after { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); transform: translateX(46%); }
+.theme-ha-florals body.guest::before { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); background-position: right top; }
+.theme-ha-florals body.guest::after { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); background-position: left top; }
 .theme-ha-florals body.guest > main { position: relative; z-index: 1; }
 .theme-ha-florals .hero .deco.top { display: none; }
 .theme-ha-florals .hero > :not(.deco) { position: relative; z-index: 1; }
 .theme-ha-florals .hero .deco.bottom { display: block; bottom: -24px; width: min(70px, 18vw); aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
-.theme-ha-florals .hero .deco.bottom.left { left: -22px; }
-.theme-ha-florals .hero .deco.bottom.right { right: -22px; transform: scaleX(-1); }
-.theme-ha-florals .foot .deco.bottom { display: block; bottom: 0; width: min(110px, 28vw); aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
-.theme-ha-florals .foot .deco.bottom.left { left: -26px; }
-.theme-ha-florals .foot .deco.bottom.right { right: -26px; transform: scaleX(-1); }
+.theme-ha-florals .hero .deco.bottom.left { left: 0; }
+.theme-ha-florals .hero .deco.bottom.right { right: 0; transform: scaleX(-1); }
+.theme-ha-florals .foot .deco.bottom { display: block; bottom: 0; width: min(88px, 23vw); aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
+.theme-ha-florals .foot .deco.bottom.left { left: 0; }
+.theme-ha-florals .foot .deco.bottom.right { right: 0; transform: scaleX(-1); }
 .theme-ha-florals .hero { padding-top: 0; }
 .theme-ha-florals .pre {
   display: block; margin: 0; padding-top: 74px;
@@ -475,13 +475,13 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
   display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
 }
 .ent-flower { position: absolute; pointer-events: none; background: center / contain no-repeat; opacity: .94; }
-.ent-flower.tl, .ent-flower.tr { top: 0; height: 100%; max-height: 980px; width: auto; aspect-ratio: 300 / 975; }
-.ent-flower.tl { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); transform: translateX(-46%); }
-.ent-flower.tr { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); transform: translateX(46%); }
+.ent-flower.tl, .ent-flower.tr { top: 0; height: 100%; max-height: 980px; width: auto; aspect-ratio: 162 / 975; background-size: auto 100%; }
+.ent-flower.tl { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); background-position: right top; }
+.ent-flower.tr { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); background-position: left top; }
 .ent-scene > :not(.ent-flower) { position: relative; z-index: 1; }
 .ent-flower.bl, .ent-flower.br { bottom: 0; width: 88px; z-index: 1; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
-.ent-flower.bl { left: -20px; }
-.ent-flower.br { right: -20px; transform: scaleX(-1); }
+.ent-flower.bl { left: 0; }
+.ent-flower.br { right: 0; transform: scaleX(-1); }
 .entrance { overflow-x: hidden; }
 .ent-pre { margin: 0; font-weight: 500; font-size: 12.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--iv-ink); }
 .ent-names { margin: 8px 0 18px; font-family: var(--script); font-weight: 400; font-size: clamp(42px, 12.5vw, 54px); line-height: 1.1; color: var(--iv-ink); }
@@ -598,14 +598,14 @@ body.guest .v-delete.armed:hover { background: #c62f26; }
 }
 .theme-ha-florals body.guest .occasion { color: #4f453e; }
 
-/* admin + create pages: the same side garlands as the guest page */
+/* admin + create pages: the same side garlands as the guest page, on the first screen */
 .theme-ha-florals body.admin::before, .theme-ha-florals body.admin::after,
 .theme-ha-florals body.create::before, .theme-ha-florals body.create::after {
-  content: ""; position: fixed; top: 0; height: 100%; max-height: 1100px; width: auto; aspect-ratio: 300 / 975; z-index: 0;
-  pointer-events: none; background: center / contain no-repeat; opacity: .96;
+  content: ""; position: absolute; top: 0; height: 100vh; height: 100svh; max-height: 1000px; min-height: 560px; width: auto; aspect-ratio: 162 / 975; z-index: 0;
+  pointer-events: none; background: no-repeat; background-size: auto 100%; opacity: .96;
 }
-.theme-ha-florals body.admin::before, .theme-ha-florals body.create::before { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); transform: translateX(-46%); }
-.theme-ha-florals body.admin::after, .theme-ha-florals body.create::after { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); transform: translateX(46%); }
+.theme-ha-florals body.admin::before, .theme-ha-florals body.create::before { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); background-position: right top; }
+.theme-ha-florals body.admin::after, .theme-ha-florals body.create::after { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); background-position: left top; }
 .theme-ha-florals body.admin > main, .theme-ha-florals body.create > main { position: relative; z-index: 1; }
 .theme-ha-florals body.admin .admin-hero .deco.top { display: none !important; }
 .theme-ha-florals body.admin .admin-hero, .theme-ha-florals body.create .wrap > h1, .theme-ha-florals body.create .wrap > .sub,
@@ -631,3 +631,12 @@ body.guest .v-delete.armed:hover { background: #c62f26; }
 }
 .theme-ha-florals body.guest .gallery-head h2 { text-shadow: none; }
 .theme-ha-florals body.guest #more { background: #fff; }
+/* short phones (iPhone SE and similar): smaller envelope so "Enter the album" stays on screen */
+@media (max-height: 700px) {
+  .env { --ew: min(300px, calc(100vw - 44px)); }
+  .env-letter { font-size: 19px; padding-top: 16px; }
+  .env-letter .l-names { font-size: 26px; }
+  .ent-enter-wrap { margin-top: 18px; }
+  .ent-scene { padding-bottom: 24px; }
+}
+.ent-skip { background: #fdfcf9 !important; border: 1px solid rgba(140, 126, 108, .35) !important; border-radius: 999px !important; padding: 7px 14px !important; color: var(--iv-ink) !important; }
