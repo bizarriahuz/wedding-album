@@ -255,3 +255,14 @@ textarea { min-height: 120px; resize: vertical; }
 /* no blue tap flash on phones; keyboard users still get a focus outline */
 html { -webkit-tap-highlight-color: transparent; }
 :focus:not(:focus-visible) { outline: none; }
+
+/* about */
+.about-card { max-width: 760px; margin: 0 auto; }
+.about-card .fc-text p { margin: 0 0 14px; font-size: 17.5px; line-height: 1.85; color: #4c4a41; }
+.about-card .fc-text p:last-child { margin-bottom: 0; }
+.about-lede { font-style: italic; font-size: 21px !important; color: var(--ink) !important; }
+.about-row { margin-top: 54px; }
+.about-cta { margin-top: 40px; }
+@media (max-width: 760px) { .about-card .fc-text { text-align: left; } .about-lede { font-size: 19px !important; } }
+@media (max-width: 860px) { .top nav { gap: 14px; flex-wrap: nowrap; } .top nav a { font-size: 10.5px; letter-spacing: .16em; } }
+@media (max-width: 370px) { .top nav { gap: 10px; } .top nav a { font-size: 10px; letter-spacing: .12em; } }
