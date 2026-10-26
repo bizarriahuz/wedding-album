@@ -10,6 +10,8 @@
 //   PUT  /api/events/:slug/thumbs/:id  small preview image, sent before its media (needs X-Guest-Token)
 //   PUT  /api/events/:slug/media/:id   a photo or video, raw body; safe to retry (needs X-Guest-Token)
 //   GET  /api/events/:slug/feed      gallery items, ?since= newer or ?before= older (needs X-Guest-Token)
+//   PUT  /api/events/:slug/wishes/:id  a wish: JSON {body} for written, raw audio for voice; safe to retry (needs X-Guest-Token)
+//   GET  /api/admin/:slug/wishes     every wish, for the couple (needs X-Admin-Token)
 //   GET  /media/<key>                serve a file from R2
 //   GET  /e/:slug                    guest page (static e.html)
 //   GET  /admin/:slug                couple's admin page (static admin.html)
@@ -45,6 +47,9 @@ const EXT = {
 };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const FEED_PAGE = 60;
+const MAX_WISH_CHARS = 1000;
+const MAX_VOICE_BYTES = 10 * 1024 * 1024; // about two minutes of compressed voice; the page stops at one
+const AUDIO_EXT = { 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/aac': 'aac', 'audio/mpeg': 'mp3', 'audio/wav': 'wav' };
 
 export default {
   async fetch(request, env) {
@@ -84,6 +89,12 @@ export default {
 
       m = path.match(/^\/api\/events\/([a-z0-9-]+)\/feed$/);
       if (m && request.method === 'GET') return feed(m[1], request, env, url);
+
+      m = path.match(/^\/api\/events\/([a-z0-9-]+)\/wishes\/([0-9a-f-]{36})$/);
+      if (m && request.method === 'PUT') return putWish(m[1], m[2], request, env, url);
+
+      m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/wishes$/);
+      if (m && request.method === 'GET') return listWishes(m[1], request, env);
 
       if (path.startsWith('/api/')) return json({ error: 'Not found' }, 404);
       return env.ASSETS.fetch(request);
@@ -196,6 +207,68 @@ async function uploadCover(slug, request, env) {
   await env.DB.prepare('UPDATE events SET cover_key = ? WHERE id = ?').bind(key, ev.id).run();
 
   return json({ cover_url: `/media/${key}` });
+}
+
+// ---------- wishes ----------
+
+async function putWish(slug, id, request, env, url) {
+  const ev = await authorizeGuest(slug, request, env, true);
+  if (ev instanceof Response) return ev;
+  if (!UUID.test(id)) return json({ error: 'Bad id' }, 400);
+
+  const done = await env.DB.prepare('SELECT id FROM wishes WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
+  if (done) return json({ ok: true, duplicate: true });
+
+  const guest = await env.DB.prepare('SELECT id FROM guests WHERE id = ? AND event_id = ?')
+    .bind(url.searchParams.get('guest') || '', ev.id).first();
+  if (!guest) return json({ error: 'Please enter your name again', code: 'no_guest' }, 403);
+
+  const type = (request.headers.get('Content-Type') || '').split(';')[0].toLowerCase();
+  const insert = (kind, body, key) => env.DB.prepare(
+    `INSERT OR IGNORE INTO wishes (id, event_id, guest_id, kind, body, r2_key, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`
+  ).bind(id, ev.id, guest.id, kind, body, key).run();
+
+  if (type === 'application/json') {
+    const data = await readJson(request);
+    const body = String(data.body ?? '').trim();
+    if (!body) return json({ error: 'Write a few words first' }, 400);
+    if (body.length > MAX_WISH_CHARS) return json({ error: `Please keep it under ${MAX_WISH_CHARS} characters` }, 400);
+    await insert('text', body, null);
+    return json({ ok: true }, 201);
+  }
+
+  if (AUDIO_EXT[type]) {
+    const bytes = Number(request.headers.get('Content-Length') || 0);
+    if (!bytes) return json({ error: 'The recording is empty' }, 400);
+    if (bytes > MAX_VOICE_BYTES) return json({ error: 'That recording is too long' }, 413);
+    const key = `events/${ev.id}/wishes/${id}.${AUDIO_EXT[type]}`;
+    await env.MEDIA.put(key, request.body, { httpMetadata: { contentType: type } });
+    await insert('voice', null, key);
+    return json({ ok: true }, 201);
+  }
+
+  return json({ error: 'Send a written or voice wish' }, 400);
+}
+
+async function listWishes(slug, request, env) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+  const rows = await env.DB.prepare(
+    `SELECT w.id, w.kind, w.body, w.r2_key, w.created_at, g.display_name AS guest_name
+       FROM wishes w LEFT JOIN guests g ON g.id = w.guest_id
+      WHERE w.event_id = ? ORDER BY w.created_at DESC`
+  ).bind(ev.id).all();
+  return json({
+    items: rows.results.map((r) => ({
+      id: r.id,
+      kind: r.kind,
+      body: r.body,
+      audio_url: r.r2_key ? `/media/${r.r2_key}` : null,
+      guest_name: r.guest_name || 'A guest',
+      created_at: r.created_at,
+    })),
+  });
 }
 
 // ---------- guest handlers ----------

@@ -38,6 +38,12 @@
         </div>
       </section>
 
+      <section class="card" id="wishes-card">
+        <div class="card-head"><h2>Wishes</h2><button type="button" class="link-btn" id="wishes-refresh">Refresh</button></div>
+        <p class="hint" style="margin:-6px 0 14px">Written and voice messages from guests. Only you can see these.</p>
+        <div id="wishes-list" class="wishes"><p class="muted">Loading…</p></div>
+      </section>
+
       <section class="card">
         <h2>Guest link</h2>
         <div class="linkbox"><input id="guest-url" class="link" readonly><button type="button" data-copy>Copy</button><button type="button" data-share>Share</button></div>
@@ -127,6 +133,55 @@
       try { localStorage.setItem('ga-admin-theme:' + slug, t); } catch {}
     }
 
+    // Chrome's own voice recordings carry no length, so players show 0:00. Seeking to the end makes the browser work it out.
+    function fixAudioDuration(audio) {
+      audio.addEventListener('loadedmetadata', function once() {
+        if (audio.duration === Infinity || isNaN(audio.duration)) {
+          audio.currentTime = 1e101;
+          audio.addEventListener('timeupdate', function reset() {
+            audio.removeEventListener('timeupdate', reset);
+            audio.currentTime = 0;
+          });
+        }
+        audio.removeEventListener('loadedmetadata', once);
+      });
+    }
+
+    async function loadWishes() {
+      const box = $('wishes-list');
+      try {
+        const { items } = await api('/wishes');
+        box.replaceChildren();
+        if (!items.length) {
+          const p = document.createElement('p'); p.className = 'muted';
+          p.textContent = 'No wishes yet. Guests can leave one from the album page.';
+          box.append(p);
+          return;
+        }
+        for (const w of items) {
+          const el = document.createElement('article'); el.className = 'wish-item';
+          const head = document.createElement('div'); head.className = 'wish-head';
+          const who = document.createElement('b'); who.textContent = w.guest_name;
+          const when = document.createElement('time');
+          when.dateTime = w.created_at;
+          when.textContent = new Date(w.created_at).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+          head.append(who, when);
+          el.append(head);
+          if (w.kind === 'voice' && w.audio_url) {
+            const a = document.createElement('audio'); a.controls = true; a.preload = 'metadata'; fixAudioDuration(a); a.src = w.audio_url;
+            el.append(a);
+          } else {
+            const p = document.createElement('p'); p.className = 'wish-body'; p.textContent = w.body || '';
+            el.append(p);
+          }
+          box.append(el);
+        }
+      } catch (e) {
+        box.textContent = 'Could not load wishes. Check your connection and tap Refresh.';
+      }
+    }
+    $('wishes-refresh').onclick = loadWishes;
+
     function render(ev) {
       applyTheme(ev.theme);
       $('title').textContent = ev.couple_names;
@@ -157,7 +212,7 @@
     }
 
     if (!slug || !token) showError('This admin link is incomplete. Use the full link you were given.');
-    else api('').then(render).catch((e) => showError(e.message));
+    else api('').then((ev) => { render(ev); loadWishes(); }).catch((e) => showError(e.message));
 
     $('pick-cover').onclick = () => $('cover-file').click();
     $('cover-file').onchange = async () => {

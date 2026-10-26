@@ -75,6 +75,31 @@
 
       <p class="who">Sharing as <b id="who-name"></b>, <button type="button" class="link-btn" id="change-name">change name</button></p>
 
+      <section class="panel wish" id="wish" aria-labelledby="wish-title">
+        <h2 id="wish-title">Leave a wish</h2>
+        <p class="lead">Write a message or record one in your own voice. Only the couple will see it.</p>
+        <div class="seg" role="tablist" aria-label="How to leave your wish">
+          <button type="button" class="seg-btn on" data-tab="write" role="tab" aria-selected="true">Write</button>
+          <button type="button" class="seg-btn" data-tab="record" role="tab" aria-selected="false" id="seg-record">Record voice</button>
+        </div>
+        <div id="tab-write" role="tabpanel">
+          <textarea id="wish-text" rows="4" maxlength="1000" placeholder="Selamat pengantin baru! Semoga berkekalan hingga ke Jannah." aria-label="Your wish"></textarea>
+          <button type="button" class="full" id="wish-send-text">Send wish</button>
+        </div>
+        <div id="tab-record" class="hidden" role="tabpanel">
+          <button type="button" class="rec" id="rec-btn" aria-live="polite"><span class="rec-dot" aria-hidden="true"></span><span id="rec-label">Tap to record</span></button>
+          <p class="hint" id="rec-hint">Up to 1 minute. Tap again to stop.</p>
+          <div id="rec-review" class="hidden">
+            <audio id="rec-audio" controls preload="metadata"></audio>
+            <div class="rec-actions">
+              <button type="button" class="soft" id="rec-again">Record again</button>
+              <button type="button" id="wish-send-voice">Send wish</button>
+            </div>
+          </div>
+        </div>
+        <div id="wish-msg" class="msg" role="status"></div>
+      </section>
+
       <div class="gallery-head">
         <h2 id="gallery-title">Guests' photos</h2>
         <span id="count" class="muted"></span>

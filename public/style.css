@@ -229,8 +229,8 @@ body.guest .panel {
   background: var(--g-surface);
   text-align: center;
 }
-body.guest .panel h2 { font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.2; margin: 0 0 6px; color: var(--g-text); }
-body.guest .panel p.lead { margin: 0 0 18px; color: var(--g-muted); font-size: 15px; }
+body.guest .panel h2 { font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.2; margin: 0 0 6px; color: var(--g-text); text-wrap: balance; }
+body.guest .panel p.lead { margin: 0 0 18px; color: var(--g-muted); font-size: 15px; text-wrap: balance; }
 body.guest .panel input {
   background: var(--g-field); color: var(--g-text);
   border: 1px solid var(--g-field-line);
@@ -272,6 +272,32 @@ body.guest .wide:hover { background: var(--g-surface); }
 .status.waiting { border-color: var(--g-accent); }
 .status.done { border-color: var(--g-good); }
 .status.done .bar i { background: var(--g-good); }
+
+/* wishes */
+body.guest .wish { margin-top: 26px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--g-surface-2); margin-bottom: 14px; }
+body.guest .seg-btn { background: transparent; color: var(--g-muted); padding: 10px; border-radius: 9px; font-weight: 600; }
+body.guest .seg-btn.on { background: var(--g-btn); color: var(--g-btn-ink); }
+body.guest .seg-btn:hover:not(.on) { background: var(--g-surface); }
+body.guest .wish textarea {
+  width: 100%; font: inherit; font-size: 16px; line-height: 1.5;
+  padding: 12px 13px; border-radius: 12px; resize: vertical; min-height: 110px;
+  background: var(--g-field); color: var(--g-text); border: 1px solid var(--g-field-line);
+}
+body.guest .wish textarea::placeholder { color: var(--g-muted); opacity: .75; }
+body.guest .wish textarea:focus { outline: 2px solid var(--g-accent); border-color: transparent; }
+body.guest .wish button.full { margin-top: 12px; }
+body.guest .rec { width: 100%; padding: 18px; border-radius: 14px; gap: 12px; font-size: 16px; }
+.rec-dot { width: 14px; height: 14px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.rec.live .rec-dot { animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .rec.live .rec-dot { animation: none; } }
+#rec-audio { width: 100%; margin-top: 4px; }
+.rec-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+body.guest button.soft { background: transparent; color: var(--g-accent); box-shadow: inset 0 0 0 1px var(--g-accent); }
+body.guest button.soft:hover { background: var(--g-surface-2); }
+body.guest .wish .msg { margin-top: 10px; }
+body.guest .wish .msg.ok { color: var(--g-good); }
 
 .who { text-align: center; font-size: 14px; color: var(--g-muted); margin: 18px 0 0; }
 .who b { color: var(--g-text); font-weight: 600; }
@@ -383,7 +409,7 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 .theme-ha-florals .hero.compact .names { font-size: clamp(48px, 14vw, 62px); margin-top: 14px; }
 .theme-ha-florals .hero.compact::after { height: 96px; }
 .theme-ha-florals .hero.compact .deco.bottom { width: min(80px, 21vw); }
-.theme-ha-florals .panel h2, .theme-ha-florals .gallery-head h2 { font-family: "Marcellus", var(--serif); letter-spacing: .02em; }
+.theme-ha-florals body.guest .panel h2, .theme-ha-florals .gallery-head h2 { font-family: "Marcellus", var(--serif); letter-spacing: .02em; }
 .theme-ha-florals .gallery-head h2 { font-size: 24px; }
 .theme-ha-florals .foot { position: relative; height: 210px; margin-top: 40px; }
 .theme-ha-florals .foot .deco.bottom { bottom: 0; width: min(104px, 27vw); }
@@ -393,6 +419,15 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
   background: url("/themes/ha-florals/jazakallah.webp") center / contain no-repeat;
 }
 .foot-mark { display: none; }
+
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.card-head .link-btn { color: var(--sapphire); font-size: 14px; }
+.wishes { display: flex; flex-direction: column; gap: 10px; }
+.wish-item { padding: 12px 14px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); }
+.wish-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; font-size: 14px; }
+.wish-head time { color: var(--ink-soft); font-size: 12.5px; white-space: nowrap; }
+.wish-body { margin: 0; white-space: pre-wrap; line-height: 1.55; }
+.wish-item audio { width: 100%; height: 40px; }
 
 .print-links { display: flex; flex-direction: column; gap: 8px; }
 .print-links .btn { justify-content: flex-start; }

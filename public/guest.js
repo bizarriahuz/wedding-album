@@ -148,6 +148,7 @@
     catch { when = d.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
     $('when').textContent = when;
     $('where').textContent = ev.venue || '';
+    $('wish-title').textContent = `Leave a wish for ${ev.couple_names}`;
     if (ev.privacy === 'private') {
       document.querySelector('#join .lead').textContent = "Share your photos and videos with the couple. Only they will see them. What's your name?";
     }
@@ -373,6 +374,10 @@
   }
 
   async function uploadOne(item) {
+    if (item.kind === 'wish-text' || item.kind === 'wish-voice') {
+      const body = item.blob.type ? item.blob : new Blob([item.blob], { type: item.type });
+      return put(`${API}/wishes/${item.id}?guest=${encodeURIComponent(state.guestId)}`, body, (p) => { progress = p; renderStatus(); });
+    }
     const blob = item.blob.type ? item.blob : new Blob([item.blob], { type: item.type });
     if (item.thumb) {
       const t = await put(`${API}/thumbs/${item.id}`, item.thumb);
@@ -426,6 +431,12 @@
   async function done(item, ok) {
     queue = queue.filter((q) => q.id !== item.id);
     await qDel(item.id);
+    if (ok && item.kind.startsWith('wish')) {
+      state.wishCount = (state.wishCount || 0) + 1;
+      saveState();
+      toast('Your wish has been sent to the couple.');
+      return;
+    }
     if (ok) {
       sharedThisVisit++;
       state.sharedCount = (state.sharedCount || 0) + 1;
@@ -472,6 +483,106 @@
       $('status-bar').style.width = `${pct}%`;
     }
   }
+
+  // ---------- wishes ----------
+  const wishMsg = (text, cls = 'ok') => { $('wish-msg').className = `msg ${cls}`; $('wish-msg').textContent = text; };
+
+  document.querySelectorAll('.seg-btn').forEach((b) => (b.onclick = () => {
+    document.querySelectorAll('.seg-btn').forEach((x) => { x.classList.toggle('on', x === b); x.setAttribute('aria-selected', x === b); });
+    show($('tab-write'), b.dataset.tab === 'write');
+    show($('tab-record'), b.dataset.tab === 'record');
+    wishMsg('', '');
+  }));
+  const canRecord = !!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  if (!canRecord) show($('seg-record'), false);
+
+  async function queueWish(kind, blob) {
+    const item = { id: uuid(), slug, kind, blob, type: blob.type, thumb: null, w: null, h: null, tries: 0, added: Date.now() };
+    await qPut(item);
+    queue.push(item);
+    renderStatus();
+    pump();
+  }
+
+  $('wish-send-text').onclick = async () => {
+    const body = $('wish-text').value.trim();
+    if (!body) { wishMsg('Write a few words first.', 'err'); $('wish-text').focus(); return; }
+    await queueWish('wish-text', new Blob([JSON.stringify({ body })], { type: 'application/json' }));
+    $('wish-text').value = '';
+    wishMsg('Thank you! Your wish is on its way to the couple.');
+  };
+
+  // Chrome's own voice recordings carry no length, so players show 0:00. Seeking to the end makes the browser work it out.
+  function fixAudioDuration(audio) {
+    audio.addEventListener('loadedmetadata', function once() {
+      if (audio.duration === Infinity || isNaN(audio.duration)) {
+        audio.currentTime = 1e101;
+        audio.addEventListener('timeupdate', function reset() {
+          audio.removeEventListener('timeupdate', reset);
+          audio.currentTime = 0;
+        });
+      }
+      audio.removeEventListener('loadedmetadata', once);
+    });
+  }
+  fixAudioDuration($('rec-audio'));
+
+  const MAX_REC_MS = 60000;
+  let recorder = null, recBlob = null, recStart = 0, recTick = null;
+  function pickAudioType() {
+    for (const t of ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm']) {
+      if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) return t;
+    }
+    return '';
+  }
+  const mmss = (ms) => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+
+  async function startRecording() {
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch { wishMsg('Allow microphone access to record, or write your wish instead.', 'err'); return; }
+    const type = pickAudioType();
+    const chunks = [];
+    recorder = new MediaRecorder(stream, type ? { mimeType: type, audioBitsPerSecond: 64000 } : undefined);
+    recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+    recorder.onstop = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      clearInterval(recTick);
+      const mime = (recorder.mimeType || type || 'audio/webm').split(';')[0];
+      recBlob = new Blob(chunks, { type: mime });
+      recorder = null;
+      $('rec-btn').classList.remove('live');
+      $('rec-label').textContent = 'Tap to record';
+      if (!recBlob.size) { wishMsg('Nothing was recorded. Please try again.', 'err'); return; }
+      $('rec-audio').src = URL.createObjectURL(recBlob);
+      show($('rec-btn'), false); show($('rec-hint'), false); show($('rec-review'));
+    };
+    recorder.start(1000);
+    recStart = Date.now();
+    $('rec-btn').classList.add('live');
+    wishMsg('', '');
+    const tick = () => {
+      const t = Date.now() - recStart;
+      $('rec-label').textContent = `Recording ${mmss(t)}, tap to stop`;
+      if (t >= MAX_REC_MS && recorder) recorder.stop();
+    };
+    tick();
+    recTick = setInterval(tick, 250);
+  }
+
+  $('rec-btn').onclick = () => { if (recorder) recorder.stop(); else startRecording(); };
+  function resetRecording() {
+    recBlob = null;
+    $('rec-audio').removeAttribute('src');
+    show($('rec-review'), false); show($('rec-btn')); show($('rec-hint'));
+  }
+  $('rec-again').onclick = () => { resetRecording(); startRecording(); };
+  $('wish-send-voice').onclick = async () => {
+    if (!recBlob) return;
+    await queueWish('wish-voice', recBlob);
+    resetRecording();
+    wishMsg('Thank you! Your voice wish is on its way to the couple.');
+  };
 
   // ---------- gallery ----------
   const items = new Map(); // id -> item
