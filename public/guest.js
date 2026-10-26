@@ -177,6 +177,8 @@
       return anim(cell, [{ filter: 'sepia(1) brightness(.42) contrast(.7) blur(1.5px)' }, { filter: 'none' }], { duration: 2800, delay, easing: 'ease-out' });
     });
     await Promise.all([photo, ...devs]);
+    // developed: drop the filter animations so nothing lingers on the photos (end state equals the plain style)
+    photoEl.querySelectorAll('.ent-cell, .ent-chem').forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
     await pause(1100);
     if (entStage === 'photo') toEnvelope();
   }
@@ -227,12 +229,11 @@
       { duration: 1500, delay: 500, easing: 'cubic-bezier(.25, .7, .25, 1)' });
     const words = [...letter.querySelectorAll('.w')];
     const step = Math.max(28, Math.min(70, 3600 / words.length)); // long messages write a little faster
-    const writes = words.map((w, n) => anim(w, [
-      { opacity: 0, filter: 'blur(1.5px)', transform: 'translateY(3px)' },
-      { opacity: 1, filter: 'none', transform: 'none' },
-    ], { duration: 420, delay: n * step, easing: 'ease-out' }));
+    // plain fade per word: iPhones can leave blur filters stuck on inline text, so no filters here
+    const writes = words.map((w, n) => anim(w, [{ opacity: 0 }, { opacity: 1 }], { duration: 420, delay: n * step, easing: 'ease-out' }));
     words.forEach((w) => { w.style.opacity = ''; });
     await Promise.all(writes);
+    letter.getAnimations({ subtree: true }).forEach((a) => a.cancel()); // end state equals the plain style; drop the animation layers
     anim($('ent-go').parentElement, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: 150 });
   }
 
