@@ -7,7 +7,7 @@
   <title>QR cards · Guest Album</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400&family=Ephesis&family=Figtree:wght@400;500;600&family=Marcellus&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Figtree:wght@400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <style id="page-size">@page { size: 210mm 297mm; margin: 0; }</style>
   <style>
@@ -97,53 +97,45 @@
     .poster .p-date { font-size: 10.5pt; margin-top: 4mm; }
 
 
-    /* ---------- look: invitation florals ---------- */
+    /* ---------- the look: ivory paper, champagne rules, brown ink; flowers sparingly ---------- */
     .theme-ha-florals .card6, .theme-ha-florals .poster {
-      --p-bg: #efeeec; --p-ink: #430011; --p-soft: #7d5a63; --p-names: #a86f84; --p-accent: #8c3a57; --p-glint: #c9a35e;
-      background-image: url("/themes/ha-florals/linen.webp"); background-repeat: repeat;
+      --p-bg: #faf8f4; --p-ink: #241c18; --p-soft: #6f645c; --p-names: #241c18; --p-accent: #8c7e6c; --p-glint: #b8aa97;
     }
-    .theme-ha-florals .card6 { background-size: 34mm; }
-    .theme-ha-florals .poster { background-size: 60mm; }
-    .theme-ha-florals .p-deco { background: center / contain no-repeat; }
-    .theme-ha-florals .p-deco.tl, .theme-ha-florals .p-deco.tr { top: -1mm; aspect-ratio: 292 / 331; background-image: url("/themes/ha-florals/corner-top.webp"); }
-    .theme-ha-florals .p-deco.bl, .theme-ha-florals .p-deco.br { bottom: -1mm; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
-    .theme-ha-florals .p-deco.tr, .theme-ha-florals .p-deco.br { transform: scaleX(-1); }
-    .theme-ha-florals .card6 .p-deco.tl, .theme-ha-florals .card6 .p-deco.tr { width: 33mm; }
-    .theme-ha-florals .card6 .p-deco.bl, .theme-ha-florals .card6 .p-deco.br { width: 22mm; }
-    .theme-ha-florals .card6 .p-deco.tl, .theme-ha-florals .card6 .p-deco.bl { left: -6mm; }
-    .theme-ha-florals .card6 .p-deco.tr, .theme-ha-florals .card6 .p-deco.br { right: -6mm; }
-    .theme-ha-florals .poster .p-deco.tl, .theme-ha-florals .poster .p-deco.tr { width: 64mm; }
-    .theme-ha-florals .poster .p-deco.bl, .theme-ha-florals .poster .p-deco.br { width: 46mm; }
-    .theme-ha-florals .poster .p-deco.tl, .theme-ha-florals .poster .p-deco.bl { left: -10mm; }
-    .theme-ha-florals .poster .p-deco.tr, .theme-ha-florals .poster .p-deco.br { right: -10mm; }
-    .theme-ha-florals .p-deco { display: none; }
-    .theme-ha-florals .p-frame { display: block; inset: 0; background-repeat: no-repeat; background-size: auto 92%; }
-    .theme-ha-florals .p-frame.left { background-image: url("/themes/ha-florals/frame-left.webp"); background-position: 2% center; }
-    .theme-ha-florals .p-frame.right { background-image: url("/themes/ha-florals/frame-right.webp"); background-position: 98% center; }
+    .theme-ha-florals .p-frame { display: none; }
+    .theme-ha-florals .p-deco { display: none; background: center / contain no-repeat; }
+    .theme-ha-florals .p-deco.tr { display: block; top: -1mm; aspect-ratio: 292 / 331; background-image: url("/themes/ha-florals/corner-top.webp"); transform: scaleX(-1); }
+    .theme-ha-florals .p-deco.bl { display: block; bottom: -1mm; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
+    .theme-ha-florals .card6 .p-deco.tr { width: 30mm; right: -6mm; }
+    .theme-ha-florals .card6 .p-deco.bl { width: 21mm; left: -5mm; }
+    .theme-ha-florals .poster .p-deco.tr { width: 58mm; right: -10mm; }
+    .theme-ha-florals .poster .p-deco.bl { width: 42mm; left: -9mm; }
+    /* a fine double champagne rule around the page, like stationery */
+    .theme-ha-florals .card6::after, .theme-ha-florals .poster::after {
+      content: ""; position: absolute; pointer-events: none; z-index: 0;
+      border: .3mm solid rgba(140, 126, 108, .55); outline: .2mm solid rgba(140, 126, 108, .35);
+    }
+    .theme-ha-florals .card6::after { inset: 5mm; outline-offset: 1mm; }
+    .theme-ha-florals .poster::after { inset: 9mm; outline-offset: 2mm; border-width: .45mm; }
+    .theme-ha-florals .p-pre, .theme-ha-florals .p-date, .theme-ha-florals .p-quote { font-family: "Cormorant Garamond", Georgia, serif; font-variant-numeric: lining-nums; }
+    .theme-ha-florals .p-pre, .theme-ha-florals .p-date { font-weight: 600; letter-spacing: .24em; }
+    .theme-ha-florals .p-quote { font-style: italic; font-weight: 500; }
+    .theme-ha-florals .p-names { font-family: "Pinyon Script", cursive; letter-spacing: 0; }
     .theme-ha-florals .p-names .nm, .theme-ha-florals .p-names .amp { display: block; }
-    .theme-ha-florals .p-names .amp { font-size: .5em; line-height: 1.15; padding: 0; }
-    .theme-ha-florals .card6 { padding: 0 25mm; }
-    .theme-ha-florals .poster { padding: 0 50mm; }
+    .theme-ha-florals .p-names .amp { font-size: .8em; line-height: 1.1; padding: 0; color: var(--p-accent); }
+    .theme-ha-florals .p-qr { box-shadow: 0 0 0 .3mm rgba(140, 126, 108, .7); border-radius: 1.5mm; }
+    .theme-ha-florals .poster .p-qr { box-shadow: 0 0 0 .5mm rgba(140, 126, 108, .7); border-radius: 3mm; }
+    .theme-ha-florals .card6 { padding: 0 14mm; }
+    .theme-ha-florals .poster { padding: 0 30mm; }
     .theme-ha-florals .card6 .p-pre { font-size: 6pt; margin-top: 0; }
-    .theme-ha-florals .card6 .p-quote { font-size: 8.6pt; max-width: 52mm; margin-top: 2.5mm; }
-    .theme-ha-florals .card6 .p-qr { width: 40mm; height: 40mm; margin-top: 4mm; }
+    .theme-ha-florals .card6 .p-names { font-size: 28pt; margin-top: 2mm; padding: 1mm 0; }
+    .theme-ha-florals .card6 .p-quote { font-size: 9.5pt; max-width: 62mm; margin-top: 2.5mm; }
+    .theme-ha-florals .card6 .p-qr { width: 42mm; height: 42mm; margin-top: 4mm; }
     .theme-ha-florals .card6 .p-date { font-size: 5.8pt; margin-top: 4mm; }
     .theme-ha-florals .poster .p-pre { font-size: 11pt; margin-top: 0; }
-    .theme-ha-florals .poster .p-quote { font-size: 16pt; max-width: 104mm; margin-top: 5mm; }
-    .theme-ha-florals .poster .p-qr { width: 84mm; height: 84mm; margin-top: 8mm; }
-    .theme-ha-florals .poster .p-date { font-size: 10pt; margin-top: 8mm; }
-    .theme-ha-florals .p-pre, .theme-ha-florals .p-date, .theme-ha-florals .p-quote, .theme-ha-florals .p-steps b { font-family: "Marcellus", var(--serif); }
-    .theme-ha-florals .p-names { font-family: "Ephesis", cursive; }
-    .theme-ha-florals .p-names::before {
-      content: ""; position: absolute; inset: -18% 0; z-index: -1;
-      background: url("/themes/ha-florals/monogram.webp") center / contain no-repeat; opacity: .38;
-    }
-    .theme-ha-florals .p-names .amp { padding: 0 .28em; }
-    .theme-ha-florals .p-qr { box-shadow: 0 0 0 .3mm rgba(140, 58, 87, .45); }
-    .theme-ha-florals .poster .p-qr { box-shadow: 0 0 0 .5mm rgba(140, 58, 87, .45); }
-    .theme-ha-florals .card6 .p-names { font-size: 26pt; margin-top: 2mm; padding: 2mm 0; }
-    .theme-ha-florals .poster .p-names { font-size: 54pt; margin-top: 4mm; padding: 5mm 0; }
-    .theme-ha-florals .p-names::before { inset: 4% -10%; }
+    .theme-ha-florals .poster .p-names { font-size: 60pt; margin-top: 4mm; padding: 2mm 0; }
+    .theme-ha-florals .poster .p-quote { font-size: 18pt; max-width: 130mm; margin-top: 5mm; }
+    .theme-ha-florals .poster .p-qr { width: 88mm; height: 88mm; margin-top: 9mm; }
+    .theme-ha-florals .poster .p-date { font-size: 10pt; margin-top: 9mm; }
   </style>
 </head>
 <body class="print">
@@ -249,7 +241,7 @@
 
     function build(ev) {
       document.documentElement.className = 'theme-ha-florals';
-      document.documentElement.style.setProperty('--qr-ink', '#430011');
+      document.documentElement.style.setProperty('--qr-ink', '#241c18');
       document.title = `QR cards · ${ev.couple_names}`;
       const card = () => fill($('t-card').content.firstElementChild.cloneNode(true), ev);
       const pages = $('pages');

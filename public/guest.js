@@ -66,13 +66,31 @@
     show($('share'), false);
   }
 
-  // ---------- entrance (once per visit) ----------
+  // ---------- entrance (once per visit): frame -> instant photo -> lace envelope letter ----------
   const ENT_KEY = `ga-ent:${slug}`;
   let entranceOn = false;
   try {
     entranceOn = !!state.token && !state.coupleToken && !sessionStorage.getItem(ENT_KEY);
   } catch { entranceOn = !!state.token && !state.coupleToken; }
   if (entranceOn) { show($('entrance')); document.body.style.overflow = 'hidden'; }
+
+  const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const running = new Set();
+  function anim(el, frames, opts = {}) {
+    const a = el.animate(frames, {
+      fill: 'both', easing: 'cubic-bezier(.2, .7, .2, 1)', ...opts,
+      duration: reduceMotion ? 0 : (opts.duration || 600),
+      delay: reduceMotion ? 0 : (opts.delay || 0),
+    });
+    running.add(a);
+    a.finished.finally(() => running.delete(a));
+    return a.finished.catch(() => {});
+  }
+  const fastForward = () => running.forEach((a) => { try { a.finish(); } catch {} });
+  const pause = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
+
+  let entStage = 'idle';
+  let entEvent = null;
 
   function dropEntrance() {
     if (!entranceOn) return;
@@ -81,82 +99,124 @@
     document.body.style.overflow = '';
   }
 
-  function buildEntrance(ev) {
-    if (!entranceOn) return;
-    const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i).map((p) => p.trim());
-    const initials = parts.length === 2 ? `${parts[0][0] || ''}${parts[1][0] || ''}` : (ev.couple_names[0] || '');
-    $('ent-mono').textContent = initials.toUpperCase();
-    $('ent-names').textContent = ev.couple_names;
-    const d = new Date(ev.event_date + 'T00:00:00');
-    $('ent-date').textContent = d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' });
-    $('ent-msg').textContent = ev.welcome_message ||
-      "We're so glad you're here. Your photos, videos and wishes help us remember every moment of today.";
-
-    // pearl beads around the gold ring
-    const beads = $('ent-beads');
-    if (!beads.childElementCount) {
-      const NS = 'http://www.w3.org/2000/svg';
-      for (let i = 0; i < 44; i++) {
-        const a = (i / 44) * Math.PI * 2;
-        const c = document.createElementNS(NS, 'circle');
-        c.setAttribute('cx', (120 + 106 * Math.cos(a)).toFixed(2));
-        c.setAttribute('cy', (152 + 136 * Math.sin(a)).toFixed(2));
-        c.setAttribute('r', '2.1');
-        c.setAttribute('fill', '#fff4c8');
-        c.setAttribute('stroke', '#8a6424');
-        c.setAttribute('stroke-width', '.6');
-        beads.append(c);
-      }
-    }
-
-    const photo = $('ent-photo');
-    const play = () => {
-      $('entrance').classList.add('ent-play');
-      const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!reduce) setTimeout(() => { try { $('ent-sheen-anim').beginElement(); } catch {} }, 600);
-    };
-    if (ev.cover_url) {
-      const img = new Image();
-      let started = false;
-      const go = (ok) => {
-        if (started) return; started = true;
-        if (ok) photo.style.backgroundImage = `url("${ev.cover_url}")`;
-        else { photo.classList.add('no-photo'); photo.dataset.initials = initials.toUpperCase(); }
-        play();
-      };
-      img.onload = () => go(true);
-      img.onerror = () => go(false);
-      setTimeout(() => go(img.complete && img.naturalWidth > 0), 2500); // weak signal: don't keep guests waiting
-      img.src = ev.cover_url;
-    } else {
-      photo.classList.add('no-photo');
-      photo.dataset.initials = initials.toUpperCase();
-      play();
-    }
-  }
-
-  // Tap anywhere (except the button) to jump to the finished picture
-  $('entrance').addEventListener('click', (e) => {
-    if (e.target.closest('#ent-go')) return;
-    const ent = $('entrance');
-    if (!ent.classList.contains('ent-play')) return;
-    document.getAnimations().forEach((a) => {
-      const t = a.effect && a.effect.target;
-      if (t && ent.contains(t) && a.effect.getComputedTiming().iterations !== Infinity) a.finish();
-    });
-    $('ent-skip-hint').style.visibility = 'hidden';
-  });
-
-  $('ent-go').onclick = () => {
+  function leaveEntrance() {
     try { sessionStorage.setItem(ENT_KEY, '1'); } catch {}
+    fastForward();
     const ent = $('entrance');
     ent.classList.add('leaving');
     document.body.style.overflow = '';
-    setTimeout(() => { show(ent, false); ent.classList.remove('ent-play', 'leaving'); }, 500);
+    setTimeout(() => { show(ent, false); ent.classList.remove('leaving'); }, 500);
     entranceOn = false;
-    const field = $('name');
-    if (!$('join').classList.contains('hidden')) setTimeout(() => field.focus(), 520);
-  };
+    entStage = 'done';
+    if (!$('join').classList.contains('hidden')) setTimeout(() => $('name').focus(), 520);
+  }
+
+  function buildEntrance(ev) {
+    if (!entranceOn) return;
+    entEvent = ev;
+    const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i).map((p) => p.trim());
+    const initials = parts.length === 2 ? [parts[0][0] || '', parts[1][0] || ''] : [ev.couple_names[0] || ''];
+    $('ent-names').textContent = ev.couple_names;
+    $('ent-initials').textContent = initials.map((c) => c.toUpperCase()).join(' & ');
+    const d = new Date(ev.event_date + 'T00:00:00');
+    $('ent-photo-date').textContent = d.toLocaleDateString('en-SG', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+    const img = $('ent-photo-img');
+    if (ev.cover_url) {
+      img.style.backgroundImage = `url("${ev.cover_url}")`;
+      new Image().src = ev.cover_url; // start loading now, while the frame is on screen
+    } else {
+      img.classList.add('no-photo');
+      img.dataset.initials = initials.join('');
+    }
+    introFrame();
+  }
+
+  async function introFrame() {
+    entStage = 'frame';
+    const els = [$('ent-a').querySelector('.ent-pre'), $('ent-names')];
+    els.forEach((el, n) => anim(el, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: n * 120 }));
+    anim($('ent-frame'), [{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 800, delay: 200 });
+    anim($('ent-heart'), [{ opacity: 0, transform: 'translateY(-16px) rotate(-12deg)' }, { opacity: 1, transform: 'rotate(-6deg)' }], { duration: 700, delay: 650, easing: 'cubic-bezier(.3, 1.4, .5, 1)' });
+    anim($('ent-hint'), [{ opacity: 0 }, { opacity: 1 }], { duration: 600, delay: 1200 });
+    setTimeout(() => { if (entStage === 'frame') $('ent-knob').classList.add('nudge'); }, reduceMotion ? 0 : 4500);
+  }
+
+  async function ejectPhoto() {
+    if (entStage !== 'frame') return;
+    entStage = 'photo';
+    const knob = $('ent-knob');
+    knob.classList.remove('nudge');
+    knob.classList.add('pressed');
+    setTimeout(() => knob.classList.remove('pressed'), 180);
+    anim($('ent-hint'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300 });
+    anim($('ent-heart'), [{ opacity: 1, transform: 'rotate(-6deg)' }, { opacity: 0, transform: 'translate(-30px, -60px) rotate(-22deg) scale(.86)' }], { duration: 750, easing: 'cubic-bezier(.5, 0, .7, .4)' });
+    const photo = anim($('ent-photo'), [{ transform: 'translateY(-172px)' }, { transform: 'translateY(8px)' }], { duration: 2000, delay: 450, easing: 'cubic-bezier(.4, .08, .25, 1)' });
+    anim($('ent-chem'), [{ opacity: 1 }, { opacity: 0 }], { duration: 2800, delay: 900, easing: 'ease-out' });
+    const dev = anim($('ent-photo-img'), [{ filter: 'sepia(1) brightness(.42) contrast(.7) blur(1.5px)' }, { filter: 'none' }], { duration: 2800, delay: 900, easing: 'ease-out' });
+    await Promise.all([photo, dev]);
+    await pause(1100);
+    if (entStage === 'photo') toEnvelope();
+  }
+
+  function writeLetter() {
+    const ev = entEvent;
+    const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i).map((p) => p.trim());
+    $('l-names').textContent = ev.couple_names;
+    const body = ev.welcome_message ||
+      'Thank you for being here and celebrating with us. Every photo, video and wish you share becomes part of our story, so please capture everything you see today.';
+    // one span per word, so the letter can "write itself"
+    const fillWords = (el, text) => {
+      el.replaceChildren();
+      text.split('\n').forEach((line, li) => {
+        if (li) el.append(document.createElement('br'));
+        line.split(/(\s+)/).forEach((tok) => {
+          if (!tok) return;
+          if (/^\s+$/.test(tok)) { el.append(tok); return; }
+          const w = document.createElement('span'); w.className = 'w'; w.textContent = tok; el.append(w);
+        });
+      });
+    };
+    fillWords($('l-greet'), 'Dear guests,');
+    fillWords($('l-body'), body);
+    fillWords($('l-sign'), 'With love,');
+    fillWords($('l-names'), parts.length === 2 ? `${parts[0]} & ${parts[1]}` : ev.couple_names);
+    $('env-letter').querySelectorAll('.w').forEach((w) => { w.style.opacity = '0'; });
+  }
+
+  async function toEnvelope() {
+    if (entStage === 'envelope' || entStage === 'done') return;
+    entStage = 'envelope';
+    fastForward();
+    await anim($('ent-a'), [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.96)' }], { duration: 600, easing: 'ease-in' });
+    show($('ent-a'), false);
+    writeLetter();
+    show($('ent-b'));
+    $('entrance').scrollTop = 0;
+    const letter = $('env-letter');
+    $('env').style.height = `${Math.max(letter.offsetHeight + 96 + 12, 250)}px`;
+    anim($('env'), [{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 800 });
+    anim($('ent-go').parentElement, [{ opacity: 0 }, { opacity: 0 }], { duration: 1 });
+    await anim(letter, [{ opacity: 0, transform: `translateY(${Math.round(letter.offsetHeight * .7)}px)` }, { opacity: 1, transform: 'none' }],
+      { duration: 1500, delay: 500, easing: 'cubic-bezier(.25, .7, .25, 1)' });
+    const words = [...letter.querySelectorAll('.w')];
+    const step = Math.max(28, Math.min(70, 3600 / words.length)); // long messages write a little faster
+    const writes = words.map((w, n) => anim(w, [
+      { opacity: 0, filter: 'blur(1.5px)', transform: 'translateY(3px)' },
+      { opacity: 1, filter: 'none', transform: 'none' },
+    ], { duration: 420, delay: n * step, easing: 'ease-out' }));
+    words.forEach((w) => { w.style.opacity = ''; });
+    await Promise.all(writes);
+    anim($('ent-go').parentElement, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: 150 });
+  }
+
+  $('ent-knob').addEventListener('click', (e) => { e.stopPropagation(); ejectPhoto(); });
+  $('ent-a').addEventListener('click', (e) => {
+    if (entStage === 'frame' && e.target.closest('#ent-frame')) ejectPhoto();
+    else if (entStage === 'photo') fastForward();
+  });
+  $('ent-b').addEventListener('click', (e) => { if (!e.target.closest('#ent-go')) fastForward(); });
+  $('ent-go').onclick = leaveEntrance;
+  $('ent-skip').onclick = leaveEntrance;
 
   // ---------- start ----------
   async function start() {
@@ -208,7 +268,7 @@
     const t = 'ha-florals';
     document.documentElement.className = `theme-${t}`;
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = '#efeeec';
+    if (meta) meta.content = '#faf8f4';
     if (state.theme !== t) { state.theme = t; saveState(); }
   }
 
