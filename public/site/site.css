@@ -266,3 +266,4 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 760px) { .about-card .fc-text { text-align: left; } .about-lede { font-size: 19px !important; } }
 @media (max-width: 860px) { .top nav { gap: 14px; flex-wrap: nowrap; } .top nav a { font-size: 10.5px; letter-spacing: .16em; } }
 @media (max-width: 370px) { .top nav { gap: 10px; } .top nav a { font-size: 10px; letter-spacing: .12em; } }
+.about-occasions { margin-top: 22px !important; padding-top: 18px; border-top: 1px solid var(--line); font-style: italic; color: var(--ink) !important; }
