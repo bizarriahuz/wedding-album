@@ -113,6 +113,22 @@
     </div>
   </main>
 
+  <div id="crop" class="crop hidden" role="dialog" aria-modal="true" aria-labelledby="crop-title">
+    <div class="crop-box">
+      <h3 id="crop-title">Position photo</h3>
+      <p class="hint">Drag to move. Pinch or use the slider to zoom. What's inside the frame goes on the strip.</p>
+      <div class="crop-stage" id="crop-stage" tabindex="0" aria-label="Photo position. Use arrow keys to move, plus and minus to zoom.">
+        <img id="crop-img" alt="" draggable="false">
+      </div>
+      <label class="crop-zoom-label" for="crop-zoom">Zoom</label>
+      <input type="range" id="crop-zoom" min="1" max="4" step="0.01" value="1">
+      <div class="crop-actions">
+        <button type="button" class="ghost" id="crop-cancel">Cancel</button>
+        <button type="button" id="crop-ok">Use photo</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const slug = location.pathname.split('/')[2];
     const token = location.hash.slice(1);
@@ -244,17 +260,105 @@
     });
     $('strip-file').onchange = async () => {
       const file = $('strip-file').files[0];
+      $('strip-file').value = '';
       if (!file) return;
       const msg = $('strip-msg');
+      let blob;
+      try { blob = await cropPhoto(file, STRIP_RATIO, 1120); }
+      catch (err) { msg.className = 'msg err'; msg.textContent = err.message; return; }
+      if (!blob) return; // cancelled
       msg.className = 'msg'; msg.textContent = `Uploading photo ${stripSlot + 1}…`;
       try {
-        const blob = await shrinkImage(file, 1400, 0.86);
         const data = await api(`/strip/${stripSlot}`, { method: 'PUT', headers: { 'Content-Type': blob.type }, body: blob });
         setStrip(data.strip_urls);
         msg.className = 'msg ok'; msg.textContent = `Photo ${stripSlot + 1} added`;
       } catch (err) { msg.className = 'msg err'; msg.textContent = err.message; }
-      $('strip-file').value = '';
     };
+
+    // ---------- cropper: drag to move, pinch / slider / wheel to zoom; exports exactly the frame ----------
+    const STRIP_RATIO = 78 / 56; // same shape as a frame on the photo-booth strip
+    function cropPhoto(file, ratio, outW) {
+      return new Promise((resolve, reject) => {
+        const box = $('crop'), stage = $('crop-stage'), img = $('crop-img'), zoom = $('crop-zoom');
+        const url = URL.createObjectURL(file);
+        let W = 0, H = 0, iw = 0, ih = 0, base = 1, z = 1, x = 0, y = 0;
+        const pts = new Map(); let pinch = null;
+
+        const scale = () => base * z;
+        const clamp = () => {
+          const s = scale();
+          x = Math.min(0, Math.max(W - iw * s, x));
+          y = Math.min(0, Math.max(H - ih * s, y));
+        };
+        const draw = () => { clamp(); img.style.transform = `translate(${x}px, ${y}px) scale(${scale()})`; zoom.value = z; };
+        const zoomAt = (nz, cx, cy) => { // keep the point under (cx, cy) still
+          nz = Math.min(4, Math.max(1, nz));
+          const s0 = scale(), s1 = base * nz;
+          x = cx - (cx - x) * (s1 / s0); y = cy - (cy - y) * (s1 / s0); z = nz; draw();
+        };
+        const local = (e) => { const r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+
+        const onDown = (e) => { stage.setPointerCapture(e.pointerId); pts.set(e.pointerId, local(e)); if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), z }; } };
+        const onMove = (e) => {
+          if (!pts.has(e.pointerId)) return;
+          const prev = pts.get(e.pointerId), cur = local(e); pts.set(e.pointerId, cur);
+          if (pts.size === 1) { x += cur[0] - prev[0]; y += cur[1] - prev[1]; draw(); }
+          else if (pts.size === 2 && pinch) {
+            const [a, b] = [...pts.values()];
+            zoomAt(pinch.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d, (a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+          }
+        };
+        const onUp = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; };
+        const onWheel = (e) => { e.preventDefault(); const [cx, cy] = local(e); zoomAt(z * (e.deltaY < 0 ? 1.08 : 1 / 1.08), cx, cy); };
+        const onKey = (e) => {
+          const k = e.key, step = 12;
+          if (k === 'ArrowLeft') x += step; else if (k === 'ArrowRight') x -= step;
+          else if (k === 'ArrowUp') y += step; else if (k === 'ArrowDown') y -= step;
+          else if (k === '+' || k === '=') return zoomAt(z * 1.1, W / 2, H / 2);
+          else if (k === '-') return zoomAt(z / 1.1, W / 2, H / 2);
+          else if (k === 'Escape') return finish(null);
+          else return;
+          e.preventDefault(); draw();
+        };
+        const onZoom = () => zoomAt(Number(zoom.value), W / 2, H / 2);
+
+        function finish(result) {
+          stage.removeEventListener('pointerdown', onDown); stage.removeEventListener('pointermove', onMove);
+          stage.removeEventListener('pointerup', onUp); stage.removeEventListener('pointercancel', onUp);
+          stage.removeEventListener('wheel', onWheel); stage.removeEventListener('keydown', onKey);
+          zoom.removeEventListener('input', onZoom);
+          $('crop-ok').onclick = $('crop-cancel').onclick = null;
+          box.classList.add('hidden'); document.body.style.overflow = '';
+          URL.revokeObjectURL(url);
+          resolve(result);
+        }
+
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('That photo could not be opened. Try a JPEG or PNG.')); };
+        img.onload = () => {
+          box.classList.remove('hidden'); document.body.style.overflow = 'hidden';
+          W = stage.clientWidth; H = Math.round(W / ratio);
+          stage.style.height = `${H + (stage.offsetHeight - stage.clientHeight)}px`; // inner area exactly W x H, border outside it
+          iw = img.naturalWidth; ih = img.naturalHeight;
+          img.style.width = `${iw}px`; img.style.height = `${ih}px`;
+          base = Math.max(W / iw, H / ih); z = 1;
+          x = (W - iw * base) / 2; y = (H - ih * base) / 2; // centred
+          draw(); stage.focus();
+        };
+        stage.addEventListener('pointerdown', onDown); stage.addEventListener('pointermove', onMove);
+        stage.addEventListener('pointerup', onUp); stage.addEventListener('pointercancel', onUp);
+        stage.addEventListener('wheel', onWheel, { passive: false }); stage.addEventListener('keydown', onKey);
+        zoom.addEventListener('input', onZoom);
+        $('crop-cancel').onclick = () => finish(null);
+        $('crop-ok').onclick = () => {
+          const s = scale(), outH = Math.round(outW / ratio);
+          const canvas = document.createElement('canvas'); canvas.width = outW; canvas.height = outH;
+          const ctx = canvas.getContext('2d'); ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, -x / s, -y / s, W / s, H / s, 0, 0, outW, outH);
+          canvas.toBlob((b) => finish(b), 'image/jpeg', 0.88);
+        };
+        img.src = url;
+      });
+    }
 
     if (!slug || !token) showError('This admin link is incomplete. Use the full link you were given.');
     else api('').then((ev) => { render(ev); loadWishes(); }).catch((e) => showError(e.message));
