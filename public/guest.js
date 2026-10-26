@@ -117,7 +117,6 @@
     const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i).map((p) => p.trim());
     const initials = parts.length === 2 ? [parts[0][0] || '', parts[1][0] || ''] : [ev.couple_names[0] || ''];
     $('ent-names').textContent = ev.couple_names;
-    $('ent-initials').textContent = initials.map((c) => c.toUpperCase()).join(' & ');
     const d = new Date(ev.event_date + 'T00:00:00');
     $('ent-photo-date').textContent = d.toLocaleDateString('en-SG', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
     const img = $('ent-photo-img');
@@ -136,7 +135,6 @@
     const els = [$('ent-a').querySelector('.ent-pre'), $('ent-names')];
     els.forEach((el, n) => anim(el, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: n * 120 }));
     anim($('ent-frame'), [{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 800, delay: 200 });
-    anim($('ent-heart'), [{ opacity: 0, transform: 'translateY(-16px) rotate(-12deg)' }, { opacity: 1, transform: 'rotate(-6deg)' }], { duration: 700, delay: 650, easing: 'cubic-bezier(.3, 1.4, .5, 1)' });
     anim($('ent-hint'), [{ opacity: 0 }, { opacity: 1 }], { duration: 600, delay: 1200 });
     setTimeout(() => { if (entStage === 'frame') $('ent-knob').classList.add('nudge'); }, reduceMotion ? 0 : 4500);
   }
@@ -149,8 +147,7 @@
     knob.classList.add('pressed');
     setTimeout(() => knob.classList.remove('pressed'), 180);
     anim($('ent-hint'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300 });
-    anim($('ent-heart'), [{ opacity: 1, transform: 'rotate(-6deg)' }, { opacity: 0, transform: 'translate(-30px, -60px) rotate(-22deg) scale(.86)' }], { duration: 750, easing: 'cubic-bezier(.5, 0, .7, .4)' });
-    const photo = anim($('ent-photo'), [{ transform: 'translateY(-172px)' }, { transform: 'translateY(8px)' }], { duration: 2000, delay: 450, easing: 'cubic-bezier(.4, .08, .25, 1)' });
+    const photo = anim($('ent-photo'), [{ transform: 'translateY(-172px)' }, { transform: 'translateY(8px)' }], { duration: 2000, delay: 200, easing: 'cubic-bezier(.4, .08, .25, 1)' });
     anim($('ent-chem'), [{ opacity: 1 }, { opacity: 0 }], { duration: 2800, delay: 900, easing: 'ease-out' });
     const dev = anim($('ent-photo-img'), [{ filter: 'sepia(1) brightness(.42) contrast(.7) blur(1.5px)' }, { filter: 'none' }], { duration: 2800, delay: 900, easing: 'ease-out' });
     await Promise.all([photo, dev]);
@@ -193,10 +190,14 @@
     show($('ent-b'));
     $('entrance').scrollTop = 0;
     const letter = $('env-letter');
-    $('env').style.height = `${Math.max(letter.offsetHeight + 96 + 12, 250)}px`;
+    // the letter sits in the pocket; give the envelope room above for however tall the letter is
+    const env = $('env');
+    const imgH = env.offsetWidth * 1.12;
+    env.style.height = `${Math.ceil(Math.max(imgH, letter.offsetHeight + imgH * .303 + 10))}px`;
+    const sink = Math.round(letter.offsetHeight + imgH * .303 - imgH * .2); // tucked fully inside the pocket
     anim($('env'), [{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 800 });
     anim($('ent-go').parentElement, [{ opacity: 0 }, { opacity: 0 }], { duration: 1 });
-    await anim(letter, [{ opacity: 0, transform: `translateY(${Math.round(letter.offsetHeight * .7)}px)` }, { opacity: 1, transform: 'none' }],
+    await anim(letter, [{ transform: `translateY(${sink}px)` }, { transform: 'none' }],
       { duration: 1500, delay: 500, easing: 'cubic-bezier(.25, .7, .25, 1)' });
     const words = [...letter.querySelectorAll('.w')];
     const step = Math.max(28, Math.min(70, 3600 / words.length)); // long messages write a little faster

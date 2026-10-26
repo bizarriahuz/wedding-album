@@ -331,7 +331,7 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
   --iv-lace: #412a1f;
   --script: "Pinyon Script", "Snell Roundhand", cursive;
   --caps: "Cormorant Garamond", Georgia, serif;
-  --hand: "Cedarville Cursive", "Segoe Script", cursive;
+  --hand: "Caveat", "Segoe Print", cursive;
 }
 .theme-ha-florals body.guest {
   --g-bg: var(--iv-paper);
@@ -362,16 +362,24 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 .theme-ha-florals body.guest .hint, .theme-ha-florals body.guest .quality-tip, .theme-ha-florals body.guest #status-sub { font-size: 15px; }
 .theme-ha-florals body.guest input, .theme-ha-florals body.guest textarea { font-family: var(--caps); font-size: 18px; border-radius: 4px; }
 
-/* flowers, sparingly: one cluster at the top right, one at the foot */
-.theme-ha-florals .deco { display: none; position: absolute; pointer-events: none; background: center / contain no-repeat; }
-.theme-ha-florals .hero .deco.top.right {
-  display: block; top: -8px; right: -30px; width: min(112px, 29vw); aspect-ratio: 292 / 331;
-  background-image: url("/themes/ha-florals/corner-top.webp"); transform: scaleX(-1); opacity: .92;
+/* flowers around the borders: every corner of the first screen and the foot */
+.theme-ha-florals .deco { display: none; position: absolute; pointer-events: none; background: center / contain no-repeat; opacity: .94; }
+/* side garlands from the invitation, fixed to both edges of the screen the whole way down the page */
+.theme-ha-florals body.guest::before, .theme-ha-florals body.guest::after {
+  content: ""; position: fixed; top: 0; height: 100%; max-height: 1100px; width: auto; aspect-ratio: 300 / 975; z-index: 0;
+  pointer-events: none; background: center / contain no-repeat; opacity: .96;
 }
-.theme-ha-florals .foot .deco.bottom.left {
-  display: block; bottom: 0; left: -26px; width: min(92px, 24vw); aspect-ratio: 352 / 585;
-  background-image: url("/themes/ha-florals/corner-bottom.webp"); opacity: .92;
-}
+.theme-ha-florals body.guest::before { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); transform: translateX(-46%); }
+.theme-ha-florals body.guest::after { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); transform: translateX(46%); }
+.theme-ha-florals body.guest > main { position: relative; z-index: 1; }
+.theme-ha-florals .hero .deco.top { display: none; }
+.theme-ha-florals .hero > :not(.deco) { position: relative; z-index: 1; }
+.theme-ha-florals .hero .deco.bottom { display: block; bottom: -24px; width: min(70px, 18vw); aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
+.theme-ha-florals .hero .deco.bottom.left { left: -22px; }
+.theme-ha-florals .hero .deco.bottom.right { right: -22px; transform: scaleX(-1); }
+.theme-ha-florals .foot .deco.bottom { display: block; bottom: 0; width: min(110px, 28vw); aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
+.theme-ha-florals .foot .deco.bottom.left { left: -26px; }
+.theme-ha-florals .foot .deco.bottom.right { right: -26px; transform: scaleX(-1); }
 .theme-ha-florals .hero { padding-top: 0; }
 .theme-ha-florals .pre {
   display: block; margin: 0; padding-top: 74px;
@@ -443,7 +451,10 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
   display: block; position: absolute; top: -8px; right: -30px; width: min(104px, 27vw); aspect-ratio: 292 / 331;
   background: url("/themes/ha-florals/corner-top.webp") center / contain no-repeat; transform: scaleX(-1);
 }
-.theme-ha-florals body.admin .admin-hero .deco.top.left { display: none; }
+.theme-ha-florals body.admin .admin-hero .deco.top.left {
+  display: block; position: absolute; top: -8px; left: -30px; width: min(104px, 27vw); aspect-ratio: 292 / 331;
+  background: url("/themes/ha-florals/corner-top.webp") center / contain no-repeat;
+}
 .theme-ha-florals body.admin .admin-label { font-family: var(--caps); font-weight: 600; text-transform: uppercase; letter-spacing: .22em; font-size: 12px; color: var(--ink); }
 .theme-ha-florals body.admin h1 { font-family: var(--script); font-weight: 400; font-size: clamp(46px, 13vw, 58px); line-height: 1.1; color: var(--ink); padding: 8px 0 4px; margin: 0; }
 .theme-ha-florals body.admin .sub { font-family: var(--caps); font-weight: 500; text-transform: uppercase; letter-spacing: .16em; font-size: 12.5px; line-height: 1.8; color: var(--ink-soft); margin-top: 8px; }
@@ -463,10 +474,15 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
   padding: max(26px, env(safe-area-inset-top)) 16px 40px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
 }
-.ent-flower {
-  position: absolute; top: -6px; right: -18px; width: 104px; aspect-ratio: 292 / 331; pointer-events: none;
-  background: url("/themes/ha-florals/corner-top.webp") center / contain no-repeat; transform: scaleX(-1); opacity: .9;
-}
+.ent-flower { position: absolute; pointer-events: none; background: center / contain no-repeat; opacity: .94; }
+.ent-flower.tl, .ent-flower.tr { top: 0; height: 100%; max-height: 980px; width: auto; aspect-ratio: 300 / 975; }
+.ent-flower.tl { left: 0; background-image: url("/themes/ha-florals/garland-left.webp"); transform: translateX(-46%); }
+.ent-flower.tr { right: 0; background-image: url("/themes/ha-florals/garland-right.webp"); transform: translateX(46%); }
+.ent-scene > :not(.ent-flower) { position: relative; z-index: 1; }
+.ent-flower.bl, .ent-flower.br { bottom: 0; width: 88px; z-index: 1; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
+.ent-flower.bl { left: -20px; }
+.ent-flower.br { right: -20px; transform: scaleX(-1); }
+.entrance { overflow-x: hidden; }
 .ent-pre { margin: 0; font-weight: 500; font-size: 12.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--iv-ink); }
 .ent-names { margin: 8px 0 18px; font-family: var(--script); font-weight: 400; font-size: clamp(42px, 12.5vw, 54px); line-height: 1.1; color: var(--iv-ink); }
 
@@ -485,9 +501,6 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 .ent-chem { position: absolute; inset: 0; opacity: 0; background: radial-gradient(120% 90% at 40% 35%, #6a5848 0%, #3a2f29 55%, #231d1a 100%); }
 .ent-photo-date { margin-top: auto; height: 32px; display: grid; place-items: center; font-size: 9.5px; letter-spacing: .14em; color: #7d7062; }
 
-.ent-heart { position: absolute; left: 55px; top: 104px; width: 150px; height: 140px; transform: rotate(-6deg); filter: drop-shadow(0 4px 8px rgba(60, 45, 30, .25)); }
-.ent-heart svg { width: 100%; height: 100%; overflow: visible; }
-.ent-initials { position: absolute; inset: 18px 0 30px; display: grid; place-items: center; font-family: var(--script); font-size: 34px; line-height: 1; color: var(--iv-ink); }
 
 .theme-ha-florals body.guest .ent-knob, .ent-knob {
   position: absolute; left: 116px; top: 287px; width: 28px; height: 28px; padding: 0; border-radius: 50%;
@@ -502,21 +515,22 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 @keyframes knob-nudge { 0%, 100% { box-shadow: 0 0 0 3px #a29688, 0 0 0 4px #e6ded2, 0 3px 6px rgba(40, 30, 20, .35); } 50% { box-shadow: 0 0 0 3px #a29688, 0 0 0 4px #e6ded2, 0 0 0 12px rgba(184, 170, 151, .35); } }
 .ent-hint { margin: 22px 0 0; font-weight: 600; font-size: 12.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--iv-ink); }
 
-/* envelope scene */
-.env { position: relative; width: 300px; flex-shrink: 0; }
-.env-back, .env-front { position: absolute; left: 0; bottom: 0; width: 300px; height: 230px; overflow: visible; }
-.env-back { z-index: 1; filter: drop-shadow(0 10px 18px rgba(40, 25, 15, .25)); }
-.env-front { z-index: 3; pointer-events: none; }
+/* envelope scene: the lace envelope from the reference photo, cut into a back and a front pocket */
+.env { --ew: min(340px, calc(100vw - 44px)); position: relative; width: var(--ew); height: calc(var(--ew) * 1.12); flex-shrink: 0; }
+.env-back, .env-front { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; display: block; pointer-events: none; user-select: none; }
+.env-back { z-index: 1; filter: drop-shadow(0 12px 20px rgba(40, 25, 15, .22)); }
+.env-front { z-index: 3; filter: drop-shadow(0 -3px 4px rgba(30, 18, 10, .3)); }
+.env-clip { position: absolute; z-index: 2; left: 0; right: 0; top: 0; bottom: calc(var(--ew) * .034); overflow: hidden; }
 .env-letter {
-  position: absolute; z-index: 2; left: 30px; bottom: 96px; width: 240px;
-  padding: 26px 22px 46px; background: #f6f2ea; text-align: left;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 8px 18px rgba(40, 25, 15, .18);
-  font-family: var(--hand); font-size: 19px; line-height: 1.55; color: #1f1714;
+  position: absolute; left: calc(var(--ew) * .149); width: calc(var(--ew) * .73); bottom: calc(var(--ew) * .303);
+  padding: 22px 20px calc(var(--ew) * .25); background: #f5f0e7; text-align: left;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 8px 18px rgba(40, 25, 15, .16);
+  font-family: var(--hand); font-weight: 500; font-size: 21px; line-height: 1.38; color: #2a201b;
 }
-.env-letter p { margin: 0 0 12px; }
+.env-letter p { margin: 0 0 10px; }
 .env-letter .l-body { white-space: pre-line; }
-.env-letter .l-sign { margin: 18px 0 0; }
-.env-letter .l-names { margin: 0; font-family: var(--script); font-size: 30px; line-height: 1.1; }
+.env-letter .l-sign { margin: 16px 0 0; }
+.env-letter .l-names { margin: 2px 0 0; font-family: var(--script); font-weight: 400; font-size: 29px; line-height: 1.15; }
 .env-letter .w { display: inline; }
 .ent-enter-wrap { width: 100%; max-width: 320px; margin-top: 26px; }
 body.guest .ent-enter-wrap button.full { margin-top: 0; }
@@ -573,3 +587,13 @@ body.guest .v-delete.armed:hover { background: #c62f26; }
 }
 
 .hidden { display: none !important; }
+
+/* garland-friendly readability */
+.theme-ha-florals body.guest { --g-surface: #fdfcf9; }
+.theme-ha-florals body.guest .hero .pre, .theme-ha-florals body.guest .occasion, .theme-ha-florals body.guest .names,
+.theme-ha-florals body.guest .when, .theme-ha-florals body.guest .where, .theme-ha-florals body.guest .gallery-head h2,
+.theme-ha-florals body.guest .hint, .theme-ha-florals body.guest .quality-tip, .theme-ha-florals body.guest .who,
+.ent-pre, .ent-names, .ent-hint {
+  text-shadow: 0 0 3px #faf8f4, 0 0 3px #faf8f4, 0 0 6px #faf8f4, 0 0 10px #faf8f4, 0 0 16px #faf8f4, 0 0 24px #faf8f4;
+}
+.theme-ha-florals body.guest .occasion { color: #4f453e; }

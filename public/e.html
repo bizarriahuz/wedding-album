@@ -8,7 +8,7 @@
   <title>Guest Album</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <script>
     // Apply this album's look before the page paints, if this phone has seen it before
@@ -19,7 +19,7 @@
   <!-- Entrance: shown once per visit before the album -->
   <div id="entrance" class="entrance hidden" role="dialog" aria-modal="true" aria-label="Welcome">
     <section class="ent-scene" id="ent-a">
-      <div class="ent-flower" aria-hidden="true"></div>
+      <div class="ent-flower tl" aria-hidden="true"></div><div class="ent-flower tr" aria-hidden="true"></div><div class="ent-flower bl" aria-hidden="true"></div><div class="ent-flower br" aria-hidden="true"></div>
       <p class="ent-pre">The wedding of</p>
       <h1 class="ent-names" id="ent-names"></h1>
       <div class="ent-frame-wrap" id="ent-frame">
@@ -65,70 +65,24 @@
             <span class="ent-photo-date" id="ent-photo-date"></span>
           </div>
         </div>
-        <div class="ent-heart" id="ent-heart">
-          <svg viewBox="-75 -70 150 140" aria-hidden="true">
-            <path d="M0 52C-14 40-64 12-64-20C-64-44-46-58-28-58C-14-58-4-50 0-38C4-50 14-58 28-58C46-58 64-44 64-20C64 12 14 40 0 52Z" fill="none" stroke="#fbfaf7" stroke-width="16" stroke-linecap="round" stroke-dasharray=".01 8" opacity=".96"/>
-            <path d="M0 52C-14 40-64 12-64-20C-64-44-46-58-28-58C-14-58-4-50 0-38C4-50 14-58 28-58C46-58 64-44 64-20C64 12 14 40 0 52Z" fill="none" stroke="#fbfaf7" stroke-width="9"/>
-            <path d="M0 52C-14 40-64 12-64-20C-64-44-46-58-28-58C-14-58-4-50 0-38C4-50 14-58 28-58C46-58 64-44 64-20C64 12 14 40 0 52Z" fill="none" stroke="#d9d0c3" stroke-width="2" stroke-linecap="round" stroke-dasharray=".01 8" stroke-dashoffset="4"/>
-            <path d="M0 52C-14 40-64 12-64-20C-64-44-46-58-28-58C-14-58-4-50 0-38C4-50 14-58 28-58C46-58 64-44 64-20C64 12 14 40 0 52Z" transform="translate(0 -3) scale(.8)" fill="#f6f2ea" stroke="#d3c9bb" stroke-width="1.2"/>
-          </svg>
-          <span class="ent-initials" id="ent-initials"></span>
-        </div>
         <button type="button" class="ent-knob" id="ent-knob" aria-label="Press the button to see the couple's photo"></button>
       </div>
       <p class="ent-hint" id="ent-hint">Tap the button</p>
     </section>
 
     <section class="ent-scene hidden" id="ent-b">
+      <div class="ent-flower tl" aria-hidden="true"></div><div class="ent-flower tr" aria-hidden="true"></div><div class="ent-flower bl" aria-hidden="true"></div><div class="ent-flower br" aria-hidden="true"></div>
       <div class="env" id="env">
-        <svg class="env-back" viewBox="0 0 300 230" aria-hidden="true">
-          <defs>
-            <pattern id="lace" width="40" height="40" patternUnits="userSpaceOnUse">
-              <rect width="40" height="40" fill="#3b2519"/>
-              <g fill="#24150f">
-                <circle cx="5" cy="5" r="1.3"/><circle cx="35" cy="5" r="1.3"/><circle cx="5" cy="35" r="1.3"/><circle cx="35" cy="35" r="1.3"/>
-                <circle cx="20" cy="2.5" r="1"/><circle cx="2.5" cy="20" r="1"/><circle cx="37.5" cy="20" r="1"/><circle cx="20" cy="37.5" r="1"/>
-                <circle cx="10" cy="12" r=".9"/><circle cx="30" cy="12" r=".9"/><circle cx="10" cy="28" r=".9"/><circle cx="30" cy="28" r=".9"/>
-              </g>
-              <g fill="none" stroke="#5d4131" stroke-width="1.2" stroke-linecap="round">
-                <path d="M0 20C6 14 6 8 0 4M40 20C34 26 34 32 40 36M20 0C26 6 32 6 36 0M20 40C14 34 8 34 4 40"/>
-              </g>
-              <g fill="#5a3c2c" opacity=".9">
-                <ellipse cx="0" cy="0" rx="2.2" ry="5" transform="rotate(45)"/><ellipse cx="40" cy="40" rx="2.2" ry="5" transform="rotate(45 40 40)"/>
-                <ellipse cx="40" cy="0" rx="2.2" ry="5" transform="rotate(-45 40 0)"/><ellipse cx="0" cy="40" rx="2.2" ry="5" transform="rotate(-45 0 40)"/>
-              </g>
-              <g fill="#6d4c39" stroke="#2a1810" stroke-width=".5">
-                <ellipse cx="20" cy="12.6" rx="3.1" ry="5.6"/><ellipse cx="20" cy="12.6" rx="3.1" ry="5.6" transform="rotate(45 20 20)"/>
-                <ellipse cx="20" cy="12.6" rx="3.1" ry="5.6" transform="rotate(90 20 20)"/><ellipse cx="20" cy="12.6" rx="3.1" ry="5.6" transform="rotate(135 20 20)"/>
-                <ellipse cx="20" cy="12.6" rx="3.1" ry="5.6" transform="rotate(180 20 20)"/><ellipse cx="20" cy="12.6" rx="3.1" ry="5.6" transform="rotate(225 20 20)"/>
-                <ellipse cx="20" cy="12.6" rx="3.1" ry="5.6" transform="rotate(270 20 20)"/><ellipse cx="20" cy="12.6" rx="3.1" ry="5.6" transform="rotate(315 20 20)"/>
-              </g>
-              <circle cx="20" cy="20" r="3.6" fill="#4a3123" stroke="#7a5743" stroke-width=".8"/>
-              <circle cx="20" cy="20" r="1.4" fill="#24150f"/>
-            </pattern>
-          </defs>
-          <path d="M12 74L150-6L288 74Z" fill="url(#lace)"/>
-          <path d="M12 74L150-6L288 74" fill="none" stroke="#3a2419" stroke-width="12" stroke-linecap="round" stroke-dasharray=".01 9"/>
-          <path d="M12 74L150-6L288 74" fill="none" stroke="#24150f" stroke-width="3" stroke-linecap="round" stroke-dasharray=".01 9"/>
-          <rect x="10" y="70" width="280" height="152" rx="3" fill="url(#lace)"/>
-          <rect x="10" y="70" width="280" height="152" rx="3" fill="#000" opacity=".28"/>
-        </svg>
+        <img class="env-back" src="/themes/ha-florals/env-back.webp" alt="" aria-hidden="true">
+        <div class="env-clip">
         <div class="env-letter" id="env-letter">
           <p class="l-greet" id="l-greet">Dear guests,</p>
           <p class="l-body" id="l-body"></p>
           <p class="l-sign" id="l-sign">With love,</p>
           <p class="l-names" id="l-names"></p>
         </div>
-        <svg class="env-front" viewBox="0 0 300 230" aria-hidden="true">
-          <path d="M10 70L150 160L290 70" fill="none" stroke="#000" stroke-opacity=".22" stroke-width="10" transform="translate(0 -4)" style="filter: blur(3px)"/>
-          <path d="M10 70L150 160L290 70V222H10Z" fill="url(#lace)"/>
-          <path d="M10 222L150 152M290 222L150 152" stroke="#24150f" stroke-width="1.6" opacity=".7"/>
-          <path d="M10 70L150 160L290 70" fill="none" stroke="#3a2419" stroke-width="12" stroke-linecap="round" stroke-dasharray=".01 9"/>
-          <path d="M10 70L150 160L290 70" fill="none" stroke="#24150f" stroke-width="3" stroke-linecap="round" stroke-dasharray=".01 9"/>
-          <path d="M10 76V222H290V76" fill="none" stroke="#3a2419" stroke-width="12" stroke-linecap="round" stroke-dasharray=".01 9"/>
-          <path d="M10 76V222H290V76" fill="none" stroke="#24150f" stroke-width="3" stroke-linecap="round" stroke-dasharray=".01 9"/>
-          <circle cx="150" cy="158" r="11" fill="url(#lace)" stroke="#5d4131" stroke-width="1.5"/>
-        </svg>
+        </div>
+        <img class="env-front" src="/themes/ha-florals/env-front.webp" alt="" aria-hidden="true">
       </div>
       <div class="ent-enter-wrap"><button type="button" class="full" id="ent-go">Enter the album</button></div>
     </section>

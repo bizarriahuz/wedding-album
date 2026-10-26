@@ -101,14 +101,23 @@
     .theme-ha-florals .card6, .theme-ha-florals .poster {
       --p-bg: #faf8f4; --p-ink: #241c18; --p-soft: #6f645c; --p-names: #241c18; --p-accent: #8c7e6c; --p-glint: #b8aa97;
     }
-    .theme-ha-florals .p-frame { display: none; }
+    .theme-ha-florals .p-frame { display: block; top: 0; height: 100%; width: auto; aspect-ratio: 300 / 975; background: center / contain no-repeat; z-index: 0; }
+    .theme-ha-florals .p-frame.left { left: 0; right: auto; background-image: url("/themes/ha-florals/garland-left.webp"); transform: translateX(-44%); }
+    .theme-ha-florals .p-frame.right { right: 0; left: auto; background-image: url("/themes/ha-florals/garland-right.webp"); transform: translateX(44%); }
+    .theme-ha-florals .p-deco.tl, .theme-ha-florals .p-deco.tr { display: none !important; }
     .theme-ha-florals .p-deco { display: none; background: center / contain no-repeat; }
-    .theme-ha-florals .p-deco.tr { display: block; top: -1mm; aspect-ratio: 292 / 331; background-image: url("/themes/ha-florals/corner-top.webp"); transform: scaleX(-1); }
-    .theme-ha-florals .p-deco.bl { display: block; bottom: -1mm; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
-    .theme-ha-florals .card6 .p-deco.tr { width: 30mm; right: -6mm; }
-    .theme-ha-florals .card6 .p-deco.bl { width: 21mm; left: -5mm; }
-    .theme-ha-florals .poster .p-deco.tr { width: 58mm; right: -10mm; }
-    .theme-ha-florals .poster .p-deco.bl { width: 42mm; left: -9mm; }
+    .theme-ha-florals .p-deco.tl, .theme-ha-florals .p-deco.tr { display: block; top: -1mm; aspect-ratio: 292 / 331; background-image: url("/themes/ha-florals/corner-top.webp"); }
+    .theme-ha-florals .p-deco.tr { transform: scaleX(-1); }
+    .theme-ha-florals .p-deco.bl, .theme-ha-florals .p-deco.br { display: block; bottom: -1mm; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
+    .theme-ha-florals .p-deco.br { transform: scaleX(-1); }
+    .theme-ha-florals .card6 .p-deco.tl, .theme-ha-florals .card6 .p-deco.tr { width: 30mm; }
+    .theme-ha-florals .card6 .p-deco.tl { left: -6mm; } .theme-ha-florals .card6 .p-deco.tr { right: -6mm; }
+    .theme-ha-florals .card6 .p-deco.bl, .theme-ha-florals .card6 .p-deco.br { width: 22mm; }
+    .theme-ha-florals .card6 .p-deco.bl { left: -5mm; } .theme-ha-florals .card6 .p-deco.br { right: -5mm; }
+    .theme-ha-florals .poster .p-deco.tl, .theme-ha-florals .poster .p-deco.tr { width: 60mm; }
+    .theme-ha-florals .poster .p-deco.tl { left: -10mm; } .theme-ha-florals .poster .p-deco.tr { right: -10mm; }
+    .theme-ha-florals .poster .p-deco.bl, .theme-ha-florals .poster .p-deco.br { width: 44mm; }
+    .theme-ha-florals .poster .p-deco.bl { left: -9mm; } .theme-ha-florals .poster .p-deco.br { right: -9mm; }
     /* a fine double champagne rule around the page, like stationery */
     .theme-ha-florals .card6::after, .theme-ha-florals .poster::after {
       content: ""; position: absolute; pointer-events: none; z-index: 0;
