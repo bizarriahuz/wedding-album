@@ -251,3 +251,7 @@ textarea { min-height: 120px; resize: vertical; }
 .page { position: relative; }
 .st { transform: translate(var(--dx, 0px), var(--dy, 0px)) rotate(calc(var(--r, 0deg) + var(--jr, 0deg))) scale(var(--s, 1)) scaleX(var(--fx, 1)); }
 .st-x { z-index: 0; opacity: .97; }
+
+/* no blue tap flash on phones; keyboard users still get a focus outline */
+html { -webkit-tap-highlight-color: transparent; }
+:focus:not(:focus-visible) { outline: none; }

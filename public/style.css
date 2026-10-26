@@ -730,3 +730,7 @@ body.admin .strip-pick.has-photo span { display: none; }
 .foot-brand a { display: block; color: inherit; text-decoration: none; line-height: 1.3; }
 .foot-brand .foot-cta { display: block; margin-top: 10px; font-family: var(--caps); font-size: 15px; letter-spacing: .04em; color: var(--iv-ink-soft); text-align: center; }
 .foot-brand a:hover .foot-cta, .foot-brand a:focus-visible .foot-cta { color: var(--iv-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+/* no blue tap flash on phones; keyboard users still get a focus outline */
+html { -webkit-tap-highlight-color: transparent; }
+:focus:not(:focus-visible) { outline: none; }
