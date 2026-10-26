@@ -697,3 +697,13 @@ body.admin .strip-pick.has-photo span { display: none; }
 .theme-ha-florals .hero .deco.bottom { display: none; }
 .theme-ha-florals body.guest .hero .pre { padding-top: 118px; }
 
+
+/* the Made of Memories mark on the entrance screens */
+.ent-brand { width: 140px; margin-top: 18px; line-height: 0; flex-shrink: 0; }
+.ent-brand svg { width: 100%; height: auto; display: block; }
+@media (max-height: 760px) {
+  .ent-brand { width: 112px; margin-top: 10px; }
+  .env { --ew: min(280px, calc(100vw - 44px)); }
+  .ent-scene { padding-top: max(16px, env(safe-area-inset-top)); padding-bottom: 16px; }
+  .ent-names { margin-bottom: 12px; }
+}
