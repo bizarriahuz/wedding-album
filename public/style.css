@@ -1,6 +1,5 @@
-/* Guest Album: sapphire theme
-   Light pages (create, admin) use --paper/--ink; the guest page (body.guest) is sapphire night.
-   Signature: the gold pucuk rebung songket band. Everything else stays quiet. */
+/* Guest Album: one look, built from Harris & Aqilah's invitation (linen, wine lettering, florals).
+   Pages put theme-ha-florals on <html>; the base tokens below are fallbacks. */
 
 :root {
   --midnight: #0a1d49;      /* guest page background */
@@ -20,7 +19,6 @@
   --serif: "Bodoni Moda", "Didot", Georgia, serif;
   --sans: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --songket: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='18' viewBox='0 0 24 18'%3E%3Cg fill='none' stroke='%23d6b56e' stroke-width='1'%3E%3Cpath d='M0 17L12 2l12 15'/%3E%3Cpath d='M5.5 17L12 8.6l6.5 8.4'/%3E%3C/g%3E%3Cpath d='M12 11.4l2 2.6-2 2.6-2-2.6z' fill='%23d6b56e'/%3E%3C/svg%3E");
 }
 
 * { box-sizing: border-box; }
@@ -36,20 +34,8 @@ body {
 
 .wrap { max-width: 520px; margin: 0 auto; padding: 28px 16px 64px; }
 
-/* ---------- songket band (signature) ---------- */
-.songket {
-  height: 26px;
-  background: var(--songket) center / 24px 18px repeat-x;
-  border-top: 1px solid rgba(214, 181, 110, .55);
-  border-bottom: 1px solid rgba(214, 181, 110, .55);
-  background-origin: content-box;
-  padding: 3px 0;
-}
-.songket.flip { transform: scaleY(-1); }
-
 /* ---------- light pages: create + admin ---------- */
 .brand { display: flex; justify-content: center; margin-bottom: 22px; }
-.brand .songket { width: 120px; height: 20px; padding: 1px 0; }
 
 h1 {
   font-family: var(--serif);
@@ -75,7 +61,7 @@ label { display: block; font-size: 14px; font-weight: 600; margin: 16px 0 6px; }
 label:first-child { margin-top: 0; }
 .hint { font-size: 13px; color: var(--ink-soft); margin: 6px 0 0; font-weight: 400; }
 
-input, select {
+input, select, textarea {
   width: 100%;
   font: inherit;
   padding: 12px 13px;
@@ -178,7 +164,6 @@ body.guest .wrap { padding-top: 0; }
 .pre, .deco, .names-mono { display: none; }
 
 .hero { position: relative; text-align: center; padding-top: max(18px, env(safe-area-inset-top)); }
-.hero .songket { margin: 0 -16px; }
 .occasion { color: var(--g-accent); font-size: 15px; letter-spacing: .02em; margin: 28px 0 6px; }
 .names {
   position: relative;
@@ -331,7 +316,6 @@ body.guest .tile:hover { background: var(--g-tile); }
 body.guest #more { margin-top: 18px; background: transparent; color: var(--g-accent); box-shadow: inset 0 0 0 1px var(--g-accent); }
 
 .foot { margin-top: 48px; }
-.foot .songket { margin: 0 -16px; opacity: .6; }
 
 /* ---------- look: invitation florals (Harris & Aqilah's card) ----------
    Artwork in /themes/ha-florals comes from the couple's own invitation; use it for their album only. */
@@ -356,7 +340,6 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
   background: #efeeec url("/themes/ha-florals/linen.webp") repeat;
   background-size: 256px;
 }
-.theme-ha-florals .songket { display: none; }
 .theme-ha-florals .hero { padding-top: 0; min-height: 0; }
 .theme-ha-florals .deco {
   display: block; position: absolute; pointer-events: none;
@@ -432,18 +415,18 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 .print-links { display: flex; flex-direction: column; gap: 8px; }
 .print-links .btn { justify-content: flex-start; }
 
+/* ---------- create page ---------- */
+.theme-ha-florals body.create {
+  --ink: #430011; --ink-soft: #7d5a63; --line: rgba(67, 0, 17, .14);
+  --sapphire: #4a0c1d; --sapphire-2: #63172c; --paper: #f7f5f2;
+  background: #efeeec url("/themes/ha-florals/linen.webp") repeat; background-size: 256px;
+}
+.theme-ha-florals body.create h1, .theme-ha-florals body.create .card h2 { font-family: "Marcellus", var(--serif); }
+.theme-ha-florals body.create .card { background: rgba(255, 255, 255, .82); }
+
 /* ---------- admin page follows the album's look ---------- */
 .admin-hero { position: relative; text-align: center; }
 .admin-label { margin: 0 0 6px; font-size: 13px; color: var(--ink-soft); }
-
-.theme-sapphire body.admin { background: var(--midnight); }
-.theme-sapphire body.admin .wrap { padding-top: 0; }
-.theme-sapphire body.admin .brand { margin: 0 -16px 26px; padding-top: max(18px, env(safe-area-inset-top)); }
-.theme-sapphire body.admin .brand .songket { width: 100%; height: 26px; padding: 3px 0; }
-.theme-sapphire body.admin .admin-label { color: var(--gold); }
-.theme-sapphire body.admin h1 { color: var(--pearl); }
-.theme-sapphire body.admin .sub { color: var(--mist); }
-.theme-sapphire body.admin #error { color: var(--ink); }
 
 .theme-ha-florals body.admin {
   --ink: #430011;
@@ -483,6 +466,88 @@ body.guest #more { margin-top: 18px; background: transparent; color: var(--g-acc
 .theme-ha-florals body.admin .cover { background-color: #e9e4e2; }
 .theme-ha-florals body.admin button.ghost:hover,
 .theme-ha-florals body.admin .btn.ghost:hover { background: rgba(74, 12, 29, .06); }
+
+/* ---------- entrance: gold oval + instant polaroid ----------
+   Resting styles are the finished picture; the .play animations start from the "inside the frame" state.
+   Timeline: frame 0-0.8s, polaroid ejects 0.9-2.2s, lifts forward 2.2-3.5s, develops 3.0-6.0s, text 3.6s. */
+.entrance {
+  position: fixed; inset: 0; z-index: 40; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--g-bg);
+  display: flex; justify-content: center;
+  transition: opacity .5s ease, transform .5s ease;
+}
+.theme-ha-florals .entrance { background: #efeeec url("/themes/ha-florals/linen.webp") repeat; background-size: 256px; }
+.entrance.leaving { opacity: 0; transform: translateY(-12px); pointer-events: none; }
+.ent-inner { width: 100%; max-width: 420px; min-height: 100%; padding: max(28px, env(safe-area-inset-top)) 16px 36px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.entrance:not(.ent-play) .ent-stage, .entrance:not(.ent-play) .ent-copy { visibility: hidden; }
+
+.ent-stage { position: relative; width: 240px; height: 452px; flex-shrink: 0; }
+.ent-frame { position: absolute; left: 5px; top: 0; width: 230px; height: 288px; z-index: 2; }
+.ent-oval { width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 6px 14px rgba(40, 25, 5, .28)); }
+.oval-inside { fill: #0f2a66; }
+.theme-ha-florals .oval-inside { fill: #f4f2ef; }
+.oval-mono {
+  position: absolute; left: 50%; top: 146px; width: 150px; height: 190px; transform: translate(-50%, -50%);
+  display: grid; place-items: center;
+  font-family: var(--serif); font-style: italic; font-size: 54px; letter-spacing: .04em; color: #d6b56e;
+}
+.theme-ha-florals .oval-mono { color: transparent; background: url("/themes/ha-florals/monogram.webp") center / 82% no-repeat; opacity: .55; }
+
+.pol-wrap { position: absolute; left: 50%; top: 0; width: 196px; margin-left: -98px; z-index: 3; }
+.polaroid {
+  margin: 0; width: 196px; padding: 12px 12px 0; background: #fbfaf6; border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 14px 30px rgba(30, 20, 10, .28);
+  transform-origin: 50% 50%;
+  transform: translateY(200px) rotate(-4deg);
+}
+.pol-photo {
+  position: relative; width: 172px; height: 172px; overflow: hidden;
+  background: #2e2622 center / cover no-repeat;
+}
+.pol-photo.no-photo { display: grid; place-items: center; background: var(--g-accent); }
+.pol-photo.no-photo::before { content: attr(data-initials); font-family: var(--serif); font-style: italic; font-size: 52px; color: rgba(255, 255, 255, .9); }
+.pol-chem { position: absolute; inset: 0; opacity: 0; background: radial-gradient(120% 90% at 40% 35%, #6a5848 0%, #3a2f29 55%, #231d1a 100%); }
+.pol-caption { height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #3b2f2a; }
+.pol-caption span { font-family: "Ephesis", cursive; font-size: 25px; line-height: 1; }
+.pol-caption small { font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; color: #8a7a70; }
+
+.ent-glints { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; overflow: visible; fill: #d6b56e; }
+.theme-ha-florals .ent-glints { fill: #c9a35e; }
+
+.ent-copy { text-align: center; max-width: 340px; margin-top: 6px; }
+.ent-copy h2 { font-family: var(--serif); font-weight: 400; font-size: 25px; line-height: 1.25; margin: 0 0 10px; color: var(--g-text); text-wrap: balance; }
+.theme-ha-florals .ent-copy h2 { font-family: "Marcellus", var(--serif); }
+.ent-copy p#ent-msg { margin: 0; color: var(--g-muted); font-size: 15.5px; line-height: 1.6; text-wrap: pretty; white-space: pre-line; }
+body.guest .ent-copy button.full { margin-top: 22px; }
+.ent-skip-hint { margin: 14px 0 0; font-size: 12.5px; color: var(--g-muted); opacity: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .entrance.ent-play .ent-frame { animation: ent-frame-in .8s cubic-bezier(.2, .7, .2, 1) both; }
+  .entrance.ent-play .pol-wrap { animation: ent-front 0s linear 2.2s both; }
+  .entrance.ent-play .polaroid { animation: ent-print 2.6s .9s both; }
+  .entrance.ent-play .pol-photo { animation: ent-develop 3s 3s ease-out both; }
+  .entrance.ent-play .pol-chem { animation: ent-chem 3s 3s ease-out both; }
+  .entrance.ent-play .ent-glints > * { transform-box: fill-box; transform-origin: center; animation: ent-twinkle 2.4s ease-in-out 3.3s infinite both; }
+  .entrance.ent-play .ent-glints > :nth-child(2n) { animation-delay: 3.9s; }
+  .entrance.ent-play .ent-glints > :nth-child(3n) { animation-delay: 4.5s; }
+  .entrance.ent-play .ent-copy h2, .entrance.ent-play .ent-copy p#ent-msg { animation: ent-rise .8s 3.6s cubic-bezier(.2, .7, .2, 1) both; }
+  .entrance.ent-play .ent-copy button { animation: ent-rise .8s 3.95s cubic-bezier(.2, .7, .2, 1) both; }
+  .entrance.ent-play .ent-skip-hint { animation: ent-hint 3.2s .6s both; }
+}
+@keyframes ent-frame-in { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes ent-front { from { z-index: 1; } to { z-index: 3; } }
+@keyframes ent-print {
+  0%   { opacity: 0; transform: translateY(60px) scale(.62) rotate(0); animation-timing-function: cubic-bezier(.25, .8, .35, 1); }
+  6%   { opacity: 1; }
+  50%  { transform: translateY(258px) scale(1) rotate(0); animation-timing-function: cubic-bezier(.3, 0, .2, 1); }
+  74%  { transform: translateY(184px) scale(1.07) rotate(-7deg); animation-timing-function: cubic-bezier(.3, .7, .3, 1); }
+  100% { transform: translateY(200px) scale(1) rotate(-4deg); }
+}
+@keyframes ent-develop { from { filter: sepia(1) brightness(.4) contrast(.7) blur(2px); } to { filter: none; } }
+@keyframes ent-chem { from { opacity: 1; } to { opacity: 0; } }
+@keyframes ent-twinkle { 0%, 100% { opacity: .15; transform: scale(.6); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes ent-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes ent-hint { 0% { opacity: 0; } 15%, 80% { opacity: .8; } 100% { opacity: 0; } }
 
 /* ---------- viewer ---------- */
 .viewer {

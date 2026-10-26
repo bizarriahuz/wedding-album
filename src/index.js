@@ -19,13 +19,15 @@
 //   GET  /print/:slug                printable QR cards and poster (static print.html, needs admin token in #)
 
 const EVENT_TYPES = ['nikah', 'sanding', 'tandang', 'other'];
-const THEMES = ['sapphire', 'ha-florals'];
+const THEMES = ['ha-florals']; // the invitation florals look is the only look
 const PRIVACY = ['public', 'private']; // private: each guest sees only their own uploads; the couple sees all
 
 // Schema changes the live database needs, applied by the Worker itself on first use.
 // Each must be safe to run again: a "duplicate column" error means it's already done.
 const MIGRATIONS = [
   "ALTER TABLE events ADD COLUMN theme TEXT NOT NULL DEFAULT 'sapphire'",
+  "ALTER TABLE events ADD COLUMN welcome_message TEXT",
+  "UPDATE events SET theme = 'ha-florals' WHERE theme <> 'ha-florals'",
 ];
 let schemaReady = false;
 async function ensureSchema(env) {
@@ -130,8 +132,8 @@ async function createEvent(request, env, url) {
 
   await env.DB.prepare(
     `INSERT INTO events (id, slug, couple_names, event_type, event_date, venue,
-                         guest_token, admin_token_hash, expires_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                         guest_token, admin_token_hash, expires_at, theme)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ha-florals')`
   )
     .bind(id, slug, fields.couple_names, fields.event_type, fields.event_date,
           fields.venue, guestToken, await sha256(adminToken), expires.toISOString())
@@ -147,7 +149,7 @@ async function createEvent(request, env, url) {
 
 async function publicEvent(slug, env) {
   const ev = await env.DB.prepare(
-    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, status, theme, privacy
+    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, status, theme, privacy, welcome_message
        FROM events WHERE slug = ?`
   ).bind(slug).first();
   if (!ev) return json({ error: 'Album not found' }, 404);
@@ -185,8 +187,8 @@ async function updateEvent(slug, request, env, url) {
   if (fields.error) return json({ error: fields.error }, 400);
 
   await env.DB.prepare(
-    `UPDATE events SET couple_names = ?, event_type = ?, event_date = ?, venue = ?, theme = ?, privacy = ? WHERE id = ?`
-  ).bind(fields.couple_names, fields.event_type, fields.event_date, fields.venue, fields.theme, fields.privacy, ev.id).run();
+    `UPDATE events SET couple_names = ?, event_type = ?, event_date = ?, venue = ?, theme = ?, privacy = ?, welcome_message = ? WHERE id = ?`
+  ).bind(fields.couple_names, fields.event_type, fields.event_date, fields.venue, fields.theme, fields.privacy, fields.welcome_message, ev.id).run();
 
   return adminEvent(slug, request, env, url);
 }
@@ -469,16 +471,18 @@ function validateEventFields(b, isNew) {
   const event_type = String(b?.event_type ?? 'sanding').trim();
   const event_date = String(b?.event_date ?? '').trim();
   const venue = String(b?.venue ?? '').trim() || null;
-  const theme = String(b?.theme ?? 'sapphire').trim();
+  const theme = 'ha-florals';
   const privacy = String(b?.privacy ?? 'public').trim();
+  const welcome_message = String(b?.welcome_message ?? '').trim() || null;
 
   if (!THEMES.includes(theme)) return { error: 'Pick a look from the list' };
   if (!PRIVACY.includes(privacy)) return { error: 'Pick who can see the photos' };
+  if (welcome_message && welcome_message.length > 300) return { error: 'Keep the welcome message under 300 characters' };
   if (couple_names.length < 3 || couple_names.length > 80) return { error: 'Enter the couple\'s names (3 to 80 characters)' };
   if (!EVENT_TYPES.includes(event_type)) return { error: 'Pick nikah, sanding, tandang or other' };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(event_date) || isNaN(Date.parse(event_date))) return { error: 'Enter a valid date' };
   if (venue && venue.length > 120) return { error: 'Venue is too long (120 characters max)' };
-  return { couple_names, event_type, event_date, venue, theme, privacy };
+  return { couple_names, event_type, event_date, venue, theme, privacy, welcome_message };
 }
 
 function withCoverUrl(ev) {

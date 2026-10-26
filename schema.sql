@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS events (
   admin_token_hash TEXT NOT NULL,                 -- SHA-256 of the couple's secret admin token
   privacy          TEXT NOT NULL DEFAULT 'public', -- public | private | approve
   status           TEXT NOT NULL DEFAULT 'live',  -- draft | live | closed
-  theme            TEXT NOT NULL DEFAULT 'sapphire', -- sapphire | ha-florals
+  theme            TEXT NOT NULL DEFAULT 'ha-florals', -- the invitation florals look
+  welcome_message  TEXT,                          -- couple's thank-you note on the entrance page
   expires_at       TEXT,                          -- when media gets deleted
   created_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );

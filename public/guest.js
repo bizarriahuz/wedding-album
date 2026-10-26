@@ -66,6 +66,98 @@
     show($('share'), false);
   }
 
+  // ---------- entrance (once per visit) ----------
+  const ENT_KEY = `ga-ent:${slug}`;
+  let entranceOn = false;
+  try {
+    entranceOn = !!state.token && !state.coupleToken && !sessionStorage.getItem(ENT_KEY);
+  } catch { entranceOn = !!state.token && !state.coupleToken; }
+  if (entranceOn) { show($('entrance')); document.body.style.overflow = 'hidden'; }
+
+  function dropEntrance() {
+    if (!entranceOn) return;
+    entranceOn = false;
+    show($('entrance'), false);
+    document.body.style.overflow = '';
+  }
+
+  function buildEntrance(ev) {
+    if (!entranceOn) return;
+    const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i).map((p) => p.trim());
+    const initials = parts.length === 2 ? `${parts[0][0] || ''}${parts[1][0] || ''}` : (ev.couple_names[0] || '');
+    $('ent-mono').textContent = initials.toUpperCase();
+    $('ent-names').textContent = ev.couple_names;
+    const d = new Date(ev.event_date + 'T00:00:00');
+    $('ent-date').textContent = d.toLocaleDateString('en-SG', { day: 'numeric', month: 'long', year: 'numeric' });
+    $('ent-msg').textContent = ev.welcome_message ||
+      "We're so glad you're here. Your photos, videos and wishes help us remember every moment of today.";
+
+    // pearl beads around the gold ring
+    const beads = $('ent-beads');
+    if (!beads.childElementCount) {
+      const NS = 'http://www.w3.org/2000/svg';
+      for (let i = 0; i < 44; i++) {
+        const a = (i / 44) * Math.PI * 2;
+        const c = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', (120 + 106 * Math.cos(a)).toFixed(2));
+        c.setAttribute('cy', (152 + 136 * Math.sin(a)).toFixed(2));
+        c.setAttribute('r', '2.1');
+        c.setAttribute('fill', '#fff4c8');
+        c.setAttribute('stroke', '#8a6424');
+        c.setAttribute('stroke-width', '.6');
+        beads.append(c);
+      }
+    }
+
+    const photo = $('ent-photo');
+    const play = () => {
+      $('entrance').classList.add('ent-play');
+      const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) setTimeout(() => { try { $('ent-sheen-anim').beginElement(); } catch {} }, 600);
+    };
+    if (ev.cover_url) {
+      const img = new Image();
+      let started = false;
+      const go = (ok) => {
+        if (started) return; started = true;
+        if (ok) photo.style.backgroundImage = `url("${ev.cover_url}")`;
+        else { photo.classList.add('no-photo'); photo.dataset.initials = initials.toUpperCase(); }
+        play();
+      };
+      img.onload = () => go(true);
+      img.onerror = () => go(false);
+      setTimeout(() => go(img.complete && img.naturalWidth > 0), 2500); // weak signal: don't keep guests waiting
+      img.src = ev.cover_url;
+    } else {
+      photo.classList.add('no-photo');
+      photo.dataset.initials = initials.toUpperCase();
+      play();
+    }
+  }
+
+  // Tap anywhere (except the button) to jump to the finished picture
+  $('entrance').addEventListener('click', (e) => {
+    if (e.target.closest('#ent-go')) return;
+    const ent = $('entrance');
+    if (!ent.classList.contains('ent-play')) return;
+    document.getAnimations().forEach((a) => {
+      const t = a.effect && a.effect.target;
+      if (t && ent.contains(t) && a.effect.getComputedTiming().iterations !== Infinity) a.finish();
+    });
+    $('ent-skip-hint').style.visibility = 'hidden';
+  });
+
+  $('ent-go').onclick = () => {
+    try { sessionStorage.setItem(ENT_KEY, '1'); } catch {}
+    const ent = $('entrance');
+    ent.classList.add('leaving');
+    document.body.style.overflow = '';
+    setTimeout(() => { show(ent, false); ent.classList.remove('ent-play', 'leaving'); }, 500);
+    entranceOn = false;
+    const field = $('name');
+    if (!$('join').classList.contains('hidden')) setTimeout(() => field.focus(), 520);
+  };
+
   // ---------- start ----------
   async function start() {
     let ev;
@@ -74,6 +166,7 @@
       try {
         const r = await fetch(API, { cache: 'no-store' });
         if (r.status === 404) {
+          dropEntrance();
           $('title').textContent = 'Album not found';
           $('when').textContent = 'Check the QR code or link and try again.';
           return;
@@ -88,12 +181,14 @@
       }
     }
     if (!ev) {
+      dropEntrance();
       $('title').textContent = "Can't connect right now";
       $('when').innerHTML = 'Check your signal or Wi-Fi, then <button type="button" class="link-btn" id="retry">try again</button>.';
       $('retry').onclick = () => { $('when').textContent = ''; start(); };
       return;
     }
     paintHero(ev);
+    buildEntrance(ev);
 
     if (!state.token) return problem('Please scan the QR code on your table to join this album.');
     // The couple skip the name step: anything they share is labelled with their names
@@ -110,10 +205,10 @@
   }
 
   function applyTheme(theme) {
-    const t = theme || 'sapphire';
+    const t = 'ha-florals';
     document.documentElement.className = `theme-${t}`;
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = getComputedStyle(document.body).getPropertyValue('--g-bg').trim() || '#0a1d49';
+    if (meta) meta.content = '#efeeec';
     if (state.theme !== t) { state.theme = t; saveState(); }
   }
 

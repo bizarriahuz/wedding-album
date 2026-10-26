@@ -56,7 +56,7 @@
     .card6 { width: 105mm; height: 148mm; padding: 0 12mm; }
     .poster { width: 210mm; height: 297mm; padding: 0 26mm; }
 
-    .p-deco, .p-band, .p-frame { position: absolute; pointer-events: none; }
+    .p-deco, .p-frame { position: absolute; pointer-events: none; }
     .p-frame { display: none; }
     .p-names .nm, .p-names .amp { position: relative; }
     .p-date span { display: block; }
@@ -96,25 +96,6 @@
     .poster .p-how { font-size: 10pt; margin-top: 6mm; }
     .poster .p-date { font-size: 10.5pt; margin-top: 4mm; }
 
-    /* ---------- look: sapphire ---------- */
-    .theme-sapphire .card6, .theme-sapphire .poster {
-      --p-bg: #0a1d49; --p-ink: #eef2fb; --p-soft: #a3b3d9; --p-names: #eef2fb; --p-accent: #d6b56e; --p-glint: #e6c987;
-    }
-    .theme-sapphire .p-band { left: 0; right: 0; background: var(--songket) center / 24px 18px repeat-x; background-origin: content-box; border-top: .3mm solid rgba(214, 181, 110, .6); border-bottom: .3mm solid rgba(214, 181, 110, .6); }
-    .theme-sapphire .card6 .p-band { height: 7mm; padding: .8mm 0; background-size: 6.4mm 4.8mm; }
-    .theme-sapphire .poster .p-band { height: 12mm; padding: 1.5mm 0; background-size: 10mm 7.5mm; }
-    .theme-sapphire .card6 .p-band.top { top: 9mm; }
-    .theme-sapphire .card6 .p-band.bottom { bottom: 9mm; transform: scaleY(-1); }
-    .theme-sapphire .poster .p-band.top { top: 18mm; }
-    .theme-sapphire .poster .p-band.bottom { bottom: 18mm; transform: scaleY(-1); }
-    .theme-sapphire .p-pre { color: var(--p-accent); letter-spacing: .14em; }
-    .theme-sapphire .p-names { font-family: var(--serif); letter-spacing: -.01em; }
-    .theme-sapphire .p-names .amp { font-style: italic; color: var(--p-accent); font-size: .7em; padding: 0 .22em; }
-    .theme-sapphire .p-quote { font-family: var(--serif); font-style: italic; }
-    .theme-sapphire .p-qr { outline: .3mm solid var(--p-accent); outline-offset: 1.6mm; }
-    .theme-sapphire .poster .p-qr { outline-width: .5mm; outline-offset: 3mm; }
-    .theme-sapphire .p-steps b { color: var(--p-accent); }
-
 
     /* ---------- look: invitation florals ---------- */
     .theme-ha-florals .card6, .theme-ha-florals .poster {
@@ -135,7 +116,7 @@
     .theme-ha-florals .poster .p-deco.bl, .theme-ha-florals .poster .p-deco.br { width: 46mm; }
     .theme-ha-florals .poster .p-deco.tl, .theme-ha-florals .poster .p-deco.bl { left: -10mm; }
     .theme-ha-florals .poster .p-deco.tr, .theme-ha-florals .poster .p-deco.br { right: -10mm; }
-    .theme-ha-florals .p-band, .theme-ha-florals .p-deco { display: none; }
+    .theme-ha-florals .p-deco { display: none; }
     .theme-ha-florals .p-frame { display: block; inset: 0; background-repeat: no-repeat; background-size: auto 92%; }
     .theme-ha-florals .p-frame.left { background-image: url("/themes/ha-florals/frame-left.webp"); background-position: 2% center; }
     .theme-ha-florals .p-frame.right { background-image: url("/themes/ha-florals/frame-right.webp"); background-position: 98% center; }
@@ -178,7 +159,6 @@
   <template id="t-card">
     <article class="card6">
       <div class="p-frame left"></div><div class="p-frame right"></div>
-      <div class="p-band top"></div>
       <div class="p-deco tl"></div><div class="p-deco tr"></div>
       <p class="p-pre">The wedding of</p>
       <h1 class="p-names"></h1>
@@ -186,14 +166,12 @@
       <div class="p-qr"></div>
       <p class="p-date"></p>
       <div class="p-deco bl"></div><div class="p-deco br"></div>
-      <div class="p-band bottom"></div>
     </article>
   </template>
 
   <template id="t-poster">
     <article class="poster">
       <div class="p-frame left"></div><div class="p-frame right"></div>
-      <div class="p-band top"></div>
       <div class="p-deco tl"></div><div class="p-deco tr"></div>
       <p class="p-pre">The wedding of</p>
       <h1 class="p-names"></h1>
@@ -201,7 +179,6 @@
       <div class="p-qr"></div>
       <p class="p-date"></p>
       <div class="p-deco bl"></div><div class="p-deco br"></div>
-      <div class="p-band bottom"></div>
     </article>
   </template>
 
@@ -271,9 +248,8 @@
     }
 
     function build(ev) {
-      const t = ev.theme || 'sapphire';
-      document.documentElement.className = `theme-${t}`;
-      document.documentElement.style.setProperty('--qr-ink', t === 'ha-florals' ? '#430011' : '#0a1d49');
+      document.documentElement.className = 'theme-ha-florals';
+      document.documentElement.style.setProperty('--qr-ink', '#430011');
       document.title = `QR cards · ${ev.couple_names}`;
       const card = () => fill($('t-card').content.firstElementChild.cloneNode(true), ev);
       const pages = $('pages');

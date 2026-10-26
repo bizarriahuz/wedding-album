@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="theme-color" content="#f4f6fc">
+  <meta name="theme-color" content="#efeeec">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex">
   <title>Album admin · Guest Album</title>
@@ -11,8 +11,7 @@
   <link rel="stylesheet" href="/style.css">
   <script>
     // Same look as the album's guest page, applied before paint when this phone has seen it
-    try { var t = localStorage.getItem('ga-admin-theme:' + location.pathname.split('/')[2]);
-          if (t) document.documentElement.className = 'theme-' + t; } catch (e) {}
+    document.documentElement.className = 'theme-ha-florals';
   </script>
 </head>
 <body class="admin">
@@ -24,7 +23,6 @@
       <header class="admin-hero">
         <div class="deco top left" aria-hidden="true"></div>
         <div class="deco top right" aria-hidden="true"></div>
-        <div class="brand" aria-hidden="true"><div class="songket"></div></div>
         <p class="admin-label">Album admin</p>
         <h1 id="title"></h1>
         <p class="sub" id="subtitle" style="white-space:pre-line"></p>
@@ -89,15 +87,13 @@
         </div>
         <label for="venue">Venue</label>
         <input id="venue" name="venue" maxlength="120">
+        <label for="welcome">Thank-you message on the entrance page</label>
+        <textarea id="welcome" name="welcome_message" rows="3" maxlength="300" placeholder="We're so glad you're here. Your photos, videos and wishes help us remember every moment of today."></textarea>
+        <p class="hint">Guests see this under your polaroid when they scan the QR. Leave empty to use the message shown here.</p>
         <label for="privacy">Who can see the photos</label>
         <select id="privacy" name="privacy">
           <option value="public">Everyone sees all guests' photos</option>
           <option value="private">Guests see only their own (you see all)</option>
-        </select>
-        <label for="theme">Look of the guest page</label>
-        <select id="theme" name="theme">
-          <option value="sapphire">Sapphire night</option>
-          <option value="ha-florals">Invitation florals (Harris &amp; Aqilah)</option>
         </select>
         <button class="full" type="submit">Save changes</button>
         <div id="details-msg" class="msg" role="status"></div>
@@ -128,9 +124,7 @@
     }
 
     function applyTheme(theme) {
-      const t = theme || 'sapphire';
-      document.documentElement.className = `theme-${t}`;
-      try { localStorage.setItem('ga-admin-theme:' + slug, t); } catch {}
+      document.documentElement.className = 'theme-ha-florals';
     }
 
     // Chrome's own voice recordings carry no length, so players show 0:00. Seeking to the end makes the browser work it out.
@@ -200,8 +194,8 @@
       f.event_type.value = ev.event_type;
       f.event_date.value = ev.event_date;
       f.venue.value = ev.venue || '';
-      f.theme.value = ev.theme || 'sapphire';
       f.privacy.value = ev.privacy || 'public';
+      f.welcome_message.value = ev.welcome_message || '';
       $('app').classList.remove('hidden');
     }
 
@@ -244,8 +238,8 @@
             event_type: f.event_type.value,
             event_date: f.event_date.value,
             venue: f.venue.value,
-            theme: f.theme.value,
             privacy: f.privacy.value,
+            welcome_message: f.welcome_message.value,
           }),
         });
         render(ev);
