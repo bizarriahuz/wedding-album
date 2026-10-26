@@ -86,9 +86,9 @@
           <div>
             <label for="type">Event</label>
             <select id="type" name="event_type">
-              <option value="nikah">Nikah</option>
-              <option value="sanding">Sanding</option>
-              <option value="tandang">Tandang</option>
+              <option value="nikah">Solemnisation (nikah)</option>
+              <option value="sanding">Wedding reception (sanding)</option>
+              <option value="tandang">Groom's side reception (tandang)</option>
               <option value="other">Other</option>
             </select>
           </div>
@@ -133,7 +133,7 @@
     const slug = location.pathname.split('/')[2];
     const token = location.hash.slice(1);
     const $ = (id) => document.getElementById(id);
-    const TYPES = { nikah: 'Nikah', sanding: 'Sanding', tandang: 'Tandang', other: 'Celebration' };
+    const TYPES = { nikah: 'Solemnisation', sanding: 'Wedding reception', tandang: 'Wedding reception', other: 'Celebration' };
 
     const api = (path, opts = {}) =>
       fetch(`/api/admin/${slug}${path}`, {

@@ -518,7 +518,7 @@ function validateEventFields(b, isNew) {
   if (!PRIVACY.includes(privacy)) return { error: 'Pick who can see the photos' };
   if (welcome_message && welcome_message.length > 300) return { error: 'Keep the welcome message under 300 characters' };
   if (couple_names.length < 3 || couple_names.length > 80) return { error: 'Enter the couple\'s names (3 to 80 characters)' };
-  if (!EVENT_TYPES.includes(event_type)) return { error: 'Pick nikah, sanding, tandang or other' };
+  if (!EVENT_TYPES.includes(event_type)) return { error: 'Pick an event type' };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(event_date) || isNaN(Date.parse(event_date))) return { error: 'Enter a valid date' };
   if (venue && venue.length > 120) return { error: 'Venue is too long (120 characters max)' };
   return { couple_names, event_type, event_date, venue, theme, privacy, welcome_message };

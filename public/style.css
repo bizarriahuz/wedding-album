@@ -690,3 +690,9 @@ body.admin .strip-pick.has-photo span { display: none; }
 }
 .theme-ha-florals body.guest, .theme-ha-florals body.admin, .theme-ha-florals body.create { position: relative; }
 .theme-ha-florals .foot .deco.bottom { display: none; }
+
+/* entrance screens: exactly the same repeating garland borders as the guest page */
+.ent-flower.tl, .ent-flower.tr { top: 0; bottom: 0; height: auto; max-height: none; aspect-ratio: auto; width: min(140px, 36vw); background-repeat: repeat-y; background-size: calc(min(140px, 36vw) / .54) auto; opacity: .96; }
+.ent-flower.bl, .ent-flower.br { display: none; }
+.theme-ha-florals .hero .deco.bottom { display: none; }
+.theme-ha-florals body.guest .hero .pre { padding-top: 118px; }

@@ -7,7 +7,7 @@
   const POLL_MS = 12000;          // check for new photos every 12 s while the page is on screen
   const IDLE_MS = 10 * 60 * 1000;  // and pause after 10 min without a tap or scroll
   const STALL_MS = 45000; // abort an upload that makes no progress for this long
-  const TYPES = { nikah: 'Majlis Akad Nikah', sanding: 'Majlis Persandingan', tandang: 'Majlis Bertandang', other: 'Majlis' };
+  const TYPES = { nikah: 'Solemnisation', sanding: '', tandang: '', other: '' }; // receptions: "The wedding of" already says it
 
   // ---------- per-device state ----------
   const storeKey = `ga:${slug}`;
@@ -324,10 +324,11 @@
     }
     names.setAttribute('aria-label', ev.couple_names);
 
-    $('occasion').textContent = TYPES[ev.event_type] || 'Majlis';
+    $('occasion').textContent = TYPES[ev.event_type] || '';
+    $('occasion').hidden = !$('occasion').textContent;
     const d = new Date(ev.event_date + 'T00:00:00');
     let when;
-    try { when = d.toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+    try { when = d.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
     catch { when = d.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
     $('when').textContent = when;
     $('where').textContent = ev.venue || '';
