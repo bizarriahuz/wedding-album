@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" class="theme-ha-florals theme-ivory">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#faf8f4">
+  <title>Enquiries · Made of Memories</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .enq { padding: 18px 20px; margin-bottom: 14px; }
+    .enq h3 { margin: 0; font-family: var(--caps); font-weight: 600; font-size: 21px; }
+    .enq .meta { margin: 4px 0 8px; color: var(--iv-ink-soft); font-size: 15px; }
+    .enq .meta a { color: inherit; }
+    .enq p { margin: 0; white-space: pre-line; }
+    .when { color: var(--iv-ink-soft); font-size: 14px; float: right; }
+  </style>
+</head>
+<body class="create">
+  <main class="wrap">
+    <h1>Enquiries</h1>
+    <p class="sub">Messages from the website's contact form.</p>
+    <form id="unlock" class="card" autocomplete="off">
+      <label for="key">Creator key</label>
+      <input id="key" type="password" required autocomplete="current-password">
+      <button class="full" type="submit">Show enquiries</button>
+      <div id="msg" class="msg" role="status"></div>
+    </form>
+    <div id="list"></div>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    try { $('key').value = localStorage.getItem('creatorKey') || ''; } catch {}
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    async function load() {
+      const msg = $('msg'); msg.className = 'msg'; msg.textContent = 'Loading…';
+      try {
+        const res = await fetch('/api/enquiries', { headers: { 'X-Create-Key': $('key').value } });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not load');
+        try { localStorage.setItem('creatorKey', $('key').value); } catch {}
+        msg.textContent = data.enquiries.length ? `${data.enquiries.length} enquir${data.enquiries.length === 1 ? 'y' : 'ies'}` : 'No enquiries yet.';
+        $('list').innerHTML = data.enquiries.map((e) => {
+          const date = e.wedding_date ? new Date(e.wedding_date + 'T00:00:00').toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : 'date not set';
+          const got = new Date(e.created_at.replace(' ', 'T') + 'Z').toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+          return `<div class="card enq"><span class="when">${esc(got)}</span><h3>${esc(e.name)}</h3>
+            <p class="meta"><a href="mailto:${esc(e.email)}?subject=${encodeURIComponent('Your wedding album with Made of Memories')}">${esc(e.email)}</a> · wedding ${esc(date)}${e.guests ? ' · ' + esc(e.guests) + ' guests' : ''}${e.package ? ' · ' + esc(e.package) : ''}</p>
+            ${e.message ? `<p>${esc(e.message)}</p>` : ''}</div>`;
+        }).join('');
+      } catch (err) { msg.className = 'msg err'; msg.textContent = err.message; }
+    }
+    $('unlock').onsubmit = (e) => { e.preventDefault(); load(); };
+    if ($('key').value) load();
+  </script>
+</body>
+</html>

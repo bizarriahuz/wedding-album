@@ -1,132 +1,333 @@
 <!doctype html>
-<html lang="en" class="theme-ha-florals">
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="theme-color" content="#faf8f4">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Create an album · Guest Album</title>
+  <title>Made of Memories · Wedding guest photo albums, Singapore</title>
+  <meta name="description" content="Guests scan a QR code and share their photos, videos and wishes into one beautiful album for the two of you. No app needed. Made in Singapore.">
+  <meta name="theme-color" content="#faf8f4">
+  <meta property="og:title" content="Made of Memories">
+  <meta property="og:description" content="Every moment, from every guest: a wedding album your guests fill from their phones.">
+  <meta property="og:image" content="/site/booth.webp">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #faf8f4; --paper-2: #f3eee6; --card: #fff; --ink: #241c18; --soft: #6a5f57; --taupe: #b8aa97; --line: rgba(140, 126, 108, .3);
+      --brown: #3a2a22; --blush: #e2cfd3; --script: "Pinyon Script", cursive; --serif: "Cormorant Garamond", Georgia, serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    html, body { margin: 0; overflow-x: clip; }
+    body { position: relative; background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 19px; line-height: 1.6; font-variant-numeric: lining-nums; }
+    body::before, body::after {
+      content: ""; position: absolute; top: 0; bottom: 0; width: 44px; z-index: 0; pointer-events: none;
+      background: url("/brand/lace-edge.svg") left top / 44px 36px repeat-y;
+    }
+    body::before { left: 0; } body::after { right: 0; transform: scaleX(-1); }
+    @media (max-width: 520px) { body::before, body::after { width: 30px; background-size: 44px 36px; } }
+    a { color: inherit; }
+    .wrap { position: relative; z-index: 1; width: min(1080px, 100% - 88px); margin: 0 auto; }
+    @media (max-width: 520px) { .wrap { width: calc(100% - 64px); } }
+    img { max-width: 100%; display: block; }
+
+    /* header */
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; }
+    .top .brand { width: 170px; line-height: 0; }
+    .top .brand svg { width: 100%; height: auto; }
+    .top nav { display: flex; gap: 22px; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
+    .top nav a { text-decoration: none; color: var(--soft); }
+    .top nav a:hover { color: var(--ink); }
+    @media (max-width: 760px) { .top nav { display: none; } .top { justify-content: center; } }
+
+    /* buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 26px; border-radius: 4px;
+      font-family: var(--serif); font-weight: 600; font-size: 15px; letter-spacing: .2em; text-transform: uppercase; text-decoration: none; cursor: pointer;
+      border: 1px solid var(--brown); background: var(--brown); color: #fbf7f1; }
+    .btn:hover { background: #2a1d17; }
+    .btn.ghost { background: #fff; color: var(--brown); }
+    .btn.ghost:hover { background: var(--paper-2); }
+    .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--brown); outline-offset: 3px; }
+
+    /* hero */
+    .hero { text-align: center; padding: 34px 0 20px; }
+    .eyebrow { margin: 0; font-weight: 600; font-size: 13.5px; letter-spacing: .28em; text-transform: uppercase; color: var(--soft); }
+    h1, h2 { font-family: var(--script); font-weight: 400; line-height: 1.12; margin: 0; color: var(--ink); }
+    h1 { font-size: clamp(50px, 9vw, 92px); margin: 10px 0 14px; }
+    .lede { max-width: 640px; margin: 0 auto; font-size: clamp(19px, 2.3vw, 22px); color: #3d332d; }
+    .ctas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 28px; }
+
+    .phones { display: flex; justify-content: center; align-items: flex-end; gap: clamp(10px, 3vw, 34px); margin: 46px auto 0; padding-bottom: 10px; }
+    .phone { width: clamp(150px, 26vw, 250px); border-radius: 30px; padding: 7px; background: #2b211c; box-shadow: 0 22px 46px rgba(58, 42, 34, .22); }
+    .phone img { border-radius: 24px; aspect-ratio: 560 / 1212; width: 100%; height: auto; background: var(--paper); }
+    .phone.mid { transform: translateY(-26px); }
+    .phone figcaption { position: absolute; }
+    @media (max-width: 620px) { .phone:not(.mid) { display: none; } .phone.mid { transform: none; width: min(260px, 70vw); } }
+
+    /* sections */
+    section { padding: 72px 0 8px; }
+    .head { text-align: center; margin-bottom: 34px; }
+    .head h2 { font-size: clamp(42px, 6vw, 60px); margin-top: 6px; }
+    .head p { max-width: 620px; margin: 10px auto 0; color: var(--soft); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 6px; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; counter-reset: s; }
+    .step { padding: 28px 24px 26px; text-align: center; }
+    .step::before { counter-increment: s; content: counter(s); display: grid; place-items: center; width: 44px; height: 44px; margin: 0 auto 12px;
+      border-radius: 50%; border: 1px solid var(--taupe); font-weight: 600; font-size: 20px; color: var(--brown); }
+    .step h3, .feature h3 { margin: 0 0 6px; font-family: var(--serif); font-weight: 600; font-size: 22px; }
+    .step p, .feature p { margin: 0; color: #4a3f38; }
+    @media (max-width: 820px) { .steps { grid-template-columns: 1fr; } }
+
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature { padding: 24px 22px; }
+    .feature svg { width: 30px; height: 30px; color: var(--brown); margin-bottom: 8px; }
+    @media (max-width: 900px) { .features { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+
+    /* packages */
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
+    .plan { position: relative; display: flex; flex-direction: column; padding: 30px 26px 26px; }
+    .plan h3 { margin: 0; font-family: var(--script); font-weight: 400; font-size: 40px; line-height: 1.1; }
+    .plan .price { margin: 6px 0 2px; font-size: 40px; font-weight: 500; letter-spacing: .01em; }
+    .plan .price small { font-size: 17px; color: var(--soft); letter-spacing: .08em; }
+    .plan .for { margin: 0 0 14px; color: var(--soft); font-style: italic; }
+    .plan ul { margin: 0 0 22px; padding: 0; list-style: none; flex: 1; }
+    .plan li { position: relative; padding: 7px 0 7px 26px; border-top: 1px solid rgba(140, 126, 108, .18); }
+    .plan li::before { content: ""; position: absolute; left: 4px; top: 16px; width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--taupe); background: var(--paper-2); }
+    .plan.pick { border-color: var(--taupe); box-shadow: 0 14px 34px rgba(58, 42, 34, .12); }
+    .ribbon { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); padding: 5px 18px; white-space: nowrap;
+      font-weight: 600; font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink);
+      background: linear-gradient(180deg, #efe3e5, #dcc7cc 55%, #ebdfe1); box-shadow: 0 2px 5px rgba(90, 70, 54, .2); }
+    .ribbon::before, .ribbon::after { content: ""; position: absolute; left: 6px; right: 6px; border-top: 1px dashed rgba(150, 120, 128, .7); }
+    .ribbon::before { top: 3px; } .ribbon::after { bottom: 3px; }
+    .note { text-align: center; color: var(--soft); font-size: 16px; margin: 18px 0 0; }
+    @media (max-width: 900px) { .plans { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; gap: 30px; } }
+
+    /* demo band */
+    .demo { margin-top: 64px; padding: 34px 28px; text-align: center; }
+    .demo h2 { font-size: clamp(38px, 5.5vw, 52px); }
+    .demo p { max-width: 560px; margin: 8px auto 20px; color: #4a3f38; }
+
+    /* faq */
+    .faq { max-width: 760px; margin: 0 auto; }
+    details { border-top: 1px solid var(--line); padding: 4px 0; }
+    details:last-child { border-bottom: 1px solid var(--line); }
+    summary { cursor: pointer; list-style: none; padding: 14px 34px 14px 0; position: relative; font-weight: 600; font-size: 20px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; position: absolute; right: 6px; top: 10px; font-size: 26px; font-weight: 400; color: var(--soft); }
+    details[open] summary::after { content: "–"; }
+    details p { margin: 0 0 16px; color: #4a3f38; }
+
+    /* contact */
+    .contact { max-width: 680px; margin: 0 auto; padding: 30px 26px 28px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+    label { display: block; margin: 14px 0 6px; font-weight: 600; font-size: 16px; }
+    input, select, textarea { width: 100%; padding: 12px 14px; font: inherit; font-size: 18px; color: var(--ink); background: #fff;
+      border: 1px solid rgba(140, 126, 108, .5); border-radius: 4px; }
+    textarea { min-height: 120px; resize: vertical; }
+    .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+    .contact .btn { width: 100%; margin-top: 20px; }
+    .msg { margin: 14px 0 0; text-align: center; min-height: 1.6em; }
+    .msg.ok { color: #3f6b46; } .msg.err { color: #9b3b2f; }
+
+    footer { padding: 70px 0 40px; text-align: center; color: var(--soft); font-size: 16px; }
+    footer .brand { width: 230px; margin: 0 auto 12px; line-height: 0; }
+    footer .brand svg { width: 100%; height: auto; }
+    footer p { margin: 4px 0; }
+  </style>
 </head>
-<body class="create">
-  <main class="wrap">
-    <h1>Create an album</h1>
-    <p class="sub">One album per event. You'll get a private admin link for the couple and a guest link for the QR codes.</p>
-
-    <form id="create" class="card" autocomplete="off">
-      <label for="names">Couple's names</label>
-      <input id="names" name="couple_names" placeholder="Aina &amp; Hakim" required maxlength="80">
-
-      <div class="row">
-        <div>
-          <label for="type">Event</label>
-          <select id="type" name="event_type">
-            <option value="nikah">Solemnisation (nikah)</option>
-            <option value="sanding" selected>Wedding reception (sanding)</option>
-            <option value="tandang">Groom's side reception (tandang)</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div>
-          <label for="date">Date</label>
-          <input id="date" name="event_date" type="date" required>
-        </div>
-      </div>
-
-      <label for="venue">Venue <span class="hint">(optional)</span></label>
-      <input id="venue" name="venue" placeholder="Void deck, Blk 123 Tampines St 11" maxlength="120">
-
-      <label for="key">Creator key</label>
-      <input id="key" name="key" type="password" required autocomplete="current-password">
-      <p class="hint">Your own password, so only you can create albums.</p>
-
-      <button class="full" type="submit">Create album</button>
-      <div id="msg" class="msg" role="status"></div>
-    </form>
-
-    <section id="done" class="card hidden">
-      <h2>Album created</h2>
-
-      <label>Couple's admin link</label>
-      <div class="linkbox"><input id="admin-url" class="link" readonly><button type="button" data-copy>Copy</button><button type="button" data-share>Share</button></div>
-      <div class="warn">Save this link now. It's the only way into the admin page, and it can't be shown again.</div>
-
-      <label>Guest link (goes on the QR codes)</label>
-      <div class="linkbox"><input id="guest-url" class="link" readonly><button type="button" data-copy>Copy</button><button type="button" data-share>Share</button></div>
-
-      <p class="center" style="margin-top:20px"><a id="open-admin" class="btn ghost" href="#">Open admin page</a></p>
-    </section>
-    <div class="foot-brand admin-brand"><svg xmlns="http://www.w3.org/2000/svg" focusable="false" viewBox="0 0 320 160" role="img" aria-label="madeofmemories.sg">
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/" aria-label="Made of Memories, home"><svg xmlns="http://www.w3.org/2000/svg" focusable="false" viewBox="0 0 320 160" role="img" aria-label="madeofmemories.sg">
   <defs>
-    <pattern id="mom1-net" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <pattern id="site1-net" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
       <path d="M0 0H5M0 0V5" stroke="#d8cbb9" stroke-width=".35" opacity=".7"/>
     </pattern>
-    <linearGradient id="mom1-satin" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="site1-satin" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#efe3e5"/><stop offset=".35" stop-color="#e2cfd3"/><stop offset=".6" stop-color="#d7c1c6"/><stop offset="1" stop-color="#e9dcdf"/>
     </linearGradient>
-    <linearGradient id="mom1-sheen" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="site1-sheen" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".35"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
-    <filter id="mom1-shadow" x="-10%" y="-30%" width="120%" height="160%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#5a4636" flood-opacity=".22"/></filter>
+    <filter id="site1-shadow" x="-10%" y="-30%" width="120%" height="160%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#5a4636" flood-opacity=".22"/></filter>
   </defs>
   <path d="M14 14 A5.20 5.20 0 0 1 24.43 14.00 A5.20 5.20 0 0 1 34.86 14.00 A5.20 5.20 0 0 1 45.29 14.00 A5.20 5.20 0 0 1 55.71 14.00 A5.20 5.20 0 0 1 66.14 14.00 A5.20 5.20 0 0 1 76.57 14.00 A5.20 5.20 0 0 1 87.00 14.00 A5.20 5.20 0 0 1 97.43 14.00 A5.20 5.20 0 0 1 107.86 14.00 A5.20 5.20 0 0 1 118.29 14.00 A5.20 5.20 0 0 1 128.71 14.00 A5.20 5.20 0 0 1 139.14 14.00 A5.20 5.20 0 0 1 149.57 14.00 A5.20 5.20 0 0 1 160.00 14.00 A5.20 5.20 0 0 1 170.43 14.00 A5.20 5.20 0 0 1 180.86 14.00 A5.20 5.20 0 0 1 191.29 14.00 A5.20 5.20 0 0 1 201.71 14.00 A5.20 5.20 0 0 1 212.14 14.00 A5.20 5.20 0 0 1 222.57 14.00 A5.20 5.20 0 0 1 233.00 14.00 A5.20 5.20 0 0 1 243.43 14.00 A5.20 5.20 0 0 1 253.86 14.00 A5.20 5.20 0 0 1 264.29 14.00 A5.20 5.20 0 0 1 274.71 14.00 A5.20 5.20 0 0 1 285.14 14.00 A5.20 5.20 0 0 1 295.57 14.00 A5.20 5.20 0 0 1 306.00 14.00 A5.20 5.20 0 0 1 306.00 24.15 A5.20 5.20 0 0 1 306.00 34.31 A5.20 5.20 0 0 1 306.00 44.46 A5.20 5.20 0 0 1 306.00 54.62 A5.20 5.20 0 0 1 306.00 64.77 A5.20 5.20 0 0 1 306.00 74.92 A5.20 5.20 0 0 1 306.00 85.08 A5.20 5.20 0 0 1 306.00 95.23 A5.20 5.20 0 0 1 306.00 105.38 A5.20 5.20 0 0 1 306.00 115.54 A5.20 5.20 0 0 1 306.00 125.69 A5.20 5.20 0 0 1 306.00 135.85 A5.20 5.20 0 0 1 306.00 146.00 A5.20 5.20 0 0 1 295.57 146.00 A5.20 5.20 0 0 1 285.14 146.00 A5.20 5.20 0 0 1 274.71 146.00 A5.20 5.20 0 0 1 264.29 146.00 A5.20 5.20 0 0 1 253.86 146.00 A5.20 5.20 0 0 1 243.43 146.00 A5.20 5.20 0 0 1 233.00 146.00 A5.20 5.20 0 0 1 222.57 146.00 A5.20 5.20 0 0 1 212.14 146.00 A5.20 5.20 0 0 1 201.71 146.00 A5.20 5.20 0 0 1 191.29 146.00 A5.20 5.20 0 0 1 180.86 146.00 A5.20 5.20 0 0 1 170.43 146.00 A5.20 5.20 0 0 1 160.00 146.00 A5.20 5.20 0 0 1 149.57 146.00 A5.20 5.20 0 0 1 139.14 146.00 A5.20 5.20 0 0 1 128.71 146.00 A5.20 5.20 0 0 1 118.29 146.00 A5.20 5.20 0 0 1 107.86 146.00 A5.20 5.20 0 0 1 97.43 146.00 A5.20 5.20 0 0 1 87.00 146.00 A5.20 5.20 0 0 1 76.57 146.00 A5.20 5.20 0 0 1 66.14 146.00 A5.20 5.20 0 0 1 55.71 146.00 A5.20 5.20 0 0 1 45.29 146.00 A5.20 5.20 0 0 1 34.86 146.00 A5.20 5.20 0 0 1 24.43 146.00 A5.20 5.20 0 0 1 14.00 146.00 A5.20 5.20 0 0 1 14.00 135.85 A5.20 5.20 0 0 1 14.00 125.69 A5.20 5.20 0 0 1 14.00 115.54 A5.20 5.20 0 0 1 14.00 105.38 A5.20 5.20 0 0 1 14.00 95.23 A5.20 5.20 0 0 1 14.00 85.08 A5.20 5.20 0 0 1 14.00 74.92 A5.20 5.20 0 0 1 14.00 64.77 A5.20 5.20 0 0 1 14.00 54.62 A5.20 5.20 0 0 1 14.00 44.46 A5.20 5.20 0 0 1 14.00 34.31 A5.20 5.20 0 0 1 14.00 24.15 A5.20 5.20 0 0 1 14.00 14.00Z" fill="#fcfaf6" stroke="#bfae98" stroke-width=".75"/>
   <g fill="#bfae98"><circle cx="19.21" cy="7.20" r=".75"/><circle cx="29.64" cy="7.20" r=".75"/><circle cx="40.07" cy="7.20" r=".75"/><circle cx="50.50" cy="7.20" r=".75"/><circle cx="60.93" cy="7.20" r=".75"/><circle cx="71.36" cy="7.20" r=".75"/><circle cx="81.79" cy="7.20" r=".75"/><circle cx="92.21" cy="7.20" r=".75"/><circle cx="102.64" cy="7.20" r=".75"/><circle cx="113.07" cy="7.20" r=".75"/><circle cx="123.50" cy="7.20" r=".75"/><circle cx="133.93" cy="7.20" r=".75"/><circle cx="144.36" cy="7.20" r=".75"/><circle cx="154.79" cy="7.20" r=".75"/><circle cx="165.21" cy="7.20" r=".75"/><circle cx="175.64" cy="7.20" r=".75"/><circle cx="186.07" cy="7.20" r=".75"/><circle cx="196.50" cy="7.20" r=".75"/><circle cx="206.93" cy="7.20" r=".75"/><circle cx="217.36" cy="7.20" r=".75"/><circle cx="227.79" cy="7.20" r=".75"/><circle cx="238.21" cy="7.20" r=".75"/><circle cx="248.64" cy="7.20" r=".75"/><circle cx="259.07" cy="7.20" r=".75"/><circle cx="269.50" cy="7.20" r=".75"/><circle cx="279.93" cy="7.20" r=".75"/><circle cx="290.36" cy="7.20" r=".75"/><circle cx="300.79" cy="7.20" r=".75"/><circle cx="312.80" cy="19.08" r=".75"/><circle cx="312.80" cy="29.23" r=".75"/><circle cx="312.80" cy="39.38" r=".75"/><circle cx="312.80" cy="49.54" r=".75"/><circle cx="312.80" cy="59.69" r=".75"/><circle cx="312.80" cy="69.85" r=".75"/><circle cx="312.80" cy="80.00" r=".75"/><circle cx="312.80" cy="90.15" r=".75"/><circle cx="312.80" cy="100.31" r=".75"/><circle cx="312.80" cy="110.46" r=".75"/><circle cx="312.80" cy="120.62" r=".75"/><circle cx="312.80" cy="130.77" r=".75"/><circle cx="312.80" cy="140.92" r=".75"/><circle cx="300.79" cy="152.80" r=".75"/><circle cx="290.36" cy="152.80" r=".75"/><circle cx="279.93" cy="152.80" r=".75"/><circle cx="269.50" cy="152.80" r=".75"/><circle cx="259.07" cy="152.80" r=".75"/><circle cx="248.64" cy="152.80" r=".75"/><circle cx="238.21" cy="152.80" r=".75"/><circle cx="227.79" cy="152.80" r=".75"/><circle cx="217.36" cy="152.80" r=".75"/><circle cx="206.93" cy="152.80" r=".75"/><circle cx="196.50" cy="152.80" r=".75"/><circle cx="186.07" cy="152.80" r=".75"/><circle cx="175.64" cy="152.80" r=".75"/><circle cx="165.21" cy="152.80" r=".75"/><circle cx="154.79" cy="152.80" r=".75"/><circle cx="144.36" cy="152.80" r=".75"/><circle cx="133.93" cy="152.80" r=".75"/><circle cx="123.50" cy="152.80" r=".75"/><circle cx="113.07" cy="152.80" r=".75"/><circle cx="102.64" cy="152.80" r=".75"/><circle cx="92.21" cy="152.80" r=".75"/><circle cx="81.79" cy="152.80" r=".75"/><circle cx="71.36" cy="152.80" r=".75"/><circle cx="60.93" cy="152.80" r=".75"/><circle cx="50.50" cy="152.80" r=".75"/><circle cx="40.07" cy="152.80" r=".75"/><circle cx="29.64" cy="152.80" r=".75"/><circle cx="19.21" cy="152.80" r=".75"/><circle cx="7.20" cy="140.92" r=".75"/><circle cx="7.20" cy="130.77" r=".75"/><circle cx="7.20" cy="120.62" r=".75"/><circle cx="7.20" cy="110.46" r=".75"/><circle cx="7.20" cy="100.31" r=".75"/><circle cx="7.20" cy="90.15" r=".75"/><circle cx="7.20" cy="80.00" r=".75"/><circle cx="7.20" cy="69.85" r=".75"/><circle cx="7.20" cy="59.69" r=".75"/><circle cx="7.20" cy="49.54" r=".75"/><circle cx="7.20" cy="39.38" r=".75"/><circle cx="7.20" cy="29.23" r=".75"/><circle cx="7.20" cy="19.08" r=".75"/></g>
-  <path d="M14 14 A5.20 5.20 0 0 1 24.43 14.00 A5.20 5.20 0 0 1 34.86 14.00 A5.20 5.20 0 0 1 45.29 14.00 A5.20 5.20 0 0 1 55.71 14.00 A5.20 5.20 0 0 1 66.14 14.00 A5.20 5.20 0 0 1 76.57 14.00 A5.20 5.20 0 0 1 87.00 14.00 A5.20 5.20 0 0 1 97.43 14.00 A5.20 5.20 0 0 1 107.86 14.00 A5.20 5.20 0 0 1 118.29 14.00 A5.20 5.20 0 0 1 128.71 14.00 A5.20 5.20 0 0 1 139.14 14.00 A5.20 5.20 0 0 1 149.57 14.00 A5.20 5.20 0 0 1 160.00 14.00 A5.20 5.20 0 0 1 170.43 14.00 A5.20 5.20 0 0 1 180.86 14.00 A5.20 5.20 0 0 1 191.29 14.00 A5.20 5.20 0 0 1 201.71 14.00 A5.20 5.20 0 0 1 212.14 14.00 A5.20 5.20 0 0 1 222.57 14.00 A5.20 5.20 0 0 1 233.00 14.00 A5.20 5.20 0 0 1 243.43 14.00 A5.20 5.20 0 0 1 253.86 14.00 A5.20 5.20 0 0 1 264.29 14.00 A5.20 5.20 0 0 1 274.71 14.00 A5.20 5.20 0 0 1 285.14 14.00 A5.20 5.20 0 0 1 295.57 14.00 A5.20 5.20 0 0 1 306.00 14.00 A5.20 5.20 0 0 1 306.00 24.15 A5.20 5.20 0 0 1 306.00 34.31 A5.20 5.20 0 0 1 306.00 44.46 A5.20 5.20 0 0 1 306.00 54.62 A5.20 5.20 0 0 1 306.00 64.77 A5.20 5.20 0 0 1 306.00 74.92 A5.20 5.20 0 0 1 306.00 85.08 A5.20 5.20 0 0 1 306.00 95.23 A5.20 5.20 0 0 1 306.00 105.38 A5.20 5.20 0 0 1 306.00 115.54 A5.20 5.20 0 0 1 306.00 125.69 A5.20 5.20 0 0 1 306.00 135.85 A5.20 5.20 0 0 1 306.00 146.00 A5.20 5.20 0 0 1 295.57 146.00 A5.20 5.20 0 0 1 285.14 146.00 A5.20 5.20 0 0 1 274.71 146.00 A5.20 5.20 0 0 1 264.29 146.00 A5.20 5.20 0 0 1 253.86 146.00 A5.20 5.20 0 0 1 243.43 146.00 A5.20 5.20 0 0 1 233.00 146.00 A5.20 5.20 0 0 1 222.57 146.00 A5.20 5.20 0 0 1 212.14 146.00 A5.20 5.20 0 0 1 201.71 146.00 A5.20 5.20 0 0 1 191.29 146.00 A5.20 5.20 0 0 1 180.86 146.00 A5.20 5.20 0 0 1 170.43 146.00 A5.20 5.20 0 0 1 160.00 146.00 A5.20 5.20 0 0 1 149.57 146.00 A5.20 5.20 0 0 1 139.14 146.00 A5.20 5.20 0 0 1 128.71 146.00 A5.20 5.20 0 0 1 118.29 146.00 A5.20 5.20 0 0 1 107.86 146.00 A5.20 5.20 0 0 1 97.43 146.00 A5.20 5.20 0 0 1 87.00 146.00 A5.20 5.20 0 0 1 76.57 146.00 A5.20 5.20 0 0 1 66.14 146.00 A5.20 5.20 0 0 1 55.71 146.00 A5.20 5.20 0 0 1 45.29 146.00 A5.20 5.20 0 0 1 34.86 146.00 A5.20 5.20 0 0 1 24.43 146.00 A5.20 5.20 0 0 1 14.00 146.00 A5.20 5.20 0 0 1 14.00 135.85 A5.20 5.20 0 0 1 14.00 125.69 A5.20 5.20 0 0 1 14.00 115.54 A5.20 5.20 0 0 1 14.00 105.38 A5.20 5.20 0 0 1 14.00 95.23 A5.20 5.20 0 0 1 14.00 85.08 A5.20 5.20 0 0 1 14.00 74.92 A5.20 5.20 0 0 1 14.00 64.77 A5.20 5.20 0 0 1 14.00 54.62 A5.20 5.20 0 0 1 14.00 44.46 A5.20 5.20 0 0 1 14.00 34.31 A5.20 5.20 0 0 1 14.00 24.15 A5.20 5.20 0 0 1 14.00 14.00Z" fill="url(#mom1-net)"/>
+  <path d="M14 14 A5.20 5.20 0 0 1 24.43 14.00 A5.20 5.20 0 0 1 34.86 14.00 A5.20 5.20 0 0 1 45.29 14.00 A5.20 5.20 0 0 1 55.71 14.00 A5.20 5.20 0 0 1 66.14 14.00 A5.20 5.20 0 0 1 76.57 14.00 A5.20 5.20 0 0 1 87.00 14.00 A5.20 5.20 0 0 1 97.43 14.00 A5.20 5.20 0 0 1 107.86 14.00 A5.20 5.20 0 0 1 118.29 14.00 A5.20 5.20 0 0 1 128.71 14.00 A5.20 5.20 0 0 1 139.14 14.00 A5.20 5.20 0 0 1 149.57 14.00 A5.20 5.20 0 0 1 160.00 14.00 A5.20 5.20 0 0 1 170.43 14.00 A5.20 5.20 0 0 1 180.86 14.00 A5.20 5.20 0 0 1 191.29 14.00 A5.20 5.20 0 0 1 201.71 14.00 A5.20 5.20 0 0 1 212.14 14.00 A5.20 5.20 0 0 1 222.57 14.00 A5.20 5.20 0 0 1 233.00 14.00 A5.20 5.20 0 0 1 243.43 14.00 A5.20 5.20 0 0 1 253.86 14.00 A5.20 5.20 0 0 1 264.29 14.00 A5.20 5.20 0 0 1 274.71 14.00 A5.20 5.20 0 0 1 285.14 14.00 A5.20 5.20 0 0 1 295.57 14.00 A5.20 5.20 0 0 1 306.00 14.00 A5.20 5.20 0 0 1 306.00 24.15 A5.20 5.20 0 0 1 306.00 34.31 A5.20 5.20 0 0 1 306.00 44.46 A5.20 5.20 0 0 1 306.00 54.62 A5.20 5.20 0 0 1 306.00 64.77 A5.20 5.20 0 0 1 306.00 74.92 A5.20 5.20 0 0 1 306.00 85.08 A5.20 5.20 0 0 1 306.00 95.23 A5.20 5.20 0 0 1 306.00 105.38 A5.20 5.20 0 0 1 306.00 115.54 A5.20 5.20 0 0 1 306.00 125.69 A5.20 5.20 0 0 1 306.00 135.85 A5.20 5.20 0 0 1 306.00 146.00 A5.20 5.20 0 0 1 295.57 146.00 A5.20 5.20 0 0 1 285.14 146.00 A5.20 5.20 0 0 1 274.71 146.00 A5.20 5.20 0 0 1 264.29 146.00 A5.20 5.20 0 0 1 253.86 146.00 A5.20 5.20 0 0 1 243.43 146.00 A5.20 5.20 0 0 1 233.00 146.00 A5.20 5.20 0 0 1 222.57 146.00 A5.20 5.20 0 0 1 212.14 146.00 A5.20 5.20 0 0 1 201.71 146.00 A5.20 5.20 0 0 1 191.29 146.00 A5.20 5.20 0 0 1 180.86 146.00 A5.20 5.20 0 0 1 170.43 146.00 A5.20 5.20 0 0 1 160.00 146.00 A5.20 5.20 0 0 1 149.57 146.00 A5.20 5.20 0 0 1 139.14 146.00 A5.20 5.20 0 0 1 128.71 146.00 A5.20 5.20 0 0 1 118.29 146.00 A5.20 5.20 0 0 1 107.86 146.00 A5.20 5.20 0 0 1 97.43 146.00 A5.20 5.20 0 0 1 87.00 146.00 A5.20 5.20 0 0 1 76.57 146.00 A5.20 5.20 0 0 1 66.14 146.00 A5.20 5.20 0 0 1 55.71 146.00 A5.20 5.20 0 0 1 45.29 146.00 A5.20 5.20 0 0 1 34.86 146.00 A5.20 5.20 0 0 1 24.43 146.00 A5.20 5.20 0 0 1 14.00 146.00 A5.20 5.20 0 0 1 14.00 135.85 A5.20 5.20 0 0 1 14.00 125.69 A5.20 5.20 0 0 1 14.00 115.54 A5.20 5.20 0 0 1 14.00 105.38 A5.20 5.20 0 0 1 14.00 95.23 A5.20 5.20 0 0 1 14.00 85.08 A5.20 5.20 0 0 1 14.00 74.92 A5.20 5.20 0 0 1 14.00 64.77 A5.20 5.20 0 0 1 14.00 54.62 A5.20 5.20 0 0 1 14.00 44.46 A5.20 5.20 0 0 1 14.00 34.31 A5.20 5.20 0 0 1 14.00 24.15 A5.20 5.20 0 0 1 14.00 14.00Z" fill="url(#site1-net)"/>
   <rect x="19" y="19" width="282" height="122" rx="3" fill="none" stroke="#bfae98" stroke-width=".6" stroke-dasharray="1.2 2"/>
   <path d="M48.00 23.00 L49.75 24.27 L51.50 24.80 L53.25 24.27 L55.00 23.00 L56.75 21.73 L58.50 21.20 L60.25 21.73 L62.00 23.00 L63.75 24.27 L65.50 24.80 L67.25 24.27 L69.00 23.00 L70.75 21.73 L72.50 21.20 L74.25 21.73 L76.00 23.00 L77.75 24.27 L79.50 24.80 L81.25 24.27 L83.00 23.00 L84.75 21.73 L86.50 21.20 L88.25 21.73 L90.00 23.00 L91.75 24.27 L93.50 24.80 L95.25 24.27 L97.00 23.00 L98.75 21.73 L100.50 21.20 L102.25 21.73 L104.00 23.00 L105.75 24.27 L107.50 24.80 L109.25 24.27 L111.00 23.00 L112.75 21.73 L114.50 21.20 L116.25 21.73 L118.00 23.00 L119.75 24.27 L121.50 24.80 L123.25 24.27 L125.00 23.00 L126.75 21.73 L128.50 21.20 L130.25 21.73 L132.00 23.00 L133.75 24.27 L135.50 24.80 L137.25 24.27 L139.00 23.00 L140.75 21.73 L142.50 21.20 L144.25 21.73 L146.00 23.00 L147.75 24.27 L149.50 24.80 L151.25 24.27 L153.00 23.00 L154.75 21.73 L156.50 21.20 L158.25 21.73 L160.00 23.00 L161.75 24.27 L163.50 24.80 L165.25 24.27 L167.00 23.00 L168.75 21.73 L170.50 21.20 L172.25 21.73 L174.00 23.00 L175.75 24.27 L177.50 24.80 L179.25 24.27 L181.00 23.00 L182.75 21.73 L184.50 21.20 L186.25 21.73 L188.00 23.00 L189.75 24.27 L191.50 24.80 L193.25 24.27 L195.00 23.00 L196.75 21.73 L198.50 21.20 L200.25 21.73 L202.00 23.00 L203.75 24.27 L205.50 24.80 L207.25 24.27 L209.00 23.00 L210.75 21.73 L212.50 21.20 L214.25 21.73 L216.00 23.00 L217.75 24.27 L219.50 24.80 L221.25 24.27 L223.00 23.00 L224.75 21.73 L226.50 21.20 L228.25 21.73 L230.00 23.00 L231.75 24.27 L233.50 24.80 L235.25 24.27 L237.00 23.00 L238.75 21.73 L240.50 21.20 L242.25 21.73 L244.00 23.00 L245.75 24.27 L247.50 24.80 L249.25 24.27 L251.00 23.00 L252.75 21.73 L254.50 21.20 L256.25 21.73 L258.00 23.00 L259.75 24.27 L261.50 24.80 L263.25 24.27 L265.00 23.00 L266.75 21.73 L268.50 21.20 L270.25 21.73 L272.00 23.00 M272.00 137.00 L270.25 135.73 L268.50 135.20 L266.75 135.73 L265.00 137.00 L263.25 138.27 L261.50 138.80 L259.75 138.27 L258.00 137.00 L256.25 135.73 L254.50 135.20 L252.75 135.73 L251.00 137.00 L249.25 138.27 L247.50 138.80 L245.75 138.27 L244.00 137.00 L242.25 135.73 L240.50 135.20 L238.75 135.73 L237.00 137.00 L235.25 138.27 L233.50 138.80 L231.75 138.27 L230.00 137.00 L228.25 135.73 L226.50 135.20 L224.75 135.73 L223.00 137.00 L221.25 138.27 L219.50 138.80 L217.75 138.27 L216.00 137.00 L214.25 135.73 L212.50 135.20 L210.75 135.73 L209.00 137.00 L207.25 138.27 L205.50 138.80 L203.75 138.27 L202.00 137.00 L200.25 135.73 L198.50 135.20 L196.75 135.73 L195.00 137.00 L193.25 138.27 L191.50 138.80 L189.75 138.27 L188.00 137.00 L186.25 135.73 L184.50 135.20 L182.75 135.73 L181.00 137.00 L179.25 138.27 L177.50 138.80 L175.75 138.27 L174.00 137.00 L172.25 135.73 L170.50 135.20 L168.75 135.73 L167.00 137.00 L165.25 138.27 L163.50 138.80 L161.75 138.27 L160.00 137.00 L158.25 135.73 L156.50 135.20 L154.75 135.73 L153.00 137.00 L151.25 138.27 L149.50 138.80 L147.75 138.27 L146.00 137.00 L144.25 135.73 L142.50 135.20 L140.75 135.73 L139.00 137.00 L137.25 138.27 L135.50 138.80 L133.75 138.27 L132.00 137.00 L130.25 135.73 L128.50 135.20 L126.75 135.73 L125.00 137.00 L123.25 138.27 L121.50 138.80 L119.75 138.27 L118.00 137.00 L116.25 135.73 L114.50 135.20 L112.75 135.73 L111.00 137.00 L109.25 138.27 L107.50 138.80 L105.75 138.27 L104.00 137.00 L102.25 135.73 L100.50 135.20 L98.75 135.73 L97.00 137.00 L95.25 138.27 L93.50 138.80 L91.75 138.27 L90.00 137.00 L88.25 135.73 L86.50 135.20 L84.75 135.73 L83.00 137.00 L81.25 138.27 L79.50 138.80 L77.75 138.27 L76.00 137.00 L74.25 135.73 L72.50 135.20 L70.75 135.73 L69.00 137.00 L67.25 138.27 L65.50 138.80 L63.75 138.27 L62.00 137.00 L60.25 135.73 L58.50 135.20 L56.75 135.73 L55.00 137.00 L53.25 138.27 L51.50 138.80 L49.75 138.27 L48.00 137.00 M23.00 48.00 L21.73 49.33 L21.20 50.67 L21.73 52.00 L23.00 53.33 L24.27 54.67 L24.80 56.00 L24.27 57.33 L23.00 58.67 L21.73 60.00 L21.20 61.33 L21.73 62.67 L23.00 64.00 L24.27 65.33 L24.80 66.67 L24.27 68.00 L23.00 69.33 L21.73 70.67 L21.20 72.00 L21.73 73.33 L23.00 74.67 L24.27 76.00 L24.80 77.33 L24.27 78.67 L23.00 80.00 L21.73 81.33 L21.20 82.67 L21.73 84.00 L23.00 85.33 L24.27 86.67 L24.80 88.00 L24.27 89.33 L23.00 90.67 L21.73 92.00 L21.20 93.33 L21.73 94.67 L23.00 96.00 L24.27 97.33 L24.80 98.67 L24.27 100.00 L23.00 101.33 L21.73 102.67 L21.20 104.00 L21.73 105.33 L23.00 106.67 L24.27 108.00 L24.80 109.33 L24.27 110.67 L23.00 112.00 M297.00 112.00 L298.27 110.67 L298.80 109.33 L298.27 108.00 L297.00 106.67 L295.73 105.33 L295.20 104.00 L295.73 102.67 L297.00 101.33 L298.27 100.00 L298.80 98.67 L298.27 97.33 L297.00 96.00 L295.73 94.67 L295.20 93.33 L295.73 92.00 L297.00 90.67 L298.27 89.33 L298.80 88.00 L298.27 86.67 L297.00 85.33 L295.73 84.00 L295.20 82.67 L295.73 81.33 L297.00 80.00 L298.27 78.67 L298.80 77.33 L298.27 76.00 L297.00 74.67 L295.73 73.33 L295.20 72.00 L295.73 70.67 L297.00 69.33 L298.27 68.00 L298.80 66.67 L298.27 65.33 L297.00 64.00 L295.73 62.67 L295.20 61.33 L295.73 60.00 L297.00 58.67 L298.27 57.33 L298.80 56.00 L298.27 54.67 L297.00 53.33 L295.73 52.00 L295.20 50.67 L295.73 49.33 L297.00 48.00" fill="none" stroke="#bfae98" stroke-width=".5"/>
   <g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(10 36 36)"/><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(82 36 36)"/><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(154 36 36)"/><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(226 36 36)"/><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(298 36 36)"/><circle cx="36" cy="36" r="1.75" fill="#bfae98"/></g><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(43 38) rotate(0) scale(1.1)" fill="none" stroke="#bfae98" stroke-width=".5"/><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(37 44) rotate(90) scale(1.0)" fill="none" stroke="#bfae98" stroke-width=".5"/><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(-10 284 36)"/><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(62 284 36)"/><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(134 284 36)"/><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(206 284 36)"/><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(278 284 36)"/><circle cx="284" cy="36" r="1.75" fill="#bfae98"/></g><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(277 38) rotate(180) scale(1.1)" fill="none" stroke="#bfae98" stroke-width=".5"/><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(283 44) rotate(90) scale(1.0)" fill="none" stroke="#bfae98" stroke-width=".5"/><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(-10 36 124)"/><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(62 36 124)"/><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(134 36 124)"/><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(206 36 124)"/><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(278 36 124)"/><circle cx="36" cy="124" r="1.75" fill="#bfae98"/></g><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(43 122) rotate(0) scale(1.1)" fill="none" stroke="#bfae98" stroke-width=".5"/><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(37 116) rotate(-90) scale(1.0)" fill="none" stroke="#bfae98" stroke-width=".5"/><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(10 284 124)"/><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(82 284 124)"/><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(154 284 124)"/><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(226 284 124)"/><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(298 284 124)"/><circle cx="284" cy="124" r="1.75" fill="#bfae98"/></g><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(277 122) rotate(180) scale(1.1)" fill="none" stroke="#bfae98" stroke-width=".5"/><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(283 116) rotate(-90) scale(1.0)" fill="none" stroke="#bfae98" stroke-width=".5"/><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(0 114.0 29)"/><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(72 114.0 29)"/><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(144 114.0 29)"/><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(216 114.0 29)"/><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(288 114.0 29)"/><circle cx="114.0" cy="29" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(36 114.0 131)"/><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(108 114.0 131)"/><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(180 114.0 131)"/><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(252 114.0 131)"/><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(324 114.0 131)"/><circle cx="114.0" cy="131" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(0 160.0 29)"/><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(72 160.0 29)"/><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(144 160.0 29)"/><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(216 160.0 29)"/><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(288 160.0 29)"/><circle cx="160.0" cy="29" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(36 160.0 131)"/><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(108 160.0 131)"/><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(180 160.0 131)"/><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(252 160.0 131)"/><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(324 160.0 131)"/><circle cx="160.0" cy="131" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(0 206.0 29)"/><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(72 206.0 29)"/><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(144 206.0 29)"/><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(216 206.0 29)"/><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(288 206.0 29)"/><circle cx="206.0" cy="29" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(36 206.0 131)"/><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(108 206.0 131)"/><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(180 206.0 131)"/><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(252 206.0 131)"/><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(324 206.0 131)"/><circle cx="206.0" cy="131" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(0 28 80.0)"/><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(72 28 80.0)"/><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(144 28 80.0)"/><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(216 28 80.0)"/><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(288 28 80.0)"/><circle cx="28" cy="80.0" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(36 292 80.0)"/><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(108 292 80.0)"/><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(180 292 80.0)"/><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(252 292 80.0)"/><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(324 292 80.0)"/><circle cx="292" cy="80.0" r="1.19" fill="#bfae98"/></g>
-  <g filter="url(#mom1-shadow)">
-    <rect x="44" y="59.0" width="232" height="42" fill="url(#mom1-satin)"/>
-    <rect x="44" y="59.0" width="232" height="42" fill="url(#mom1-sheen)"/>
+  <g filter="url(#site1-shadow)">
+    <rect x="44" y="59.0" width="232" height="42" fill="url(#site1-satin)"/>
+    <rect x="44" y="59.0" width="232" height="42" fill="url(#site1-sheen)"/>
+    <path d="M48 62.5H272M48 97.5H272" stroke="#b9a1a8" stroke-width=".55" stroke-dasharray="2 1.6"/>
+  </g>
+  <text x="160.0" y="85.4" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-weight="600" font-size="15.5" letter-spacing="2.1" fill="#111">MADEOFMEMORIES.SG</text>
+</svg></a>
+      <nav aria-label="Sections">
+        <a href="#how">How it works</a><a href="#packages">Packages</a><a href="/demo">Demo</a><a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="hero">
+        <p class="eyebrow">Wedding guest albums · Singapore</p>
+        <h1>Every moment, from every guest</h1>
+        <p class="lede">Your guests scan a QR code and share their photos, videos and heartfelt wishes, straight into one beautiful album for the two of you. No app to download, no group chats, nothing lost.</p>
+        <div class="ctas">
+          <a class="btn" href="/demo">Try the live demo</a>
+          <a class="btn ghost" href="#packages">See packages</a>
+        </div>
+        <div class="phones" aria-label="What your guests see">
+          <figure class="phone" style="margin:0"><img src="/site/booth.webp" alt="A photo-booth strip of the couple's photos sliding out of a vintage frame" width="560" height="1212" loading="eager"></figure>
+          <figure class="phone mid" style="margin:0"><img src="/site/letter.webp" alt="A thank-you letter from the couple rising out of a lace envelope" width="560" height="1212" loading="eager"></figure>
+          <figure class="phone" style="margin:0"><img src="/site/album.webp" alt="The album page where guests take photos, record videos and leave wishes" width="560" height="1212" loading="eager"></figure>
+        </div>
+      </div>
+
+      <section id="how">
+        <div class="head"><p class="eyebrow">How it works</p><h2>Simple for everyone</h2></div>
+        <div class="steps">
+          <div class="step card"><h3>We set up your album</h3><p>Your names, your date, your favourite photos in a photo-booth welcome, and a thank-you letter in your own words. You get a QR poster and table cards, ready to print.</p></div>
+          <div class="step card"><h3>Guests scan and share</h3><p>At their table, guests scan the QR code, open your welcome and read your letter, then share photos, videos and wishes from their own phone.</p></div>
+          <div class="step card"><h3>You keep every moment</h3><p>Watch your album fill up through the day, then download everything: every photo, video, written wish and voice message, to keep for good.</p></div>
+        </div>
+      </section>
+
+      <section id="features">
+        <div class="head"><p class="eyebrow">What's included</p><h2>Made for the big day</h2></div>
+        <div class="features">
+          <div class="feature card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.6"/><path d="M8.5 6l1.4-2h4.2l1.4 2"/></svg><h3>Photos and videos</h3><p>Shared at full quality, straight from the camera or the gallery.</p></div>
+          <div class="feature card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg><h3>Written and voice wishes</h3><p>Guests leave a message or record one in their own voice, for your eyes and ears only.</p></div>
+          <div class="feature card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg><h3>Private when you want it</h3><p>Let guests see everyone's photos, or only their own while you see them all.</p></div>
+          <div class="feature card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M10.5 18.5h3"/></svg><h3>No app needed</h3><p>Works on any phone, iPhone or Android, young guests or old. Just scan and share.</p></div>
+          <div class="feature card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.8 16a5 5 0 0 1 6.4 0"/><circle cx="12" cy="19.2" r="1"/></svg><h3>Weak signal? No problem</h3><p>Ballrooms often have patchy signal. Uploads wait patiently and send as soon as they can.</p></div>
+          <div class="feature card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7"/><rect x="13.5" y="3.5" width="7" height="7"/><rect x="3.5" y="13.5" width="7" height="7"/><path d="M13.5 13.5h3v3h-3zM18 18h2.5v2.5H18z"/></svg><h3>Print-ready QR cards</h3><p>An A4 poster and A6 table cards in your album's look, ready for the printer.</p></div>
+        </div>
+      </section>
+
+      <section id="packages">
+        <div class="head"><p class="eyebrow">Packages</p><h2>Choose your album</h2><p>Introductory prices for our first couples.</p></div>
+        <div class="plans">
+          <div class="plan card">
+            <h3>Essential</h3><p class="price">S$39</p><p class="for">The heart of it: every photo, in one place.</p>
+            <ul><li>Guest photo and video album</li><li>QR poster and table cards, ready to print</li><li>Download everything after</li><li>Album online for 1 month</li></ul>
+            <a class="btn ghost" href="#contact" data-plan="Essential">Enquire</a>
+          </div>
+          <div class="plan card pick">
+            <span class="ribbon">Most chosen</span>
+            <h3>Signature</h3><p class="price">S$79</p><p class="for">The full experience your guests will remember.</p>
+            <ul><li>Everything in Essential</li><li>Photo-booth welcome with your photos</li><li>Thank-you letter in a lace envelope</li><li>Written and voice wishes</li><li>Private mode</li><li>Album online for 3 months</li></ul>
+            <a class="btn" href="#contact" data-plan="Signature">Enquire</a>
+          </div>
+          <div class="plan card">
+            <h3>Heirloom</h3><p class="price">S$149</p><p class="for">Styled to your wedding, with us beside you.</p>
+            <ul><li>Everything in Signature</li><li>Look styled to match your invitation</li><li>Set up together with you</li><li>Help on your wedding day</li><li>Album online for 12 months</li></ul>
+            <a class="btn ghost" href="#contact" data-plan="Heirloom">Enquire</a>
+          </div>
+        </div>
+        <p class="note">Prices in Singapore dollars. Printing is done by you or your printer of choice.</p>
+
+        <div class="demo card" id="demo">
+          <p class="eyebrow">See it for yourself</p>
+          <h2>Try the live demo</h2>
+          <p>Open the demo album on your phone: press the button, read the letter, then take a photo or record a wish. Everything you share is private to you and cleared daily.</p>
+          <a class="btn" href="/demo">Open the demo</a>
+        </div>
+      </section>
+
+      <section id="faq">
+        <div class="head"><p class="eyebrow">Questions</p><h2>Good to know</h2></div>
+        <div class="faq">
+          <details><summary>Do our guests need to download an app?</summary><p>No. Guests scan the QR code with their phone camera and the album opens in their browser, on iPhone and Android alike.</p></details>
+          <details><summary>What if the signal at our venue is weak?</summary><p>Photos and videos wait on the guest's phone and send automatically as soon as there's a connection. If your venue has guest Wi-Fi, we can add the details to your table cards.</p></details>
+          <details><summary>Who can see the photos?</summary><p>You choose. Guests can see everyone's photos, or only their own while the two of you see them all. Wishes and voice messages are always for the couple only.</p></details>
+          <details><summary>How do we get our photos afterwards?</summary><p>From your private couple's link, you can download everything in one go: photos, videos, written wishes and voice messages.</p></details>
+          <details><summary>Can the album match our wedding's look?</summary><p>Yes. Every album has an elegant ivory and lace look, and with Heirloom we style it to match your invitation's colours and details.</p></details>
+          <details><summary>How far ahead should we book?</summary><p>Ideally four weeks before your wedding, so there's time to print your QR cards. Get in touch even if it's sooner and we'll do our best.</p></details>
+        </div>
+      </section>
+
+      <section id="contact">
+        <div class="head"><p class="eyebrow">Contact</p><h2>Tell us about your wedding</h2><p>We'll reply by email, usually within two days.</p></div>
+        <form class="contact card" id="enquiry" novalidate>
+          <div class="row">
+            <div><label for="f-name">Your names</label><input id="f-name" name="name" autocomplete="name" maxlength="80" required placeholder="e.g. Nurul &amp; Daniel"></div>
+            <div><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" maxlength="120" required></div>
+          </div>
+          <div class="row">
+            <div><label for="f-date">Wedding date</label><input id="f-date" name="wedding_date" type="date"></div>
+            <div><label for="f-guests">Number of guests</label><input id="f-guests" name="guests" inputmode="numeric" maxlength="20" placeholder="e.g. 300"></div>
+          </div>
+          <label for="f-plan">Package</label>
+          <select id="f-plan" name="package"><option value="">Not sure yet</option><option>Essential</option><option>Signature</option><option>Heirloom</option></select>
+          <label for="f-msg">Anything else? <span style="font-weight:400;color:var(--soft)">(optional)</span></label>
+          <textarea id="f-msg" name="message" maxlength="2000" placeholder="Venue, timing, questions…"></textarea>
+          <div class="hp" aria-hidden="true"><label for="f-web">Leave this empty</label><input id="f-web" name="website" tabindex="-1" autocomplete="off"></div>
+          <button class="btn" type="submit">Send enquiry</button>
+          <p class="msg" id="f-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" focusable="false" viewBox="0 0 320 160" role="img" aria-label="madeofmemories.sg">
+  <defs>
+    <pattern id="site2-net" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <path d="M0 0H5M0 0V5" stroke="#d8cbb9" stroke-width=".35" opacity=".7"/>
+    </pattern>
+    <linearGradient id="site2-satin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#efe3e5"/><stop offset=".35" stop-color="#e2cfd3"/><stop offset=".6" stop-color="#d7c1c6"/><stop offset="1" stop-color="#e9dcdf"/>
+    </linearGradient>
+    <linearGradient id="site2-sheen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".35"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="site2-shadow" x="-10%" y="-30%" width="120%" height="160%"><feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#5a4636" flood-opacity=".22"/></filter>
+  </defs>
+  <path d="M14 14 A5.20 5.20 0 0 1 24.43 14.00 A5.20 5.20 0 0 1 34.86 14.00 A5.20 5.20 0 0 1 45.29 14.00 A5.20 5.20 0 0 1 55.71 14.00 A5.20 5.20 0 0 1 66.14 14.00 A5.20 5.20 0 0 1 76.57 14.00 A5.20 5.20 0 0 1 87.00 14.00 A5.20 5.20 0 0 1 97.43 14.00 A5.20 5.20 0 0 1 107.86 14.00 A5.20 5.20 0 0 1 118.29 14.00 A5.20 5.20 0 0 1 128.71 14.00 A5.20 5.20 0 0 1 139.14 14.00 A5.20 5.20 0 0 1 149.57 14.00 A5.20 5.20 0 0 1 160.00 14.00 A5.20 5.20 0 0 1 170.43 14.00 A5.20 5.20 0 0 1 180.86 14.00 A5.20 5.20 0 0 1 191.29 14.00 A5.20 5.20 0 0 1 201.71 14.00 A5.20 5.20 0 0 1 212.14 14.00 A5.20 5.20 0 0 1 222.57 14.00 A5.20 5.20 0 0 1 233.00 14.00 A5.20 5.20 0 0 1 243.43 14.00 A5.20 5.20 0 0 1 253.86 14.00 A5.20 5.20 0 0 1 264.29 14.00 A5.20 5.20 0 0 1 274.71 14.00 A5.20 5.20 0 0 1 285.14 14.00 A5.20 5.20 0 0 1 295.57 14.00 A5.20 5.20 0 0 1 306.00 14.00 A5.20 5.20 0 0 1 306.00 24.15 A5.20 5.20 0 0 1 306.00 34.31 A5.20 5.20 0 0 1 306.00 44.46 A5.20 5.20 0 0 1 306.00 54.62 A5.20 5.20 0 0 1 306.00 64.77 A5.20 5.20 0 0 1 306.00 74.92 A5.20 5.20 0 0 1 306.00 85.08 A5.20 5.20 0 0 1 306.00 95.23 A5.20 5.20 0 0 1 306.00 105.38 A5.20 5.20 0 0 1 306.00 115.54 A5.20 5.20 0 0 1 306.00 125.69 A5.20 5.20 0 0 1 306.00 135.85 A5.20 5.20 0 0 1 306.00 146.00 A5.20 5.20 0 0 1 295.57 146.00 A5.20 5.20 0 0 1 285.14 146.00 A5.20 5.20 0 0 1 274.71 146.00 A5.20 5.20 0 0 1 264.29 146.00 A5.20 5.20 0 0 1 253.86 146.00 A5.20 5.20 0 0 1 243.43 146.00 A5.20 5.20 0 0 1 233.00 146.00 A5.20 5.20 0 0 1 222.57 146.00 A5.20 5.20 0 0 1 212.14 146.00 A5.20 5.20 0 0 1 201.71 146.00 A5.20 5.20 0 0 1 191.29 146.00 A5.20 5.20 0 0 1 180.86 146.00 A5.20 5.20 0 0 1 170.43 146.00 A5.20 5.20 0 0 1 160.00 146.00 A5.20 5.20 0 0 1 149.57 146.00 A5.20 5.20 0 0 1 139.14 146.00 A5.20 5.20 0 0 1 128.71 146.00 A5.20 5.20 0 0 1 118.29 146.00 A5.20 5.20 0 0 1 107.86 146.00 A5.20 5.20 0 0 1 97.43 146.00 A5.20 5.20 0 0 1 87.00 146.00 A5.20 5.20 0 0 1 76.57 146.00 A5.20 5.20 0 0 1 66.14 146.00 A5.20 5.20 0 0 1 55.71 146.00 A5.20 5.20 0 0 1 45.29 146.00 A5.20 5.20 0 0 1 34.86 146.00 A5.20 5.20 0 0 1 24.43 146.00 A5.20 5.20 0 0 1 14.00 146.00 A5.20 5.20 0 0 1 14.00 135.85 A5.20 5.20 0 0 1 14.00 125.69 A5.20 5.20 0 0 1 14.00 115.54 A5.20 5.20 0 0 1 14.00 105.38 A5.20 5.20 0 0 1 14.00 95.23 A5.20 5.20 0 0 1 14.00 85.08 A5.20 5.20 0 0 1 14.00 74.92 A5.20 5.20 0 0 1 14.00 64.77 A5.20 5.20 0 0 1 14.00 54.62 A5.20 5.20 0 0 1 14.00 44.46 A5.20 5.20 0 0 1 14.00 34.31 A5.20 5.20 0 0 1 14.00 24.15 A5.20 5.20 0 0 1 14.00 14.00Z" fill="#fcfaf6" stroke="#bfae98" stroke-width=".75"/>
+  <g fill="#bfae98"><circle cx="19.21" cy="7.20" r=".75"/><circle cx="29.64" cy="7.20" r=".75"/><circle cx="40.07" cy="7.20" r=".75"/><circle cx="50.50" cy="7.20" r=".75"/><circle cx="60.93" cy="7.20" r=".75"/><circle cx="71.36" cy="7.20" r=".75"/><circle cx="81.79" cy="7.20" r=".75"/><circle cx="92.21" cy="7.20" r=".75"/><circle cx="102.64" cy="7.20" r=".75"/><circle cx="113.07" cy="7.20" r=".75"/><circle cx="123.50" cy="7.20" r=".75"/><circle cx="133.93" cy="7.20" r=".75"/><circle cx="144.36" cy="7.20" r=".75"/><circle cx="154.79" cy="7.20" r=".75"/><circle cx="165.21" cy="7.20" r=".75"/><circle cx="175.64" cy="7.20" r=".75"/><circle cx="186.07" cy="7.20" r=".75"/><circle cx="196.50" cy="7.20" r=".75"/><circle cx="206.93" cy="7.20" r=".75"/><circle cx="217.36" cy="7.20" r=".75"/><circle cx="227.79" cy="7.20" r=".75"/><circle cx="238.21" cy="7.20" r=".75"/><circle cx="248.64" cy="7.20" r=".75"/><circle cx="259.07" cy="7.20" r=".75"/><circle cx="269.50" cy="7.20" r=".75"/><circle cx="279.93" cy="7.20" r=".75"/><circle cx="290.36" cy="7.20" r=".75"/><circle cx="300.79" cy="7.20" r=".75"/><circle cx="312.80" cy="19.08" r=".75"/><circle cx="312.80" cy="29.23" r=".75"/><circle cx="312.80" cy="39.38" r=".75"/><circle cx="312.80" cy="49.54" r=".75"/><circle cx="312.80" cy="59.69" r=".75"/><circle cx="312.80" cy="69.85" r=".75"/><circle cx="312.80" cy="80.00" r=".75"/><circle cx="312.80" cy="90.15" r=".75"/><circle cx="312.80" cy="100.31" r=".75"/><circle cx="312.80" cy="110.46" r=".75"/><circle cx="312.80" cy="120.62" r=".75"/><circle cx="312.80" cy="130.77" r=".75"/><circle cx="312.80" cy="140.92" r=".75"/><circle cx="300.79" cy="152.80" r=".75"/><circle cx="290.36" cy="152.80" r=".75"/><circle cx="279.93" cy="152.80" r=".75"/><circle cx="269.50" cy="152.80" r=".75"/><circle cx="259.07" cy="152.80" r=".75"/><circle cx="248.64" cy="152.80" r=".75"/><circle cx="238.21" cy="152.80" r=".75"/><circle cx="227.79" cy="152.80" r=".75"/><circle cx="217.36" cy="152.80" r=".75"/><circle cx="206.93" cy="152.80" r=".75"/><circle cx="196.50" cy="152.80" r=".75"/><circle cx="186.07" cy="152.80" r=".75"/><circle cx="175.64" cy="152.80" r=".75"/><circle cx="165.21" cy="152.80" r=".75"/><circle cx="154.79" cy="152.80" r=".75"/><circle cx="144.36" cy="152.80" r=".75"/><circle cx="133.93" cy="152.80" r=".75"/><circle cx="123.50" cy="152.80" r=".75"/><circle cx="113.07" cy="152.80" r=".75"/><circle cx="102.64" cy="152.80" r=".75"/><circle cx="92.21" cy="152.80" r=".75"/><circle cx="81.79" cy="152.80" r=".75"/><circle cx="71.36" cy="152.80" r=".75"/><circle cx="60.93" cy="152.80" r=".75"/><circle cx="50.50" cy="152.80" r=".75"/><circle cx="40.07" cy="152.80" r=".75"/><circle cx="29.64" cy="152.80" r=".75"/><circle cx="19.21" cy="152.80" r=".75"/><circle cx="7.20" cy="140.92" r=".75"/><circle cx="7.20" cy="130.77" r=".75"/><circle cx="7.20" cy="120.62" r=".75"/><circle cx="7.20" cy="110.46" r=".75"/><circle cx="7.20" cy="100.31" r=".75"/><circle cx="7.20" cy="90.15" r=".75"/><circle cx="7.20" cy="80.00" r=".75"/><circle cx="7.20" cy="69.85" r=".75"/><circle cx="7.20" cy="59.69" r=".75"/><circle cx="7.20" cy="49.54" r=".75"/><circle cx="7.20" cy="39.38" r=".75"/><circle cx="7.20" cy="29.23" r=".75"/><circle cx="7.20" cy="19.08" r=".75"/></g>
+  <path d="M14 14 A5.20 5.20 0 0 1 24.43 14.00 A5.20 5.20 0 0 1 34.86 14.00 A5.20 5.20 0 0 1 45.29 14.00 A5.20 5.20 0 0 1 55.71 14.00 A5.20 5.20 0 0 1 66.14 14.00 A5.20 5.20 0 0 1 76.57 14.00 A5.20 5.20 0 0 1 87.00 14.00 A5.20 5.20 0 0 1 97.43 14.00 A5.20 5.20 0 0 1 107.86 14.00 A5.20 5.20 0 0 1 118.29 14.00 A5.20 5.20 0 0 1 128.71 14.00 A5.20 5.20 0 0 1 139.14 14.00 A5.20 5.20 0 0 1 149.57 14.00 A5.20 5.20 0 0 1 160.00 14.00 A5.20 5.20 0 0 1 170.43 14.00 A5.20 5.20 0 0 1 180.86 14.00 A5.20 5.20 0 0 1 191.29 14.00 A5.20 5.20 0 0 1 201.71 14.00 A5.20 5.20 0 0 1 212.14 14.00 A5.20 5.20 0 0 1 222.57 14.00 A5.20 5.20 0 0 1 233.00 14.00 A5.20 5.20 0 0 1 243.43 14.00 A5.20 5.20 0 0 1 253.86 14.00 A5.20 5.20 0 0 1 264.29 14.00 A5.20 5.20 0 0 1 274.71 14.00 A5.20 5.20 0 0 1 285.14 14.00 A5.20 5.20 0 0 1 295.57 14.00 A5.20 5.20 0 0 1 306.00 14.00 A5.20 5.20 0 0 1 306.00 24.15 A5.20 5.20 0 0 1 306.00 34.31 A5.20 5.20 0 0 1 306.00 44.46 A5.20 5.20 0 0 1 306.00 54.62 A5.20 5.20 0 0 1 306.00 64.77 A5.20 5.20 0 0 1 306.00 74.92 A5.20 5.20 0 0 1 306.00 85.08 A5.20 5.20 0 0 1 306.00 95.23 A5.20 5.20 0 0 1 306.00 105.38 A5.20 5.20 0 0 1 306.00 115.54 A5.20 5.20 0 0 1 306.00 125.69 A5.20 5.20 0 0 1 306.00 135.85 A5.20 5.20 0 0 1 306.00 146.00 A5.20 5.20 0 0 1 295.57 146.00 A5.20 5.20 0 0 1 285.14 146.00 A5.20 5.20 0 0 1 274.71 146.00 A5.20 5.20 0 0 1 264.29 146.00 A5.20 5.20 0 0 1 253.86 146.00 A5.20 5.20 0 0 1 243.43 146.00 A5.20 5.20 0 0 1 233.00 146.00 A5.20 5.20 0 0 1 222.57 146.00 A5.20 5.20 0 0 1 212.14 146.00 A5.20 5.20 0 0 1 201.71 146.00 A5.20 5.20 0 0 1 191.29 146.00 A5.20 5.20 0 0 1 180.86 146.00 A5.20 5.20 0 0 1 170.43 146.00 A5.20 5.20 0 0 1 160.00 146.00 A5.20 5.20 0 0 1 149.57 146.00 A5.20 5.20 0 0 1 139.14 146.00 A5.20 5.20 0 0 1 128.71 146.00 A5.20 5.20 0 0 1 118.29 146.00 A5.20 5.20 0 0 1 107.86 146.00 A5.20 5.20 0 0 1 97.43 146.00 A5.20 5.20 0 0 1 87.00 146.00 A5.20 5.20 0 0 1 76.57 146.00 A5.20 5.20 0 0 1 66.14 146.00 A5.20 5.20 0 0 1 55.71 146.00 A5.20 5.20 0 0 1 45.29 146.00 A5.20 5.20 0 0 1 34.86 146.00 A5.20 5.20 0 0 1 24.43 146.00 A5.20 5.20 0 0 1 14.00 146.00 A5.20 5.20 0 0 1 14.00 135.85 A5.20 5.20 0 0 1 14.00 125.69 A5.20 5.20 0 0 1 14.00 115.54 A5.20 5.20 0 0 1 14.00 105.38 A5.20 5.20 0 0 1 14.00 95.23 A5.20 5.20 0 0 1 14.00 85.08 A5.20 5.20 0 0 1 14.00 74.92 A5.20 5.20 0 0 1 14.00 64.77 A5.20 5.20 0 0 1 14.00 54.62 A5.20 5.20 0 0 1 14.00 44.46 A5.20 5.20 0 0 1 14.00 34.31 A5.20 5.20 0 0 1 14.00 24.15 A5.20 5.20 0 0 1 14.00 14.00Z" fill="url(#site2-net)"/>
+  <rect x="19" y="19" width="282" height="122" rx="3" fill="none" stroke="#bfae98" stroke-width=".6" stroke-dasharray="1.2 2"/>
+  <path d="M48.00 23.00 L49.75 24.27 L51.50 24.80 L53.25 24.27 L55.00 23.00 L56.75 21.73 L58.50 21.20 L60.25 21.73 L62.00 23.00 L63.75 24.27 L65.50 24.80 L67.25 24.27 L69.00 23.00 L70.75 21.73 L72.50 21.20 L74.25 21.73 L76.00 23.00 L77.75 24.27 L79.50 24.80 L81.25 24.27 L83.00 23.00 L84.75 21.73 L86.50 21.20 L88.25 21.73 L90.00 23.00 L91.75 24.27 L93.50 24.80 L95.25 24.27 L97.00 23.00 L98.75 21.73 L100.50 21.20 L102.25 21.73 L104.00 23.00 L105.75 24.27 L107.50 24.80 L109.25 24.27 L111.00 23.00 L112.75 21.73 L114.50 21.20 L116.25 21.73 L118.00 23.00 L119.75 24.27 L121.50 24.80 L123.25 24.27 L125.00 23.00 L126.75 21.73 L128.50 21.20 L130.25 21.73 L132.00 23.00 L133.75 24.27 L135.50 24.80 L137.25 24.27 L139.00 23.00 L140.75 21.73 L142.50 21.20 L144.25 21.73 L146.00 23.00 L147.75 24.27 L149.50 24.80 L151.25 24.27 L153.00 23.00 L154.75 21.73 L156.50 21.20 L158.25 21.73 L160.00 23.00 L161.75 24.27 L163.50 24.80 L165.25 24.27 L167.00 23.00 L168.75 21.73 L170.50 21.20 L172.25 21.73 L174.00 23.00 L175.75 24.27 L177.50 24.80 L179.25 24.27 L181.00 23.00 L182.75 21.73 L184.50 21.20 L186.25 21.73 L188.00 23.00 L189.75 24.27 L191.50 24.80 L193.25 24.27 L195.00 23.00 L196.75 21.73 L198.50 21.20 L200.25 21.73 L202.00 23.00 L203.75 24.27 L205.50 24.80 L207.25 24.27 L209.00 23.00 L210.75 21.73 L212.50 21.20 L214.25 21.73 L216.00 23.00 L217.75 24.27 L219.50 24.80 L221.25 24.27 L223.00 23.00 L224.75 21.73 L226.50 21.20 L228.25 21.73 L230.00 23.00 L231.75 24.27 L233.50 24.80 L235.25 24.27 L237.00 23.00 L238.75 21.73 L240.50 21.20 L242.25 21.73 L244.00 23.00 L245.75 24.27 L247.50 24.80 L249.25 24.27 L251.00 23.00 L252.75 21.73 L254.50 21.20 L256.25 21.73 L258.00 23.00 L259.75 24.27 L261.50 24.80 L263.25 24.27 L265.00 23.00 L266.75 21.73 L268.50 21.20 L270.25 21.73 L272.00 23.00 M272.00 137.00 L270.25 135.73 L268.50 135.20 L266.75 135.73 L265.00 137.00 L263.25 138.27 L261.50 138.80 L259.75 138.27 L258.00 137.00 L256.25 135.73 L254.50 135.20 L252.75 135.73 L251.00 137.00 L249.25 138.27 L247.50 138.80 L245.75 138.27 L244.00 137.00 L242.25 135.73 L240.50 135.20 L238.75 135.73 L237.00 137.00 L235.25 138.27 L233.50 138.80 L231.75 138.27 L230.00 137.00 L228.25 135.73 L226.50 135.20 L224.75 135.73 L223.00 137.00 L221.25 138.27 L219.50 138.80 L217.75 138.27 L216.00 137.00 L214.25 135.73 L212.50 135.20 L210.75 135.73 L209.00 137.00 L207.25 138.27 L205.50 138.80 L203.75 138.27 L202.00 137.00 L200.25 135.73 L198.50 135.20 L196.75 135.73 L195.00 137.00 L193.25 138.27 L191.50 138.80 L189.75 138.27 L188.00 137.00 L186.25 135.73 L184.50 135.20 L182.75 135.73 L181.00 137.00 L179.25 138.27 L177.50 138.80 L175.75 138.27 L174.00 137.00 L172.25 135.73 L170.50 135.20 L168.75 135.73 L167.00 137.00 L165.25 138.27 L163.50 138.80 L161.75 138.27 L160.00 137.00 L158.25 135.73 L156.50 135.20 L154.75 135.73 L153.00 137.00 L151.25 138.27 L149.50 138.80 L147.75 138.27 L146.00 137.00 L144.25 135.73 L142.50 135.20 L140.75 135.73 L139.00 137.00 L137.25 138.27 L135.50 138.80 L133.75 138.27 L132.00 137.00 L130.25 135.73 L128.50 135.20 L126.75 135.73 L125.00 137.00 L123.25 138.27 L121.50 138.80 L119.75 138.27 L118.00 137.00 L116.25 135.73 L114.50 135.20 L112.75 135.73 L111.00 137.00 L109.25 138.27 L107.50 138.80 L105.75 138.27 L104.00 137.00 L102.25 135.73 L100.50 135.20 L98.75 135.73 L97.00 137.00 L95.25 138.27 L93.50 138.80 L91.75 138.27 L90.00 137.00 L88.25 135.73 L86.50 135.20 L84.75 135.73 L83.00 137.00 L81.25 138.27 L79.50 138.80 L77.75 138.27 L76.00 137.00 L74.25 135.73 L72.50 135.20 L70.75 135.73 L69.00 137.00 L67.25 138.27 L65.50 138.80 L63.75 138.27 L62.00 137.00 L60.25 135.73 L58.50 135.20 L56.75 135.73 L55.00 137.00 L53.25 138.27 L51.50 138.80 L49.75 138.27 L48.00 137.00 M23.00 48.00 L21.73 49.33 L21.20 50.67 L21.73 52.00 L23.00 53.33 L24.27 54.67 L24.80 56.00 L24.27 57.33 L23.00 58.67 L21.73 60.00 L21.20 61.33 L21.73 62.67 L23.00 64.00 L24.27 65.33 L24.80 66.67 L24.27 68.00 L23.00 69.33 L21.73 70.67 L21.20 72.00 L21.73 73.33 L23.00 74.67 L24.27 76.00 L24.80 77.33 L24.27 78.67 L23.00 80.00 L21.73 81.33 L21.20 82.67 L21.73 84.00 L23.00 85.33 L24.27 86.67 L24.80 88.00 L24.27 89.33 L23.00 90.67 L21.73 92.00 L21.20 93.33 L21.73 94.67 L23.00 96.00 L24.27 97.33 L24.80 98.67 L24.27 100.00 L23.00 101.33 L21.73 102.67 L21.20 104.00 L21.73 105.33 L23.00 106.67 L24.27 108.00 L24.80 109.33 L24.27 110.67 L23.00 112.00 M297.00 112.00 L298.27 110.67 L298.80 109.33 L298.27 108.00 L297.00 106.67 L295.73 105.33 L295.20 104.00 L295.73 102.67 L297.00 101.33 L298.27 100.00 L298.80 98.67 L298.27 97.33 L297.00 96.00 L295.73 94.67 L295.20 93.33 L295.73 92.00 L297.00 90.67 L298.27 89.33 L298.80 88.00 L298.27 86.67 L297.00 85.33 L295.73 84.00 L295.20 82.67 L295.73 81.33 L297.00 80.00 L298.27 78.67 L298.80 77.33 L298.27 76.00 L297.00 74.67 L295.73 73.33 L295.20 72.00 L295.73 70.67 L297.00 69.33 L298.27 68.00 L298.80 66.67 L298.27 65.33 L297.00 64.00 L295.73 62.67 L295.20 61.33 L295.73 60.00 L297.00 58.67 L298.27 57.33 L298.80 56.00 L298.27 54.67 L297.00 53.33 L295.73 52.00 L295.20 50.67 L295.73 49.33 L297.00 48.00" fill="none" stroke="#bfae98" stroke-width=".5"/>
+  <g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(10 36 36)"/><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(82 36 36)"/><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(154 36 36)"/><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(226 36 36)"/><ellipse cx="36" cy="30.75" rx="2.88" ry="5.00" transform="rotate(298 36 36)"/><circle cx="36" cy="36" r="1.75" fill="#bfae98"/></g><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(43 38) rotate(0) scale(1.1)" fill="none" stroke="#bfae98" stroke-width=".5"/><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(37 44) rotate(90) scale(1.0)" fill="none" stroke="#bfae98" stroke-width=".5"/><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(-10 284 36)"/><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(62 284 36)"/><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(134 284 36)"/><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(206 284 36)"/><ellipse cx="284" cy="30.75" rx="2.88" ry="5.00" transform="rotate(278 284 36)"/><circle cx="284" cy="36" r="1.75" fill="#bfae98"/></g><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(277 38) rotate(180) scale(1.1)" fill="none" stroke="#bfae98" stroke-width=".5"/><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(283 44) rotate(90) scale(1.0)" fill="none" stroke="#bfae98" stroke-width=".5"/><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(-10 36 124)"/><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(62 36 124)"/><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(134 36 124)"/><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(206 36 124)"/><ellipse cx="36" cy="118.75" rx="2.88" ry="5.00" transform="rotate(278 36 124)"/><circle cx="36" cy="124" r="1.75" fill="#bfae98"/></g><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(43 122) rotate(0) scale(1.1)" fill="none" stroke="#bfae98" stroke-width=".5"/><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(37 116) rotate(-90) scale(1.0)" fill="none" stroke="#bfae98" stroke-width=".5"/><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(10 284 124)"/><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(82 284 124)"/><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(154 284 124)"/><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(226 284 124)"/><ellipse cx="284" cy="118.75" rx="2.88" ry="5.00" transform="rotate(298 284 124)"/><circle cx="284" cy="124" r="1.75" fill="#bfae98"/></g><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(277 122) rotate(180) scale(1.1)" fill="none" stroke="#bfae98" stroke-width=".5"/><path d="M0 0C3 -3 8 -3 11 0C8 3 3 3 0 0Z M0 0L11 0" transform="translate(283 116) rotate(-90) scale(1.0)" fill="none" stroke="#bfae98" stroke-width=".5"/><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(0 114.0 29)"/><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(72 114.0 29)"/><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(144 114.0 29)"/><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(216 114.0 29)"/><ellipse cx="114.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(288 114.0 29)"/><circle cx="114.0" cy="29" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(36 114.0 131)"/><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(108 114.0 131)"/><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(180 114.0 131)"/><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(252 114.0 131)"/><ellipse cx="114.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(324 114.0 131)"/><circle cx="114.0" cy="131" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(0 160.0 29)"/><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(72 160.0 29)"/><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(144 160.0 29)"/><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(216 160.0 29)"/><ellipse cx="160.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(288 160.0 29)"/><circle cx="160.0" cy="29" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(36 160.0 131)"/><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(108 160.0 131)"/><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(180 160.0 131)"/><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(252 160.0 131)"/><ellipse cx="160.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(324 160.0 131)"/><circle cx="160.0" cy="131" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(0 206.0 29)"/><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(72 206.0 29)"/><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(144 206.0 29)"/><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(216 206.0 29)"/><ellipse cx="206.0" cy="25.43" rx="1.95" ry="3.40" transform="rotate(288 206.0 29)"/><circle cx="206.0" cy="29" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(36 206.0 131)"/><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(108 206.0 131)"/><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(180 206.0 131)"/><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(252 206.0 131)"/><ellipse cx="206.0" cy="127.43" rx="1.95" ry="3.40" transform="rotate(324 206.0 131)"/><circle cx="206.0" cy="131" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(0 28 80.0)"/><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(72 28 80.0)"/><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(144 28 80.0)"/><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(216 28 80.0)"/><ellipse cx="28" cy="76.43" rx="1.95" ry="3.40" transform="rotate(288 28 80.0)"/><circle cx="28" cy="80.0" r="1.19" fill="#bfae98"/></g><g fill="none" stroke="#bfae98" stroke-width=".55"><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(36 292 80.0)"/><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(108 292 80.0)"/><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(180 292 80.0)"/><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(252 292 80.0)"/><ellipse cx="292" cy="76.43" rx="1.95" ry="3.40" transform="rotate(324 292 80.0)"/><circle cx="292" cy="80.0" r="1.19" fill="#bfae98"/></g>
+  <g filter="url(#site2-shadow)">
+    <rect x="44" y="59.0" width="232" height="42" fill="url(#site2-satin)"/>
+    <rect x="44" y="59.0" width="232" height="42" fill="url(#site2-sheen)"/>
     <path d="M48 62.5H272M48 97.5H272" stroke="#b9a1a8" stroke-width=".55" stroke-dasharray="2 1.6"/>
   </g>
   <text x="160.0" y="85.4" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-weight="600" font-size="15.5" letter-spacing="2.1" fill="#111">MADEOFMEMORIES.SG</text>
 </svg></div>
-  </main>
+      <p>Made of Memories · Singapore</p>
+      <p>© 2026 Made of Memories</p>
+    </footer>
+  </div>
 
   <script>
-    const form = document.getElementById('create');
-    const msg = document.getElementById('msg');
+    // Enquire buttons pre-pick the package
+    document.querySelectorAll('[data-plan]').forEach((a) => a.addEventListener('click', () => { document.getElementById('f-plan').value = a.dataset.plan; }));
 
-    // Remember the creator key on this device only
-    try { form.key.value = localStorage.getItem('creatorKey') || ''; } catch {}
-
+    const form = document.getElementById('enquiry'), status = document.getElementById('f-status');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = form.querySelector('button');
-      btn.disabled = true;
-      msg.className = 'msg';
-      msg.textContent = 'Creating…';
-
+      const btn = form.querySelector('button[type=submit]');
+      const data = Object.fromEntries(new FormData(form));
+      if (!data.name.trim()) { status.className = 'msg err'; status.textContent = 'Please enter your names.'; form.name.focus(); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(data.email.trim())) { status.className = 'msg err'; status.textContent = 'Please enter a valid email address.'; form.email.focus(); return; }
+      btn.disabled = true; status.className = 'msg'; status.textContent = 'Sending…';
       try {
-        const res = await fetch('/api/events', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Create-Key': form.key.value },
-          body: JSON.stringify({
-            couple_names: form.couple_names.value,
-            event_type: form.event_type.value,
-            event_date: form.event_date.value,
-            venue: form.venue.value,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Could not create the album');
-
-        try { localStorage.setItem('creatorKey', form.key.value); } catch {}
-        document.getElementById('admin-url').value = data.admin_url;
-        document.getElementById('guest-url').value = data.guest_url;
-        document.getElementById('open-admin').href = data.admin_url;
-        form.classList.add('hidden');
-        document.getElementById('done').classList.remove('hidden');
+        const res = await fetch('/api/enquiries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(out.error || 'Something went wrong. Please try again.');
+        form.reset();
+        status.className = 'msg ok'; status.textContent = 'Thank you! We\'ll be in touch by email soon.';
       } catch (err) {
-        msg.className = 'msg err';
-        msg.textContent = err.message;
-      } finally {
-        btn.disabled = false;
-      }
+        status.className = 'msg err'; status.textContent = err.message === 'Failed to fetch' ? 'No connection. Please try again.' : err.message;
+      } finally { btn.disabled = false; }
     });
   </script>
-  <script src="/links.js"></script>
 </body>
 </html>

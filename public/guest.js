@@ -293,8 +293,8 @@
   }
 
   function applyTheme(theme) {
-    const t = 'ha-florals';
-    document.documentElement.className = `theme-${t}`;
+    const t = theme === 'ivory' ? 'ivory' : 'ha-florals';
+    document.documentElement.className = t === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals';
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = '#faf8f4';
     if (state.theme !== t) { state.theme = t; saveState(); }
@@ -305,6 +305,7 @@
     // "Harris & Aqilah" -> two names stacked around a gold ampersand
     const parts = ev.couple_names.split(/\s+(?:&|and|dan)\s+/i);
     applyTheme(ev.theme);
+    $('demo-note').classList.toggle('hidden', !ev.is_demo);
     const names = $('names');
     names.textContent = '';
     const mono = document.createElement('span');

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="44" height="36" viewBox="0 0 44 36">
+<defs><clipPath id="c"><path d="M0 0H32A9 9 0 0 1 32 18A9 9 0 0 1 32 36H0Z"/></clipPath></defs>
+<path d="M0 0H32A9 9 0 0 1 32 18A9 9 0 0 1 32 36H0Z" fill="#fbf8f2" fill-opacity=".9"/>
+<g clip-path="url(#c)" stroke="#c3b29b" stroke-width=".35" opacity=".55"><path d="M-36 0L0 36" /><path d="M-31 0L5 36" /><path d="M-26 0L10 36" /><path d="M-21 0L15 36" /><path d="M-16 0L20 36" /><path d="M-11 0L25 36" /><path d="M-6 0L30 36" /><path d="M-1 0L35 36" /><path d="M4 0L40 36" /><path d="M9 0L45 36" /><path d="M14 0L50 36" /><path d="M19 0L55 36" /><path d="M24 0L60 36" /><path d="M29 0L65 36" /><path d="M34 0L70 36" /><path d="M39 0L75 36" /><path d="M-36 36L0 0" /><path d="M-31 36L5 0" /><path d="M-26 36L10 0" /><path d="M-21 36L15 0" /><path d="M-16 36L20 0" /><path d="M-11 36L25 0" /><path d="M-6 36L30 0" /><path d="M-1 36L35 0" /><path d="M4 36L40 0" /><path d="M9 36L45 0" /><path d="M14 36L50 0" /><path d="M19 36L55 0" /><path d="M24 36L60 0" /><path d="M29 36L65 0" /><path d="M34 36L70 0" /><path d="M39 36L75 0" /></g>
+<path d="M32 0A9 9 0 0 1 32 18A9 9 0 0 1 32 36" fill="none" stroke="#c3b29b" stroke-width=".8"/>
+<path d="M30 3A6.5 6.5 0 0 1 30 15M30 21A6.5 6.5 0 0 1 30 33" fill="none" stroke="#c3b29b" stroke-width=".45" stroke-dasharray="1 1.4"/>
+<circle cx="42.4" cy="9" r=".9" fill="#c3b29b"/><circle cx="42.4" cy="27" r=".9" fill="#c3b29b"/><circle cx="41" cy="2.5" r=".6" fill="#c3b29b"/><circle cx="41" cy="33.5" r=".6" fill="#c3b29b"/>
+<path d="M5 0C9 6 9 12 5 18C1 24 1 30 5 36" fill="none" stroke="#c3b29b" stroke-width=".6"/>
+<g fill="none" stroke="#c3b29b" stroke-width=".5"><ellipse cx="17" cy="14.6" rx="1.7" ry="3" transform="rotate(0 17 18)"/><ellipse cx="17" cy="14.6" rx="1.7" ry="3" transform="rotate(72 17 18)"/><ellipse cx="17" cy="14.6" rx="1.7" ry="3" transform="rotate(144 17 18)"/><ellipse cx="17" cy="14.6" rx="1.7" ry="3" transform="rotate(216 17 18)"/><ellipse cx="17" cy="14.6" rx="1.7" ry="3" transform="rotate(288 17 18)"/></g><circle cx="17" cy="18" r="1.1" fill="#c3b29b"/>
+<path d="M8.5 9C11 8 13 9 14 11M8.5 27C11 28 13 27 14 25" fill="none" stroke="#c3b29b" stroke-width=".45"/>
+<path d="M2 0V36" stroke="#c3b29b" stroke-width=".7"/>
+</svg>

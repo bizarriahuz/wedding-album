@@ -178,7 +178,7 @@
     }
 
     function applyTheme(theme) {
-      document.documentElement.className = 'theme-ha-florals';
+      document.documentElement.className = theme === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals';
     }
 
     // Chrome's own voice recordings carry no length, so players show 0:00. Seeking to the end makes the browser work it out.

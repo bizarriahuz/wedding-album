@@ -13,6 +13,10 @@
   <script>
     // Apply this album's look before the page paints, if this phone has seen it before
     document.documentElement.className = 'theme-ha-florals';
+    try {
+      const saved = JSON.parse(localStorage.getItem('ga:' + location.pathname.split('/')[2]) || '{}');
+      if (saved.theme === 'ivory') document.documentElement.className += ' theme-ivory';
+    } catch {}
   </script>
 </head>
 <body class="guest">
@@ -155,6 +159,7 @@
       <div class="deco bottom left" aria-hidden="true"></div>
       <div class="deco bottom right" aria-hidden="true"></div>
     </header>
+    <p id="demo-note" class="demo-note hidden">This is a demo album. What you share here is private to you and cleared daily. <a href="/">Back to Made of Memories</a></p>
 
     <!-- Shown when the link is broken or the token is missing -->
     <div id="problem" class="panel hidden"></div>
@@ -236,7 +241,7 @@
     <footer class="foot">
       <div class="deco bottom left" aria-hidden="true"></div>
       <div class="deco bottom right" aria-hidden="true"></div>
-      <div class="foot-brand"><svg xmlns="http://www.w3.org/2000/svg" focusable="false" viewBox="0 0 320 160" role="img" aria-label="madeofmemories.sg">
+      <div class="foot-brand"><a href="/" target="_blank" rel="noopener" aria-label="Made of Memories: get a guest album for your wedding"><svg xmlns="http://www.w3.org/2000/svg" focusable="false" viewBox="0 0 320 160" role="img" aria-label="madeofmemories.sg">
   <defs>
     <pattern id="mom3-net" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
       <path d="M0 0H5M0 0V5" stroke="#d8cbb9" stroke-width=".35" opacity=".7"/>
@@ -261,7 +266,7 @@
     <path d="M48 62.5H272M48 97.5H272" stroke="#b9a1a8" stroke-width=".55" stroke-dasharray="2 1.6"/>
   </g>
   <text x="160.0" y="85.4" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, 'Times New Roman', serif" font-weight="600" font-size="15.5" letter-spacing="2.1" fill="#111">MADEOFMEMORIES.SG</text>
-</svg></div>
+</svg><span class="foot-cta">Want this for your wedding?</span></a></div>
     </footer>
   </main>
 

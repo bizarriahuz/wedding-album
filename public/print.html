@@ -106,6 +106,10 @@
     .theme-ha-florals .p-frame.right { right: 0; left: auto; background-image: url("/themes/ha-florals/garland-right.webp"); transform: translateX(44%); }
     .theme-ha-florals .p-deco.tl, .theme-ha-florals .p-deco.tr { display: none !important; }
     .theme-ha-florals .p-deco { display: none; background: center / contain no-repeat; }
+    /* ivory: lace edges instead of the invitation florals */
+    .theme-ivory .p-frame { aspect-ratio: auto; height: 100%; width: 12mm; transform: none !important; background: url("/brand/lace-edge.svg") left top / 12mm auto repeat-y; opacity: .95; }
+    .theme-ivory .p-frame.right { transform: scaleX(-1) !important; }
+    .theme-ivory .p-deco { display: none !important; }
     .theme-ha-florals .p-deco.tl, .theme-ha-florals .p-deco.tr { display: block; top: -1mm; aspect-ratio: 292 / 331; background-image: url("/themes/ha-florals/corner-top.webp"); }
     .theme-ha-florals .p-deco.tr { transform: scaleX(-1); }
     .theme-ha-florals .p-deco.bl, .theme-ha-florals .p-deco.br { display: block; bottom: -1mm; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
@@ -305,7 +309,7 @@
     }
 
     function build(ev) {
-      document.documentElement.className = 'theme-ha-florals';
+      document.documentElement.className = ev.theme === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals';
       document.documentElement.style.setProperty('--qr-ink', '#241c18');
       document.title = `QR cards · ${ev.couple_names}`;
       const card = () => fill($('t-card').content.firstElementChild.cloneNode(true), ev);

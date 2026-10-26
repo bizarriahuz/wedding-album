@@ -56,3 +56,11 @@ Local data lives in `.wrangler/` and never touches the live database.
 - The admin token sits after `#` in the link, so browsers never send it to the server logs. Only its SHA-256 hash is stored. Lose the link and the admin page is lost too (you could reset it directly in D1).
 - Cover uploads go through the Worker (10 MB limit). Guest uploads in phase 2 will use the same route at first; Workers accept up to 100 MB per request on the free plan, which covers compressed photos and 60-second videos.
 - Albums get an `expires_at` 30 days after the event date. Nothing deletes media yet; that's a later job.
+
+
+## Website (Made of Memories)
+
+- `/` is the business website (public/index.html). Album creation moved to `/create`.
+- `/demo` opens the live demo album (ivory lace look, private mode, 12 items per visitor, cleared nightly at 3am SGT by the cron trigger). Set it up once from `/create` with "Set up website demo".
+- Website enquiries are stored in D1; read them at `/enquiries` with the creator key.
+- Themes: `ha-florals` (Harris & Aqilah's invitation artwork, only for their album) and `ivory` (original lace look for everyone else). Pass `"theme": "ivory"` when creating other couples' albums.

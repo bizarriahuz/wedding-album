@@ -16,8 +16,9 @@ CREATE TABLE IF NOT EXISTS events (
   admin_token_hash TEXT NOT NULL,                 -- SHA-256 of the couple's secret admin token
   privacy          TEXT NOT NULL DEFAULT 'public', -- public | private | approve
   status           TEXT NOT NULL DEFAULT 'live',  -- draft | live | closed
-  theme            TEXT NOT NULL DEFAULT 'ha-florals', -- the invitation florals look
+  theme            TEXT NOT NULL DEFAULT 'ha-florals', -- ha-florals (Harris & Aqilah's invitation) | ivory (plain lace)
   welcome_message  TEXT,                          -- couple's thank-you note on the entrance page
+  is_demo          INTEGER NOT NULL DEFAULT 0,    -- the public demo album on the website
   expires_at       TEXT,                          -- when media gets deleted
   created_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -68,3 +69,12 @@ CREATE TABLE IF NOT EXISTS payments (
   status       TEXT NOT NULL DEFAULT 'pending',   -- pending | paid
   paid_at      TEXT
 );
+
+-- Website enquiry form
+CREATE TABLE IF NOT EXISTS enquiries (
+  id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, wedding_date TEXT, guests TEXT,
+  package TEXT, message TEXT, ip_hash TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Small key/value settings (e.g. which album is the demo)
+CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);

@@ -18,9 +18,14 @@
 //   GET  /e/:slug                    guest page (static e.html)
 //   GET  /admin/:slug                couple's admin page (static admin.html)
 //   GET  /print/:slug                printable QR cards and poster (static print.html, needs admin token in #)
+//   POST /api/enquiries              website enquiry form (public, rate limited)
+//   GET  /api/enquiries              list enquiries (needs X-Create-Key)
+//   POST /api/demo/setup             create or reset the demo album (needs X-Create-Key)
+//   GET  /demo                       redirect to the live demo album
+//   cron                             clears demo uploads older than a day
 
 const EVENT_TYPES = ['nikah', 'sanding', 'tandang', 'other'];
-const THEMES = ['ha-florals']; // the invitation florals look is the only look
+const THEMES = ['ha-florals', 'ivory']; // ha-florals: Harris & Aqilah's invitation florals; ivory: the plain lace look (demo, other couples)
 const PRIVACY = ['public', 'private']; // private: each guest sees only their own uploads; the couple sees all
 
 // Schema changes the live database needs, applied by the Worker itself on first use.
@@ -28,8 +33,13 @@ const PRIVACY = ['public', 'private']; // private: each guest sees only their ow
 const MIGRATIONS = [
   "ALTER TABLE events ADD COLUMN theme TEXT NOT NULL DEFAULT 'sapphire'",
   "ALTER TABLE events ADD COLUMN welcome_message TEXT",
-  "UPDATE events SET theme = 'ha-florals' WHERE theme <> 'ha-florals'",
+  "UPDATE events SET theme = 'ha-florals' WHERE theme = 'sapphire'",
   "ALTER TABLE events ADD COLUMN strip_keys TEXT",
+  "ALTER TABLE events ADD COLUMN is_demo INTEGER NOT NULL DEFAULT 0",
+  `CREATE TABLE IF NOT EXISTS enquiries (
+     id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, wedding_date TEXT, guests TEXT,
+     package TEXT, message TEXT, ip_hash TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')))`,
+  "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
 ];
 let schemaReady = false;
 async function ensureSchema(env) {
@@ -52,6 +62,9 @@ const EXT = {
 };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const FEED_PAGE = 60;
+const DEMO_MAX_ITEMS = 12;            // per visitor, in the public demo album
+const DEMO_MAX_BYTES = 25 * 1024 * 1024;
+const DEMO_KEEP_HOURS = 24;           // demo uploads are cleared after this
 const MAX_WISH_CHARS = 1000;
 const MAX_VOICE_BYTES = 10 * 1024 * 1024; // about two minutes of compressed voice; the page stops at one
 const AUDIO_EXT = { 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/aac': 'aac', 'audio/mpeg': 'mp3', 'audio/wav': 'wav' };
@@ -66,6 +79,7 @@ export default {
       if (path.startsWith('/e/')) return env.ASSETS.fetch(new URL('/e', url));
       if (path.startsWith('/admin/')) return env.ASSETS.fetch(new URL('/admin', url));
       if (path.startsWith('/print/')) return env.ASSETS.fetch(new URL('/print', url));
+      if (path === '/demo') return demoRedirect(env, url);
 
       if (path.startsWith('/media/')) return serveMedia(path.slice(7), env);
 
@@ -82,6 +96,10 @@ export default {
 
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/cover$/);
       if (m && request.method === 'PUT') return uploadCover(m[1], request, env);
+
+      if (path === '/api/enquiries' && request.method === 'POST') return postEnquiry(request, env);
+      if (path === '/api/enquiries' && request.method === 'GET') return listEnquiries(request, env);
+      if (path === '/api/demo/setup' && request.method === 'POST') return setupDemo(request, env, url);
 
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/strip\/([0-2])$/);
       if (m && request.method === 'PUT') return uploadStrip(m[1], Number(m[2]), request, env);
@@ -113,6 +131,11 @@ export default {
       return json({ error: 'Something went wrong on our side' }, 500);
     }
   },
+
+  // Cron: clear old uploads from the public demo album
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil((async () => { await ensureSchema(env); await cleanDemo(env); })());
+  },
 };
 
 // ---------- handlers ----------
@@ -139,10 +162,10 @@ async function createEvent(request, env, url) {
   await env.DB.prepare(
     `INSERT INTO events (id, slug, couple_names, event_type, event_date, venue,
                          guest_token, admin_token_hash, expires_at, theme)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ha-florals')`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   )
     .bind(id, slug, fields.couple_names, fields.event_type, fields.event_date,
-          fields.venue, guestToken, await sha256(adminToken), expires.toISOString())
+          fields.venue, guestToken, await sha256(adminToken), expires.toISOString(), fields.theme)
     .run();
 
   return json({
@@ -155,7 +178,7 @@ async function createEvent(request, env, url) {
 
 async function publicEvent(slug, env) {
   const ev = await env.DB.prepare(
-    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, strip_keys, status, theme, privacy, welcome_message
+    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, strip_keys, status, theme, privacy, welcome_message, is_demo
        FROM events WHERE slug = ?`
   ).bind(slug).first();
   if (!ev) return json({ error: 'Album not found' }, 404);
@@ -265,6 +288,10 @@ async function putWish(slug, id, request, env, url) {
   const guest = await env.DB.prepare('SELECT id FROM guests WHERE id = ? AND event_id = ?')
     .bind(url.searchParams.get('guest') || '', ev.id).first();
   if (!guest) return json({ error: 'Please enter your name again', code: 'no_guest' }, 403);
+  if (ev.is_demo) {
+    const n = await env.DB.prepare('SELECT COUNT(*) AS n FROM wishes WHERE event_id = ? AND guest_id = ?').bind(ev.id, guest.id).first();
+    if (n.n >= DEMO_MAX_ITEMS) return json({ error: `The demo keeps up to ${DEMO_MAX_ITEMS} wishes per visitor`, code: 'demo_limit' }, 429);
+  }
 
   const type = (request.headers.get('Content-Type') || '').split(';')[0].toLowerCase();
   const insert = (kind, body, key) => env.DB.prepare(
@@ -364,6 +391,12 @@ async function uploadMedia(slug, id, request, env, url) {
   const guestId = url.searchParams.get('guest') || '';
   const guest = await env.DB.prepare('SELECT id FROM guests WHERE id = ? AND event_id = ?').bind(guestId, ev.id).first();
   if (!guest) return json({ error: 'Please enter your name again', code: 'no_guest' }, 403);
+
+  if (ev.is_demo) {
+    const n = await env.DB.prepare('SELECT COUNT(*) AS n FROM media WHERE event_id = ? AND guest_id = ?').bind(ev.id, guest.id).first();
+    if (n.n >= DEMO_MAX_ITEMS) return json({ error: `The demo keeps up to ${DEMO_MAX_ITEMS} photos or videos per visitor`, code: 'demo_limit' }, 429);
+    if (Number(request.headers.get('Content-Length') || 0) > DEMO_MAX_BYTES) return json({ error: 'The demo takes videos up to 25 MB', code: 'too_large' }, 413);
+  }
 
   const type = (request.headers.get('Content-Type') || '').split(';')[0].toLowerCase();
   const kind = PHOTO_TYPES.includes(type) ? 'photo' : VIDEO_TYPES.includes(type) ? 'video' : null;
@@ -487,7 +520,7 @@ async function authorizeAdmin(slug, request, env) {
 
 async function authorizeGuest(slug, request, env, forUpload = false) {
   const token = request.headers.get('X-Guest-Token') || '';
-  const ev = await env.DB.prepare('SELECT id, guest_token, admin_token_hash, status, privacy FROM events WHERE slug = ?').bind(slug).first();
+  const ev = await env.DB.prepare('SELECT id, guest_token, admin_token_hash, status, privacy, is_demo FROM events WHERE slug = ?').bind(slug).first();
   if (!ev) return json({ error: 'Album not found' }, 404);
   if (!token || !(await safeEqual(token, ev.guest_token))) {
     return json({ error: 'Please scan the QR code again', code: 'bad_token' }, 401);
@@ -510,7 +543,7 @@ function validateEventFields(b, isNew) {
   const event_type = String(b?.event_type ?? 'sanding').trim();
   const event_date = String(b?.event_date ?? '').trim();
   const venue = String(b?.venue ?? '').trim() || null;
-  const theme = 'ha-florals';
+  const theme = THEMES.includes(String(b?.theme)) ? String(b.theme) : 'ha-florals';
   const privacy = String(b?.privacy ?? 'public').trim();
   const welcome_message = String(b?.welcome_message ?? '').trim() || null;
 
@@ -574,4 +607,113 @@ function json(data, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
   });
+}
+
+// ---------- website: enquiries ----------
+
+async function postEnquiry(request, env) {
+  const b = await readJson(request);
+  if (String(b?.website ?? '').trim()) return json({ ok: true }); // honeypot: bots fill every field
+  const name = String(b?.name ?? '').trim();
+  const email = String(b?.email ?? '').trim();
+  const wedding_date = String(b?.wedding_date ?? '').trim() || null;
+  const guests = String(b?.guests ?? '').trim().slice(0, 20) || null;
+  const pkg = String(b?.package ?? '').trim().slice(0, 30) || null;
+  const message = String(b?.message ?? '').trim();
+  if (name.length < 2 || name.length > 80) return json({ error: 'Please enter your name' }, 400);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 120) return json({ error: 'Please enter a valid email address' }, 400);
+  if (wedding_date && !/^\d{4}-\d{2}-\d{2}$/.test(wedding_date)) return json({ error: 'Please pick your wedding date' }, 400);
+  if (message.length > 2000) return json({ error: 'Please keep your message under 2000 characters' }, 400);
+
+  const ipHash = await sha256(`${request.headers.get('CF-Connecting-IP') || 'local'}:${env.CREATE_KEY || ''}`);
+  const recent = await env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM enquiries WHERE ip_hash = ? AND created_at > datetime('now', '-1 hour')"
+  ).bind(ipHash).first();
+  if (recent.n >= 5) return json({ error: 'Thank you! We already have your message and will reply soon.' }, 429);
+
+  await env.DB.prepare(
+    'INSERT INTO enquiries (id, name, email, wedding_date, guests, package, message, ip_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  ).bind(crypto.randomUUID(), name, email, wedding_date, guests, pkg, message || null, ipHash).run();
+  return json({ ok: true }, 201);
+}
+
+async function listEnquiries(request, env) {
+  const key = request.headers.get('X-Create-Key') || '';
+  if (!env.CREATE_KEY || !(await safeEqual(key, env.CREATE_KEY))) return json({ error: 'Wrong creator key' }, 401);
+  const { results } = await env.DB.prepare(
+    'SELECT id, name, email, wedding_date, guests, package, message, created_at FROM enquiries ORDER BY created_at DESC LIMIT 200'
+  ).all();
+  return json({ enquiries: results });
+}
+
+// ---------- website: live demo album ----------
+
+async function getSetting(env, key) {
+  const row = await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(key).first();
+  return row ? row.value : null;
+}
+async function setSetting(env, key, value) {
+  await env.DB.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').bind(key, value).run();
+}
+
+async function setupDemo(request, env, url) {
+  const key = request.headers.get('X-Create-Key') || '';
+  if (!env.CREATE_KEY || !(await safeEqual(key, env.CREATE_KEY))) return json({ error: 'Wrong creator key' }, 401);
+  const reset = url.searchParams.get('reset') === '1';
+  const existing = await getSetting(env, 'demo');
+  if (existing && !reset) return json(JSON.parse(existing));
+
+  const next = new Date(); next.setUTCMonth(next.getUTCMonth() + 3);
+  const res = await createEvent(new Request(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Create-Key': key },
+    body: JSON.stringify({ couple_names: 'Aina & Hakim', event_type: 'sanding', event_date: next.toISOString().slice(0, 10), venue: 'Your wedding venue', theme: 'ivory' }),
+  }), env, url);
+  const made = await res.json();
+  if (!res.ok) return json(made, res.status);
+
+  await env.DB.prepare(
+    `UPDATE events SET is_demo = 1, privacy = 'private', expires_at = NULL,
+       welcome_message = ? WHERE slug = ?`
+  ).bind('Thank you for trying our demo! Take a photo, record a voice wish, and see how your guests will share your day. Everything here is private to you and cleared daily.', made.slug).run();
+
+  // Placeholder strip and cover photos, copied from the site's static files into storage
+  const evRow = await env.DB.prepare('SELECT id FROM events WHERE slug = ?').bind(made.slug).first();
+  const keys = [];
+  for (const [i, file] of ['demo-strip-0', 'demo-strip-1', 'demo-strip-2', 'demo-cover'].entries()) {
+    const img = await env.ASSETS.fetch(new URL(`/site/${file}.jpg`, url));
+    if (!img.ok) continue;
+    const key = `events/${evRow.id}/${i < 3 ? `strip-${i}` : 'cover'}-${Date.now()}.jpg`;
+    await env.MEDIA.put(key, await img.arrayBuffer(), { httpMetadata: { contentType: 'image/jpeg' } });
+    keys[i] = key;
+  }
+  await env.DB.prepare('UPDATE events SET strip_keys = ?, cover_key = ? WHERE id = ?')
+    .bind(JSON.stringify([keys[0] || null, keys[1] || null, keys[2] || null]), keys[3] || null, evRow.id).run();
+
+  const demo = { slug: made.slug, guest_path: new URL(made.guest_url).pathname + new URL(made.guest_url).search, admin_url: made.admin_url };
+  await setSetting(env, 'demo', JSON.stringify(demo));
+  return json(demo, 201);
+}
+
+async function demoRedirect(env, url) {
+  await ensureSchema(env);
+  const demo = await getSetting(env, 'demo');
+  if (!demo) return Response.redirect(new URL('/#demo', url).toString(), 302);
+  return Response.redirect(new URL(JSON.parse(demo).guest_path, url).toString(), 302);
+}
+
+async function cleanDemo(env) {
+  const cutoff = new Date(Date.now() - DEMO_KEEP_HOURS * 3600 * 1000).toISOString();
+  const { results: evs } = await env.DB.prepare('SELECT id FROM events WHERE is_demo = 1').all();
+  for (const ev of evs) {
+    const { results: media } = await env.DB.prepare('SELECT id, r2_key FROM media WHERE event_id = ? AND created_at < ?').bind(ev.id, cutoff).all();
+    const { results: wishes } = await env.DB.prepare('SELECT id, r2_key FROM wishes WHERE event_id = ? AND created_at < ?').bind(ev.id, cutoff).all();
+    const keys = [...media.flatMap((m) => [m.r2_key, thumbKey(ev.id, m.id)]), ...wishes.map((w) => w.r2_key).filter(Boolean)];
+    for (let i = 0; i < keys.length; i += 900) await env.MEDIA.delete(keys.slice(i, i + 900));
+    await env.DB.batch([
+      env.DB.prepare('DELETE FROM media WHERE event_id = ? AND created_at < ?').bind(ev.id, cutoff),
+      env.DB.prepare('DELETE FROM wishes WHERE event_id = ? AND created_at < ?').bind(ev.id, cutoff),
+      env.DB.prepare("DELETE FROM guests WHERE event_id = ? AND created_at < datetime('now', ?)").bind(ev.id, `-${DEMO_KEEP_HOURS} hours`),
+    ]);
+  }
 }
