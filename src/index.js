@@ -6,6 +6,7 @@
 //   GET  /api/admin/:slug            full event info (needs X-Admin-Token)
 //   PATCH /api/admin/:slug           edit names, date, venue, type (needs X-Admin-Token)
 //   PUT  /api/admin/:slug/cover      upload cover photo, raw image body (needs X-Admin-Token)
+//   PUT  /api/admin/:slug/strip/:n   photo-booth strip photo n (0-2), raw image body; DELETE removes it
 //   POST /api/events/:slug/guests    guest joins with a name (needs X-Guest-Token)
 //   PUT  /api/events/:slug/thumbs/:id  small preview image, sent before its media (needs X-Guest-Token)
 //   PUT  /api/events/:slug/media/:id   a photo or video, raw body; safe to retry (needs X-Guest-Token)
@@ -28,6 +29,7 @@ const MIGRATIONS = [
   "ALTER TABLE events ADD COLUMN theme TEXT NOT NULL DEFAULT 'sapphire'",
   "ALTER TABLE events ADD COLUMN welcome_message TEXT",
   "UPDATE events SET theme = 'ha-florals' WHERE theme <> 'ha-florals'",
+  "ALTER TABLE events ADD COLUMN strip_keys TEXT",
 ];
 let schemaReady = false;
 async function ensureSchema(env) {
@@ -80,6 +82,10 @@ export default {
 
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/cover$/);
       if (m && request.method === 'PUT') return uploadCover(m[1], request, env);
+
+      m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/strip\/([0-2])$/);
+      if (m && request.method === 'PUT') return uploadStrip(m[1], Number(m[2]), request, env);
+      if (m && request.method === 'DELETE') return deleteStrip(m[1], Number(m[2]), request, env);
 
       m = path.match(/^\/api\/events\/([a-z0-9-]+)\/guests$/);
       if (m && request.method === 'POST') return joinGuest(m[1], request, env);
@@ -149,7 +155,7 @@ async function createEvent(request, env, url) {
 
 async function publicEvent(slug, env) {
   const ev = await env.DB.prepare(
-    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, status, theme, privacy, welcome_message
+    `SELECT slug, couple_names, event_type, event_date, venue, cover_key, strip_keys, status, theme, privacy, welcome_message
        FROM events WHERE slug = ?`
   ).bind(slug).first();
   if (!ev) return json({ error: 'Album not found' }, 404);
@@ -191,6 +197,39 @@ async function updateEvent(slug, request, env, url) {
   ).bind(fields.couple_names, fields.event_type, fields.event_date, fields.venue, fields.theme, fields.privacy, fields.welcome_message, ev.id).run();
 
   return adminEvent(slug, request, env, url);
+}
+
+// Photo-booth strip: up to three photos that slide out of the frame on the entrance page
+async function uploadStrip(slug, n, request, env) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+
+  const type = (request.headers.get('Content-Type') || '').split(';')[0];
+  if (!IMAGE_TYPES.includes(type)) return json({ error: 'Photo must be a JPEG, PNG or WebP image' }, 400);
+  const size = Number(request.headers.get('Content-Length') || 0);
+  if (size > MAX_COVER_BYTES) return json({ error: 'Photo is over 10 MB' }, 413);
+
+  const ext = type.split('/')[1].replace('jpeg', 'jpg');
+  const key = `events/${ev.id}/strip-${n}-${Date.now()}.${ext}`;
+  await env.MEDIA.put(key, request.body, { httpMetadata: { contentType: type } });
+
+  const keys = stripKeys(ev);
+  const old = keys[n];
+  keys[n] = key;
+  await env.DB.prepare('UPDATE events SET strip_keys = ? WHERE id = ?').bind(JSON.stringify(keys), ev.id).run();
+  if (old) await env.MEDIA.delete(old);
+  return json({ strip_urls: keys.map((k) => (k ? `/media/${k}` : null)) });
+}
+
+async function deleteStrip(slug, n, request, env) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+  const keys = stripKeys(ev);
+  const old = keys[n];
+  keys[n] = null;
+  await env.DB.prepare('UPDATE events SET strip_keys = ? WHERE id = ?').bind(JSON.stringify(keys), ev.id).run();
+  if (old) await env.MEDIA.delete(old);
+  return json({ strip_urls: keys.map((k) => (k ? `/media/${k}` : null)) });
 }
 
 async function uploadCover(slug, request, env) {
@@ -485,9 +524,18 @@ function validateEventFields(b, isNew) {
   return { couple_names, event_type, event_date, venue, theme, privacy, welcome_message };
 }
 
+function stripKeys(ev) {
+  try { const k = JSON.parse(ev.strip_keys || '[]'); return [0, 1, 2].map((i) => (typeof k[i] === 'string' ? k[i] : null)); }
+  catch { return [null, null, null]; }
+}
+
 function withCoverUrl(ev) {
-  const { cover_key, ...rest } = ev;
-  return { ...rest, cover_url: cover_key ? `/media/${cover_key}` : null };
+  const { cover_key, strip_keys, ...rest } = ev;
+  return {
+    ...rest,
+    cover_url: cover_key ? `/media/${cover_key}` : null,
+    strip_urls: stripKeys({ strip_keys }).map((k) => (k ? `/media/${k}` : null)),
+  };
 }
 
 function slugify(s) {

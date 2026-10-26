@@ -640,3 +640,20 @@ body.guest .v-delete.armed:hover { background: #c62f26; }
   .ent-scene { padding-bottom: 24px; }
 }
 .ent-skip { background: #fdfcf9 !important; border: 1px solid rgba(140, 126, 108, .35) !important; border-radius: 999px !important; padding: 7px 14px !important; color: var(--iv-ink) !important; }
+
+/* admin: photo-booth strip slots */
+.strip-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+.strip-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+body.admin .strip-pick, .theme-ha-florals body.admin .strip-pick {
+  width: 100%; aspect-ratio: 4 / 3; padding: 0; border-radius: 4px; cursor: pointer;
+  background: #f4efe7 center / cover no-repeat; border: 1.5px dashed rgba(140, 126, 108, .55); box-shadow: none;
+  color: var(--iv-ink-soft, #6f645c); font-size: 13px; letter-spacing: .04em; text-transform: none;
+}
+body.admin .strip-pick.has-photo { border: 4px solid #fff; box-shadow: 0 0 0 1px rgba(140, 126, 108, .4), 0 3px 8px rgba(40, 30, 20, .15); }
+body.admin .strip-pick.has-photo span { display: none; }
+.strip-remove { font-size: 14px; }
+
+/* entrance: photo-booth strip version of the instant photo */
+.ent-photo.strip { width: 88px; height: auto; margin-left: 10px; padding: 5px 5px 0; gap: 4px; transform: translateY(-212px); }
+.ent-photo.strip .ent-cell { width: 78px; height: 56px; flex: none; }
+.ent-photo.strip .ent-photo-date { height: 20px; font-size: 8.5px; letter-spacing: .12em; }

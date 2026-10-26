@@ -66,6 +66,18 @@
         <div id="cover-msg" class="msg" role="status"></div>
       </section>
 
+      <section class="card">
+        <h2>Photo strip</h2>
+        <p class="hint">Up to 3 photos of the two of you. When guests press the button on the welcome screen, these slide out of the frame as a photo-booth strip. With none added, the cover photo is used.</p>
+        <div class="strip-slots" id="strip-slots">
+          <div class="strip-slot" data-n="0"><button type="button" class="strip-pick" aria-label="Add photo 1"><span>Add photo 1</span></button><button type="button" class="strip-remove link-btn hidden">Remove</button></div>
+          <div class="strip-slot" data-n="1"><button type="button" class="strip-pick" aria-label="Add photo 2"><span>Add photo 2</span></button><button type="button" class="strip-remove link-btn hidden">Remove</button></div>
+          <div class="strip-slot" data-n="2"><button type="button" class="strip-pick" aria-label="Add photo 3"><span>Add photo 3</span></button><button type="button" class="strip-remove link-btn hidden">Remove</button></div>
+        </div>
+        <input id="strip-file" type="file" accept="image/jpeg,image/png,image/webp" class="hidden">
+        <div id="strip-msg" class="msg" role="status"></div>
+      </section>
+
       <form id="details" class="card">
         <h2>Details</h2>
         <label for="names">Couple's names</label>
@@ -188,6 +200,7 @@
       $('open-album').href = `${ev.guest_url}#couple=${token}`;
       document.querySelectorAll('[data-print]').forEach((a) => (a.href = `/print/${slug}?layout=${a.dataset.print}#${token}`));
       setCover(ev.cover_url);
+      setStrip(ev.strip_urls || []);
 
       const f = $('details');
       f.couple_names.value = ev.couple_names;
@@ -204,6 +217,44 @@
       if (url) { el.style.backgroundImage = `url("${url}")`; el.textContent = ''; }
       else { el.style.backgroundImage = ''; el.textContent = 'No cover yet'; }
     }
+
+    function setStrip(urls) {
+      document.querySelectorAll('.strip-slot').forEach((slot) => {
+        const n = Number(slot.dataset.n), url = urls[n];
+        const pick = slot.querySelector('.strip-pick');
+        pick.style.backgroundImage = url ? `url("${url}")` : '';
+        pick.classList.toggle('has-photo', !!url);
+        pick.setAttribute('aria-label', `${url ? 'Change' : 'Add'} photo ${n + 1}`);
+        slot.querySelector('.strip-remove').classList.toggle('hidden', !url);
+      });
+    }
+
+    let stripSlot = 0;
+    document.querySelectorAll('.strip-slot').forEach((slot) => {
+      slot.querySelector('.strip-pick').onclick = () => { stripSlot = Number(slot.dataset.n); $('strip-file').click(); };
+      slot.querySelector('.strip-remove').onclick = async () => {
+        const msg = $('strip-msg');
+        msg.className = 'msg'; msg.textContent = 'Removing…';
+        try {
+          const data = await api(`/strip/${slot.dataset.n}`, { method: 'DELETE' });
+          setStrip(data.strip_urls);
+          msg.className = 'msg ok'; msg.textContent = 'Photo removed';
+        } catch (err) { msg.className = 'msg err'; msg.textContent = err.message; }
+      };
+    });
+    $('strip-file').onchange = async () => {
+      const file = $('strip-file').files[0];
+      if (!file) return;
+      const msg = $('strip-msg');
+      msg.className = 'msg'; msg.textContent = `Uploading photo ${stripSlot + 1}…`;
+      try {
+        const blob = await shrinkImage(file, 1400, 0.86);
+        const data = await api(`/strip/${stripSlot}`, { method: 'PUT', headers: { 'Content-Type': blob.type }, body: blob });
+        setStrip(data.strip_urls);
+        msg.className = 'msg ok'; msg.textContent = `Photo ${stripSlot + 1} added`;
+      } catch (err) { msg.className = 'msg err'; msg.textContent = err.message; }
+      $('strip-file').value = '';
+    };
 
     if (!slug || !token) showError('This admin link is incomplete. Use the full link you were given.');
     else api('').then((ev) => { render(ev); loadWishes(); }).catch((e) => showError(e.message));

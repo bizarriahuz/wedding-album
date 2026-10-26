@@ -120,10 +120,27 @@
     const d = new Date(ev.event_date + 'T00:00:00');
     $('ent-photo-date').textContent = d.toLocaleDateString('en-SG', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
     const img = $('ent-photo-img');
-    if (ev.cover_url) {
+    const strip = (ev.strip_urls || []).filter(Boolean);
+    if (strip.length) {
+      // photo-booth strip: one cell per photo, stacked above the date
+      const photo = $('ent-photo');
+      photo.classList.add('strip');
+      img.remove();
+      strip.forEach((url) => {
+        const cell = document.createElement('div');
+        cell.className = 'ent-photo-img ent-cell';
+        cell.style.backgroundImage = `url("${url}")`;
+        const chem = document.createElement('div'); chem.className = 'ent-chem';
+        cell.append(chem);
+        photo.insertBefore(cell, $('ent-photo-date'));
+        new Image().src = url; // start loading now, while the frame is on screen
+      });
+    } else if (ev.cover_url) {
+      img.classList.add('ent-cell');
       img.style.backgroundImage = `url("${ev.cover_url}")`;
       new Image().src = ev.cover_url; // start loading now, while the frame is on screen
     } else {
+      img.classList.add('ent-cell');
       img.classList.add('no-photo');
       img.dataset.initials = initials.join('');
     }
@@ -147,10 +164,19 @@
     knob.classList.add('pressed');
     setTimeout(() => knob.classList.remove('pressed'), 180);
     anim($('ent-hint'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300 });
-    const photo = anim($('ent-photo'), [{ transform: 'translateY(-172px)' }, { transform: 'translateY(8px)' }], { duration: 2000, delay: 200, easing: 'cubic-bezier(.4, .08, .25, 1)' });
-    anim($('ent-chem'), [{ opacity: 1 }, { opacity: 0 }], { duration: 2800, delay: 900, easing: 'ease-out' });
-    const dev = anim($('ent-photo-img'), [{ filter: 'sepia(1) brightness(.42) contrast(.7) blur(1.5px)' }, { filter: 'none' }], { duration: 2800, delay: 900, easing: 'ease-out' });
-    await Promise.all([photo, dev]);
+    const photoEl = $('ent-photo');
+    const strip = photoEl.classList.contains('strip');
+    const hidden = strip ? -(photoEl.offsetHeight + 6) : -172;
+    const photo = anim(photoEl, [{ transform: `translateY(${hidden}px)` }, { transform: 'translateY(8px)' }],
+      { duration: strip ? 2400 : 2000, delay: 200, easing: 'cubic-bezier(.4, .08, .25, 1)' });
+    // each photo develops in turn, top to bottom
+    const devs = [...photoEl.querySelectorAll('.ent-cell')].map((cell, i) => {
+      const delay = 900 + i * 550;
+      const chem = cell.querySelector('.ent-chem');
+      if (chem) anim(chem, [{ opacity: 1 }, { opacity: 0 }], { duration: 2800, delay, easing: 'ease-out' });
+      return anim(cell, [{ filter: 'sepia(1) brightness(.42) contrast(.7) blur(1.5px)' }, { filter: 'none' }], { duration: 2800, delay, easing: 'ease-out' });
+    });
+    await Promise.all([photo, ...devs]);
     await pause(1100);
     if (entStage === 'photo') toEnvelope();
   }

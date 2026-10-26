@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS events (
   event_date       TEXT NOT NULL,                 -- YYYY-MM-DD
   venue            TEXT,
   cover_key        TEXT,                          -- R2 key of the cover photo
+  strip_keys       TEXT,                          -- JSON array of up to 3 R2 keys: photo-booth strip on the entrance
   paynow_qr_key    TEXT,                          -- R2 key of the couple's PayNow QR (later)
   guest_token      TEXT NOT NULL,                 -- guests must present this to upload
   admin_token_hash TEXT NOT NULL,                 -- SHA-256 of the couple's secret admin token
