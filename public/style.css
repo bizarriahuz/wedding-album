@@ -615,3 +615,19 @@ body.guest .v-delete.armed:hover { background: #c62f26; }
 .theme-ha-florals body.admin .admin-hero .sub, .theme-ha-florals body.admin .admin-label { color: #4f453e; }
 .theme-ha-florals body.admin .admin-hero { padding-top: 64px; }
 .theme-ha-florals body.admin .link, .theme-ha-florals body.create .link { font-family: var(--caps); font-size: 16px; letter-spacing: .01em; }
+
+/* readability over the garlands: every box and every line of small text sits on solid paper */
+.theme-ha-florals body.guest .action.outline,
+.theme-ha-florals body.admin .ghost, .theme-ha-florals body.create .ghost,
+.theme-ha-florals body.admin input.link, .theme-ha-florals body.create input.link { background: #fff; }
+.theme-ha-florals body.guest .wide, .theme-ha-florals body.guest .seg { background: #f1ece4; }
+.theme-ha-florals body.guest #empty { background: #fff; }
+.theme-ha-florals body.guest .quality-tip, .theme-ha-florals body.guest .who, .theme-ha-florals body.guest #status:not(.hidden),
+.theme-ha-florals body.guest #privacy-note:not(.hidden) {
+  background: #fff; border: 1px solid rgba(140, 126, 108, .3); border-radius: 6px; padding: 10px 14px; text-shadow: none;
+}
+.theme-ha-florals body.guest .gallery-head {
+  background: #fff; border: 1px solid rgba(140, 126, 108, .3); border-radius: 6px; padding: 8px 16px;
+}
+.theme-ha-florals body.guest .gallery-head h2 { text-shadow: none; }
+.theme-ha-florals body.guest #more { background: #fff; }
