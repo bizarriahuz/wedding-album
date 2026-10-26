@@ -684,10 +684,10 @@ body.admin .strip-pick.has-photo span { display: none; }
 
 /* footer: brand line in the same serif */
 .foot-brand {
-  position: absolute; left: 0; right: 0; bottom: 34px; margin: 0; text-align: center;
-  font-family: var(--caps, "Cormorant Garamond", Georgia, serif); font-weight: 500; font-size: 15px; letter-spacing: .14em;
-  color: var(--iv-ink-soft, #6f645c);
+  position: absolute; left: 50%; bottom: 26px; width: min(250px, 66vw); transform: translateX(-50%); line-height: 0;
 }
+.foot-brand svg { width: 100%; height: auto; display: block; }
+.foot-brand.admin-brand { position: relative; left: auto; bottom: auto; transform: none; margin: 28px auto 12px; width: min(220px, 60vw); }
 .theme-ha-florals body.guest, .theme-ha-florals body.admin, .theme-ha-florals body.create { position: relative; }
 .theme-ha-florals .foot .deco.bottom { display: none; }
 
@@ -697,14 +697,3 @@ body.admin .strip-pick.has-photo span { display: none; }
 .theme-ha-florals .hero .deco.bottom { display: none; }
 .theme-ha-florals body.guest .hero .pre { padding-top: 118px; }
 
-/* photo booth screen: the hand-drawn butterfly, on its own layer so it can never move the page */
-.ent-scene > .ent-fly-layer { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; contain: strict; }
-.ent-fly { position: absolute; left: 0; top: 0; width: 56px; will-change: transform; filter: drop-shadow(0 0 4px rgba(255, 238, 205, .9)); }
-.ent-fly img { display: block; width: 100%; height: auto; transform-origin: 78% 50%; animation: bf-flap .34s ease-in-out infinite; user-select: none; -webkit-user-drag: none; }
-@keyframes bf-flap { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.3); } }
-.ent-spark {
-  position: absolute; z-index: 2; width: 13px; height: 13px; pointer-events: none;
-  background: radial-gradient(circle, #fffdf6 0 16%, #f0c978 42%, rgba(226, 163, 180, .7) 60%, transparent 72%);
-  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
-  transform: translate(-50%, -50%);
-}

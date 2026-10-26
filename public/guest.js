@@ -147,40 +147,7 @@
     introFrame();
   }
 
-  // a small magical butterfly that wanders around the photo booth screen, trailing sparkles
-  function startButterfly() {
-    const fly = $('ent-fly'), scene = $('ent-a'), layer = $('ent-fly-layer');
-    if (!fly || reduceMotion) return;
-    fly.hidden = false;
-    const ph = [0, 1, 2, 3].map(() => Math.random() * Math.PI * 2);
-    const t0 = performance.now();
-    let lastSpark = 0, prevX = null, facing = 1;
-    const spark = (x, y) => {
-      const s = document.createElement('span');
-      s.className = 'ent-spark';
-      s.style.left = `${x}px`; s.style.top = `${y}px`;
-      layer.append(s); // own floating layer: never touches the page layout
-      s.animate([
-        { opacity: .95, transform: 'translate(-50%, -50%) scale(1) rotate(0deg)' },
-        { opacity: 0, transform: `translate(-50%, ${Math.round(8 + Math.random() * 10)}px) scale(.2) rotate(90deg)` },
-      ], { duration: 1100, easing: 'ease-out' }).finished.then(() => s.remove(), () => s.remove());
-    };
-    const step = (now) => {
-      if (scene.classList.contains('hidden') || entStage === 'envelope' || entStage === 'done') { fly.hidden = true; return; }
-      const t = (now - t0) / 1000, W = layer.clientWidth, H = layer.clientHeight;
-      const x = W * (0.5 + 0.36 * Math.sin(t * 0.37 + ph[0]) + 0.08 * Math.sin(t * 1.3 + ph[1]));
-      const y = H * (0.46 + 0.3 * Math.sin(t * 0.29 + ph[2]) + 0.06 * Math.sin(t * 1.7 + ph[3]));
-      if (prevX !== null && Math.abs(x - prevX) > 0.25) facing = x > prevX ? 1 : -1;
-      prevX = x;
-      fly.style.transform = `translate(${x - 28}px, ${y - 33}px) rotate(${Math.sin(t * 2.1) * 7 - 8 * facing}deg) scaleX(${facing})`;
-      if (now - lastSpark > 160) { lastSpark = now; spark(x - facing * 14, y + 10); }
-      requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }
-
   async function introFrame() {
-    startButterfly();
     entStage = 'frame';
     const els = [$('ent-a').querySelector('.ent-pre'), $('ent-names')];
     els.forEach((el, n) => anim(el, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: n * 120 }));
