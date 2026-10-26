@@ -267,3 +267,41 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 860px) { .top nav { gap: 14px; flex-wrap: nowrap; } .top nav a { font-size: 10.5px; letter-spacing: .16em; } }
 @media (max-width: 370px) { .top nav { gap: 10px; } .top nav a { font-size: 10px; letter-spacing: .12em; } }
 .about-occasions { margin-top: 22px !important; padding-top: 18px; border-top: 1px solid var(--line); font-style: italic; color: var(--ink) !important; }
+
+/* ---------- tighter spacing ---------- */
+.top { padding: 14px 0 4px; }
+.block { padding: 44px 0 4px; }
+.block.first { padding-top: 26px; }
+.sec-title { margin-bottom: 26px; }
+.hero { margin-top: 8px; padding-bottom: 26px; }
+.arch { min-height: 440px; padding: 84px 24px 110px; }
+.italic-line { margin: 12px 0 18px; }
+.display { margin: 12px 0 10px; }
+.phones { margin: 0 auto 26px; }
+.icon-row + .icon-row { margin-top: 22px; }
+.feature-card { padding: 34px 40px; }
+.feature-card.slim { margin-top: 32px; padding: 28px 34px; }
+.demo-wrap { padding-top: 26px; }
+.about-row { margin-top: 34px; }
+.about-cta { margin-top: 26px; }
+.contact-form { margin-top: 10px; }
+label { margin: 12px 0 6px; }
+.foot { margin-top: 44px; padding: 26px 20px 34px; }
+.short-rule { margin: 12px auto; }
+@media (max-width: 760px) {
+  .block { padding-top: 36px; }
+  .block.first { padding-top: 66px; }
+  .arch { padding: 60px 18px 150px; }
+  .ir-item { padding: 16px 10px; }
+  .feature-card { padding: 26px 20px; }
+  .fc-phone { margin: 4px 0 30px !important; }
+  .foot { padding-bottom: 128px; margin-top: 30px; }
+}
+@media (max-width: 760px) {
+  .hero { padding-bottom: 40px; }
+  #packages.block { padding-top: 46px; }
+  #packages .sec-title { margin-bottom: 52px; }
+  .foot { padding-bottom: 150px; }
+  .s-foot-hyd { bottom: -34px; width: 96px; } .s-foot-cream { bottom: 0; right: 96px; width: 60px; }
+  .s-foot-lav { bottom: -4px; } .s-foot-leaves { bottom: -16px; }
+}
