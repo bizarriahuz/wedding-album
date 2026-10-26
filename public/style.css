@@ -676,3 +676,15 @@ body.admin .strip-pick.has-photo span { display: none; }
 .crop-actions { display: flex; gap: 10px; margin-top: 16px; }
 .crop-actions button { flex: 1; margin: 0; }
 .theme-ha-florals body.admin #crop-zoom, body.admin #crop-zoom { border: 0; padding: 0; background: transparent; box-shadow: none; height: 28px; min-height: 0; }
+
+/* letter in the same plain serif as the rest of the guest page; names stay in script */
+.env-letter { font-family: var(--caps); font-weight: 500; font-size: 19px; line-height: 1.45; letter-spacing: 0; }
+.env-letter .l-greet, .env-letter .l-sign { font-style: italic; }
+@media (max-height: 700px) { .env-letter { font-size: 17.5px; } }
+
+/* footer: brand line in the same serif */
+.foot-brand {
+  position: absolute; left: 0; right: 0; bottom: 34px; margin: 0; text-align: center;
+  font-family: var(--caps, "Cormorant Garamond", Georgia, serif); font-weight: 500; font-size: 15px; letter-spacing: .14em;
+  color: var(--iv-ink-soft, #6f645c);
+}
