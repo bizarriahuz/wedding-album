@@ -294,7 +294,7 @@
 
   function applyTheme(theme) {
     const t = theme === 'ivory' ? 'ivory' : 'ha-florals';
-    document.documentElement.className = t === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals';
+    document.documentElement.className = t === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals theme-invite';
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = '#faf8f4';
     if (state.theme !== t) { state.theme = t; saveState(); }

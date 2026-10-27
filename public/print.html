@@ -10,7 +10,7 @@
   <title>QR cards · Guest Album</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Figtree:wght@400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Ephesis&family=Figtree:wght@400;500;600&family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Figtree:wght@400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <style id="page-size">@page { size: 210mm 297mm; margin: 0; }</style>
   <style>
@@ -156,6 +156,62 @@
     .p-mark svg, .p-mark img { width: 100%; height: auto; display: block; border-radius: 1mm; }
     .card6 .p-mark { width: 30mm; bottom: 7.5mm; }
     .poster .p-mark { width: 54mm; bottom: 13mm; }
+    /* ---------- Harris & Aqilah: the invitation look (linen, wine lettering, invitation florals) ---------- */
+    html.theme-invite .card6::after, html.theme-invite .poster::after { display: none; }
+    html.theme-invite .p-frame { width: auto; height: auto; aspect-ratio: auto; transform: none !important; z-index: 0; background-color: transparent; }
+    html.theme-invite .card6, html.theme-invite .poster {
+      --p-bg: #efeeec; --p-ink: #430011; --p-soft: #7d5a63; --p-names: #a86f84; --p-accent: #8c3a57; --p-glint: #c9a35e;
+      background-image: url("/themes/ha-florals/linen.webp"); background-repeat: repeat;
+    }
+    html.theme-invite .card6 { background-size: 34mm; }
+    html.theme-invite .poster { background-size: 60mm; }
+    html.theme-invite .p-deco { background: center / contain no-repeat; }
+    html.theme-invite .p-deco.tl, html.theme-invite .p-deco.tr { top: -1mm; aspect-ratio: 292 / 331; background-image: url("/themes/ha-florals/corner-top.webp"); }
+    html.theme-invite .p-deco.bl, html.theme-invite .p-deco.br { bottom: -1mm; aspect-ratio: 352 / 585; background-image: url("/themes/ha-florals/corner-bottom.webp"); }
+    html.theme-invite .p-deco.tr, html.theme-invite .p-deco.br { transform: scaleX(-1); }
+    html.theme-invite .card6 .p-deco.tl, html.theme-invite .card6 .p-deco.tr { width: 33mm; }
+    html.theme-invite .card6 .p-deco.bl, html.theme-invite .card6 .p-deco.br { width: 22mm; }
+    html.theme-invite .card6 .p-deco.tl, html.theme-invite .card6 .p-deco.bl { left: -6mm; }
+    html.theme-invite .card6 .p-deco.tr, html.theme-invite .card6 .p-deco.br { right: -6mm; }
+    html.theme-invite .poster .p-deco.tl, html.theme-invite .poster .p-deco.tr { width: 64mm; }
+    html.theme-invite .poster .p-deco.bl, html.theme-invite .poster .p-deco.br { width: 46mm; }
+    html.theme-invite .poster .p-deco.tl, html.theme-invite .poster .p-deco.bl { left: -10mm; }
+    html.theme-invite .poster .p-deco.tr, html.theme-invite .poster .p-deco.br { right: -10mm; }
+    html.theme-invite .p-deco { display: none; }
+    html.theme-invite .p-frame { display: block; inset: 0; background-repeat: no-repeat; background-size: auto 92%; }
+    html.theme-invite .p-frame.left { background-image: url("/themes/ha-florals/frame-left.webp"); background-position: 2% center; }
+    html.theme-invite .p-frame.right { background-image: url("/themes/ha-florals/frame-right.webp"); background-position: 98% center; }
+    html.theme-invite .p-names .nm, html.theme-invite .p-names .amp { display: block; }
+    html.theme-invite .p-names .amp { font-size: .5em; line-height: 1.15; padding: 0; }
+    html.theme-invite .card6 { padding: 0 25mm; }
+    html.theme-invite .poster { padding: 0 50mm; }
+    html.theme-invite .card6 .p-pre { font-size: 6pt; margin-top: 0; }
+    html.theme-invite .card6 .p-quote { font-size: 8.6pt; max-width: 52mm; margin-top: 2.5mm; }
+    html.theme-invite .card6 .p-qr { width: 40mm; height: 40mm; margin-top: 4mm; }
+    html.theme-invite .card6 .p-date { font-size: 5.8pt; margin-top: 4mm; }
+    html.theme-invite .poster .p-pre { font-size: 11pt; margin-top: 0; }
+    html.theme-invite .poster .p-quote { font-size: 16pt; max-width: 104mm; margin-top: 5mm; }
+    html.theme-invite .poster .p-qr { width: 84mm; height: 84mm; margin-top: 8mm; }
+    html.theme-invite .poster .p-date { font-size: 10pt; margin-top: 8mm; }
+    html.theme-invite .p-pre, html.theme-invite .p-date, html.theme-invite .p-quote, html.theme-invite .p-steps b { font-family: "Marcellus", var(--serif); }
+    html.theme-invite .p-names { font-family: "Ephesis", cursive; }
+    html.theme-invite .p-names::before {
+      content: ""; position: absolute; inset: -18% 0; z-index: -1;
+      background: url("/themes/ha-florals/monogram.webp") center / contain no-repeat; opacity: .38;
+    }
+    html.theme-invite .p-names .amp { padding: 0 .28em; }
+    html.theme-invite .p-qr { box-shadow: 0 0 0 .3mm rgba(140, 58, 87, .45); }
+    html.theme-invite .poster .p-qr { box-shadow: 0 0 0 .5mm rgba(140, 58, 87, .45); }
+    html.theme-invite .card6 .p-names { font-size: 26pt; margin-top: 2mm; padding: 2mm 0; }
+    html.theme-invite .poster .p-names { font-size: 54pt; margin-top: 4mm; padding: 5mm 0; }
+    html.theme-invite .p-names::before { inset: 4% -10%; }
+    html.theme-invite .p-deco { display: none !important; }
+    html.theme-invite .p-names .amp { color: var(--p-names); }
+    html.theme-invite .p-pre, html.theme-invite .p-date { font-weight: 400; letter-spacing: .14em; }
+    html.theme-invite .p-quote { font-style: normal; font-weight: 400; }
+    html.theme-invite .p-frame.left, html.theme-invite .p-frame.right { left: 0 !important; right: 0 !important; top: 0; bottom: 0; width: 100%; height: 100%; }
+    html.theme-invite .card6 .p-mark { width: 24mm; bottom: 6mm; }
+    html.theme-invite .poster .p-mark { width: 40mm; bottom: 9mm; }
   </style>
 </head>
 <body class="print">
@@ -262,7 +318,7 @@
     }
 
     function build(ev) {
-      document.documentElement.className = ev.theme === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals';
+      document.documentElement.className = ev.theme === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals theme-invite';
       document.documentElement.style.setProperty('--qr-ink', '#241c18');
       document.title = `QR cards · ${ev.couple_names}`;
       const card = () => fill($('t-card').content.firstElementChild.cloneNode(true), ev);
