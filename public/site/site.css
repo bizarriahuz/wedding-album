@@ -308,3 +308,4 @@ label { margin: 12px 0 6px; }
 
 /* readability: a touch more contrast on the small grey labels */
 :root { --soft: #615d55; }
+.ir-item h2 { margin: 0 0 6px; font-weight: 600; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }
