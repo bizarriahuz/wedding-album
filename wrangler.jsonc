@@ -1,6 +1,6 @@
 {
   // One Worker serves the site (public/) and the API (src/index.js).
-  "name": "wedding-album",
+  "name": "madeofmemories",
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
 
