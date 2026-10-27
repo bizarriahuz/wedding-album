@@ -322,3 +322,4 @@ label { margin: 12px 0 6px; }
   .addon-price { text-align: left; white-space: normal; }
 }
 .addon-price { white-space: normal; max-width: 42%; } .addon > div { min-width: 0; flex: 1; }
+.addons { grid-template-columns: 1fr; max-width: 620px; }
