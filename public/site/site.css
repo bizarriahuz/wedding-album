@@ -331,3 +331,57 @@ label { margin: 12px 0 6px; }
 .s-custom-cosmos { width: 120px; bottom: -50px; left: -24px; --r: -14deg; }
 @media (max-width: 760px) { .s-custom-babys { width: 84px; top: -34px; right: -6px; } .s-custom-cosmos { width: 78px; bottom: -36px; left: -6px; } }
 @media (max-width: 760px) { .custom-card { padding-top: 46px; } .s-custom-babys { width: 70px; top: -46px; right: 4px; } }
+
+/* ---------- header: Enquire button + compact phone menu ---------- */
+.enquire-btn { justify-self: end; min-height: 42px; padding: 0 22px; }
+.menu-btn { display: none; }
+.pill.ghost { background: transparent; color: var(--sage-deep); box-shadow: inset 0 0 0 1.5px var(--sage); }
+.pill.ghost:hover { background: var(--sage-bg); }
+.pill-row { display: inline-flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.next-copy { max-width: 560px; margin: 0 auto 22px; text-align: center; font-style: italic; font-size: 18px; color: #4c4a41; }
+.next-steps { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); text-align: left; }
+.ns-title { margin: 0 0 12px; font-weight: 600; font-size: 12.5px; letter-spacing: .24em; text-transform: uppercase; }
+.next-steps ol { margin: 0; padding-left: 22px; }
+.next-steps li { margin: 0 0 10px; font-size: 16.5px; line-height: 1.65; color: #4c4a41; }
+.next-steps li b { color: var(--ink); font-weight: 600; }
+summary { border-radius: 4px; }
+summary:hover { color: var(--sage-deep); }
+
+@media (max-width: 760px) {
+  .top { display: grid; grid-template-columns: auto 1fr auto; justify-items: stretch; align-items: center; gap: 10px; padding: 12px 0 6px; }
+  .top .brand { width: 104px; }
+  .enquire-btn { grid-column: 3; grid-row: 1; justify-self: end; min-height: 44px; padding: 0 16px; font-size: 11px; letter-spacing: .18em; }
+  .menu-btn { display: inline-flex; grid-column: 2; grid-row: 1; justify-self: end; align-items: center; gap: 8px; min-height: 44px; min-width: 44px; padding: 0 12px;
+    border: 0; border-radius: 999px; background: transparent; color: var(--ink); cursor: pointer;
+    font-family: var(--serif); font-weight: 600; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
+  .menu-btn i, .menu-btn i::before { display: block; width: 18px; height: 1.5px; background: currentColor; position: relative; transition: transform .2s; }
+  .menu-btn i::before { content: ""; position: absolute; top: 5px; }
+  .menu-btn i { transform: translateY(-2.5px); }
+  .menu-btn[aria-expanded="true"] i { transform: rotate(45deg); }
+  .menu-btn[aria-expanded="true"] i::before { transform: rotate(-90deg); top: 0; }
+  .top nav { display: none; grid-column: 1 / -1; grid-row: 2; flex-direction: column; gap: 0; margin: 4px 0 6px;
+    background: var(--paper); border: 1px solid var(--paper-line); border-radius: 12px; padding: 6px 4px; }
+  body.menu-open .top nav { display: flex; }
+  .top nav a { display: flex; align-items: center; min-height: 48px; padding: 0 16px; font-size: 13.5px; letter-spacing: .2em; border-bottom: 1px solid var(--line); }
+  .top nav a:last-child { border-bottom: 0; }
+  .top nav a[aria-current] { border-bottom-color: var(--line); color: var(--sage-deep); text-decoration: underline; text-underline-offset: 6px; }
+
+  /* legibility: calmer letter-spacing, larger supporting text */
+  .caps-title { font-size: 21px; letter-spacing: .16em; gap: 12px; }
+  .caps-title::before, .caps-title::after { max-width: 40px; }
+  .sub-caps, .eyebrow { font-size: 12.5px; letter-spacing: .18em; }
+  .fc-title { font-size: 21px; letter-spacing: .14em; }
+  .fc-caps { font-size: 12.5px; letter-spacing: .16em; }
+  .ir-item h3, .ir-item h2, .addon h3 { font-size: 13px; letter-spacing: .16em; }
+  .ir-item p, .plan li, .plan-tag, details p, .fc-italic { font-size: 17px; }
+  .plan-name { font-size: 18px; letter-spacing: .24em; }
+  summary { font-size: 18px; padding-top: 14px; padding-bottom: 14px; min-height: 48px; }
+  label { font-size: 12.5px; letter-spacing: .14em; }
+  .pill { min-height: 48px; }
+  .foot-small { font-size: 15px; }
+}
+@media (max-width: 370px) {
+  .top .brand { width: 88px; }
+  .enquire-btn { padding: 0 12px; }
+  .menu-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+}
