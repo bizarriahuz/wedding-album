@@ -305,3 +305,6 @@ label { margin: 12px 0 6px; }
   .s-foot-hyd { bottom: -34px; width: 96px; } .s-foot-cream { bottom: 0; right: 96px; width: 60px; }
   .s-foot-lav { bottom: -4px; } .s-foot-leaves { bottom: -16px; }
 }
+
+/* readability: a touch more contrast on the small grey labels */
+:root { --soft: #615d55; }
