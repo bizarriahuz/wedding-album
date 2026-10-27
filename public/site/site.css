@@ -323,3 +323,11 @@ label { margin: 12px 0 6px; }
 }
 .addon-price { white-space: normal; max-width: 42%; } .addon > div { min-width: 0; flex: 1; }
 .addons { grid-template-columns: 1fr; max-width: 620px; }
+
+/* flexible-plan invitation */
+.custom-card { max-width: 860px; margin: 0 auto; text-align: center; justify-content: center; }
+.custom-card .fc-italic { margin-left: auto; margin-right: auto; }
+.s-custom-babys { width: 130px; top: -40px; right: -20px; --r: 12deg; }
+.s-custom-cosmos { width: 120px; bottom: -50px; left: -24px; --r: -14deg; }
+@media (max-width: 760px) { .s-custom-babys { width: 84px; top: -34px; right: -6px; } .s-custom-cosmos { width: 78px; bottom: -36px; left: -6px; } }
+@media (max-width: 760px) { .custom-card { padding-top: 46px; } .s-custom-babys { width: 70px; top: -46px; right: 4px; } }
