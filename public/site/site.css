@@ -385,3 +385,8 @@ summary:hover { color: var(--sage-deep); }
   .enquire-btn { padding: 0 12px; }
   .menu-btn span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 }
+/* your own lace mark */
+.mark-img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 6px 16px rgba(70, 72, 90, .14); }
+.top .brand { width: 112px; }
+.foot .brand { width: 210px; }
+@media (max-width: 760px) { .top .brand { width: 84px; } .foot .brand { width: 170px; } }

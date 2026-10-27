@@ -734,3 +734,6 @@ body.admin .strip-pick.has-photo span { display: none; }
 /* no blue tap flash on phones; keyboard users still get a focus outline */
 html { -webkit-tap-highlight-color: transparent; }
 :focus:not(:focus-visible) { outline: none; }
+/* your own lace mark */
+.mark-img { display: block; width: 100%; height: auto; border-radius: 6px; box-shadow: 0 6px 16px rgba(70, 72, 90, .14); }
+.foot-brand a .mark-img { margin: 0 auto; }
