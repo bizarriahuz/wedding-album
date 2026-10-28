@@ -894,14 +894,6 @@ html.theme-ha-florals body.guest .panel, html.theme-ha-florals body.guest .galle
   background-image: url("/site/grain.svg"); background-size: 220px 220px;
 }
 html.theme-invite body.admin .card { background-color: #fbfaf8; }
-/* washi tape holding the welcome, upload and wish cards */
-html.theme-ha-florals body.guest #join::after, html.theme-ha-florals body.guest #upload::after, html.theme-ha-florals body.guest .panel.wish::after,
-html.theme-ha-florals body.admin section.card:first-of-type::after {
-  content: ""; position: absolute; top: -14px; left: 50%; width: 108px; height: 36px; margin-left: -54px; z-index: 3;
-  background: url("/site/sb/gingham-tape.webp") center / 100% 100% no-repeat; transform: rotate(-3deg);
-  filter: drop-shadow(0 1px 1px rgba(70, 52, 36, .2)); pointer-events: none;
-}
-html.theme-ha-florals body.guest .panel.wish::after { transform: rotate(2.5deg); left: 30%; }
 /* photos sit like prints on the page */
 html.theme-ha-florals body.guest .grid { gap: 6px; margin: 0; }
 html.theme-ha-florals body.guest .tile { border-radius: 4px; overflow: hidden; box-shadow: 0 1px 2px rgba(60, 40, 30, .12), 0 6px 14px -4px rgba(60, 40, 30, .22); }
