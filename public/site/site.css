@@ -438,3 +438,30 @@ input, select, textarea { box-shadow: inset 0 1px 2px rgba(80, 62, 40, .08); }
   .js-reveal .reveal.in { opacity: 1; transform: none; }
 }
 @media (max-width: 760px) { .plan.featured::after { width: 96px; height: 32px; margin-left: -48px; } }
+
+/* ---------- type pass: sentence case and a clear scale in place of tracked capitals ----------
+   Scale (Cormorant): 15.5 nav/buttons, 17 body, 19 lede, 22 card titles, 30 plan names, 44 section titles, 86 hero */
+.top nav a { font-size: 16px; font-weight: 500; letter-spacing: .01em; text-transform: none; }
+.pill { font-size: 16px; font-weight: 600; letter-spacing: .02em; text-transform: none; padding: 0 28px; }
+.caps-title { font-weight: 300; font-size: clamp(34px, 4.6vw, 46px); letter-spacing: .005em; text-transform: none; line-height: 1.15; }
+.sub-caps { margin: 8px 0 0; font-weight: 400; font-style: italic; font-size: 18px; letter-spacing: 0; text-transform: none; color: var(--soft); }
+.lede { max-width: 30em; margin: 4px auto 0; font-size: 20px; line-height: 1.55; color: var(--ink); }
+.italic-line { margin-top: 10px; }
+.plan-name { font-size: 30px; font-weight: 400; letter-spacing: .01em; text-transform: none; padding-left: 0; }
+.ir-item h3, .ir-item h2 { font-size: 21px; font-weight: 600; letter-spacing: .005em; text-transform: none; line-height: 1.3; margin-bottom: 4px; }
+.fc-title { font-weight: 300; font-size: clamp(32px, 4vw, 42px); letter-spacing: .005em; text-transform: none; line-height: 1.15; }
+.fc-caps { margin: 10px 0 0; font-weight: 400; font-style: italic; font-size: 18px; letter-spacing: 0; text-transform: none; color: var(--soft); }
+label { font-size: 16px; font-weight: 600; letter-spacing: .01em; text-transform: none; color: var(--ink); }
+.ns-title { font-size: 21px; font-weight: 600; letter-spacing: .005em; text-transform: none; }
+.foot-caps { font-family: var(--script); font-size: clamp(30px, 4vw, 38px); letter-spacing: 0; text-transform: none; line-height: 1.3; color: #6f7856; }
+.foot-small { letter-spacing: .01em; }
+@media (max-width: 760px) {
+  .enquire-btn { font-size: 15px; letter-spacing: .01em; }
+  .menu-btn { font-size: 16px; font-weight: 500; letter-spacing: .01em; text-transform: none; }
+  .caps-title { gap: 14px; }
+  .caps-title::before, .caps-title::after { max-width: 44px; }
+}
+/* running paragraphs read upright; italics stay for short one-line notes */
+.fc-italic, .ir-item p, details p, .next-copy, .about-lede { font-style: normal; }
+.ir-item p { font-size: 17px; color: #4c4a41; }
+details p { font-size: 17.5px; line-height: 1.7; }

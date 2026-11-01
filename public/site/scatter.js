@@ -1,7 +1,7 @@
 // Sections settle in softly as they come into view
 (() => {
   if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const els = document.querySelectorAll('main .plan, main .feature-card, main .icon-row, main .phones, main .faq, main .sec-title');
+  const els = document.querySelectorAll('main .plan'); // one moment: the packages settle in
   if (!els.length) return;
   document.documentElement.classList.add('js-reveal');
   const io = new IntersectionObserver((entries) => entries.forEach((e) => {
