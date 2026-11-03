@@ -917,3 +917,90 @@ html.theme-invite body.admin .hint, html.theme-invite body.admin .muted, html.th
 html.theme-invite body.guest .lead { font-size: 18px; }
 html.theme-invite body.admin .strip-pick { text-transform: none !important; letter-spacing: .02em !important; font-size: 15px; }
 html.theme-invite body.admin select { font-size: 16px; padding-right: 26px; }
+
+/* =====================================================================
+   Harris & Aqilah: the plaid poster look. A cream card on burgundy and
+   olive plaid, pressed-flower bouquets taped over its corners.
+   ===================================================================== */
+html.theme-plaid body.guest {
+  --pl-wine: #6b1e2a; --pl-wine-2: #84303d; --pl-olive: #6f7652; --pl-olive-ink: #5d6544; --pl-card: #f7f2e8; --pl-ink: #3a2a26;
+  background: #6b1e2a url("/themes/plaid/plaid.svg") 0 0 / 200px 200px repeat;
+  background-attachment: scroll; color: var(--pl-ink);
+}
+/* the card everything sits on */
+html.theme-invite.theme-plaid body.guest .wrap {
+  position: relative; width: calc(100% - 32px); max-width: 520px; margin: 22px auto 34px; padding: 0 18px 30px;
+  background: var(--pl-card) url("/site/grain.svg") 0 0 / 220px 220px; border-radius: 28px 22px 30px 24px;
+  box-shadow: 0 2px 3px rgba(30, 6, 10, .25), 0 18px 40px -8px rgba(30, 6, 10, .45);
+}
+/* bouquets taped over the card corners */
+html.theme-invite.theme-plaid body.guest .hero .deco, html.theme-invite.theme-plaid body.guest .foot .deco {
+  display: block !important; position: absolute; pointer-events: none; z-index: 2; aspect-ratio: auto; height: auto;
+  background: center / contain no-repeat; opacity: 1; filter: drop-shadow(0 3px 4px rgba(40, 14, 10, .22));
+}
+html.theme-invite.theme-plaid body.guest .hero .deco.top.left { top: -26px; left: -30px !important; width: min(170px, 44vw); aspect-ratio: 712 / 704; background-image: url("/themes/plaid/bouquet-rose.webp"); transform: rotate(-6deg) !important; }
+html.theme-invite.theme-plaid body.guest .hero .deco.top.right { top: -30px; right: -28px !important; width: min(150px, 38vw); aspect-ratio: 614 / 631; background-image: url("/themes/plaid/bouquet-fern.webp"); transform: scaleX(-1) rotate(-8deg) !important; }
+html.theme-invite.theme-plaid body.guest .hero .deco.bottom { display: none !important; }
+html.theme-invite.theme-plaid body.guest .foot .deco.bottom.left { bottom: -30px; left: -28px !important; width: min(150px, 38vw); aspect-ratio: 614 / 631; background-image: url("/themes/plaid/bouquet-fern.webp"); transform: rotate(196deg) scaleX(-1) !important; }
+html.theme-invite.theme-plaid body.guest .foot .deco.bottom.right { bottom: -30px; right: -30px !important; width: min(170px, 44vw); aspect-ratio: 712 / 704; background-image: url("/themes/plaid/bouquet-rose.webp"); transform: rotate(172deg) scaleX(-1) !important; }
+
+/* names, date and venue like the poster */
+html.theme-invite.theme-plaid body.guest .hero { padding-top: 0; }
+html.theme-invite.theme-plaid body.guest .hero .pre, html.theme-invite.theme-plaid body.guest .occasion { display: none; }
+html.theme-invite.theme-plaid body.guest .names-mono { display: none; }
+html.theme-invite.theme-plaid body.guest .names {
+  display: flex; flex-direction: column; align-items: center; margin: 0; padding: 118px 0 0;
+  font-family: var(--caps); font-weight: 500; font-size: clamp(52px, 16vw, 72px); line-height: .98; letter-spacing: .005em; color: var(--pl-wine);
+}
+html.theme-invite.theme-plaid body.guest .names .amp { font-size: 0; line-height: 1; margin: 6px 0 4px; color: var(--pl-olive); }
+html.theme-invite.theme-plaid body.guest .names .amp::after { content: "and"; font-family: var(--script); font-size: clamp(40px, 12vw, 54px); font-weight: 400; color: var(--pl-olive); }
+html.theme-invite.theme-plaid body.guest .hero.compact .names { font-size: clamp(44px, 13vw, 58px); padding-top: 104px; }
+html.theme-invite.theme-plaid body.guest .when { margin-top: 20px; font-family: var(--caps); font-weight: 500; font-size: 19px; letter-spacing: .32em; color: var(--pl-wine); text-transform: none; padding-left: .32em; }
+html.theme-invite.theme-plaid body.guest .where { margin-top: 2px; font-family: var(--caps); font-weight: 500; font-size: 18px; letter-spacing: .14em; color: var(--pl-ink); text-transform: none; }
+/* a hairline with a small leaf sprig under the venue */
+html.theme-invite.theme-plaid body.guest .hero::after {
+  content: ""; display: block; height: 22px; margin: 18px auto 22px; width: min(320px, 82%);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 22'%3E%3Cg fill='none' stroke='%236f7652' stroke-width='1.3' stroke-linecap='round'%3E%3Cpath d='M12 19C18 15 24 9 28 3'/%3E%3C/g%3E%3Cg fill='%236f7652'%3E%3Cpath d='M17 15c-4-1-6-4-6-7 4 1 6 3 6 7z'/%3E%3Cpath d='M21 11c-3-2-4-5-3-8 3 2 4 5 3 8z'/%3E%3Cpath d='M19 14c3-3 7-3 9-2-2 3-6 4-9 2z'/%3E%3Cpath d='M23 9c3-2 6-2 8-1-2 2-5 3-8 1z'/%3E%3C/g%3E%3C/svg%3E") center / 40px 22px no-repeat,
+    linear-gradient(rgba(107, 30, 42, .22), rgba(107, 30, 42, .22)) left center / calc(50% - 30px) 1px no-repeat,
+    linear-gradient(rgba(107, 30, 42, .22), rgba(107, 30, 42, .22)) right center / calc(50% - 30px) 1px no-repeat;
+}
+html.theme-invite.theme-plaid body.guest .arch { outline-color: var(--pl-wine); background-color: #ece3d4; }
+
+/* cards inside the card, buttons, fields */
+html.theme-invite.theme-plaid body.guest .panel, html.theme-invite.theme-plaid body.guest .gallery-head, html.theme-invite.theme-plaid body.guest .quality-tip,
+html.theme-invite.theme-plaid body.guest .who, html.theme-invite.theme-plaid body.guest #status:not(.hidden), html.theme-invite.theme-plaid body.guest #privacy-note:not(.hidden), html.theme-invite.theme-plaid body.guest #empty {
+  background-color: #fffcf6; border-color: rgba(107, 30, 42, .16); color: var(--pl-ink);
+}
+html.theme-invite.theme-plaid body.guest .panel, html.theme-invite.theme-plaid body.guest .gallery-head { border-radius: 16px; box-shadow: 0 1px 1px rgba(60, 20, 20, .05), 0 10px 22px -10px rgba(60, 20, 20, .25); }
+html.theme-invite.theme-plaid body.guest .panel h2, html.theme-invite.theme-plaid body.guest .gallery-head h2, html.theme-invite.theme-plaid body.guest .wish h2 { font-weight: 500; font-size: 32px; color: var(--pl-wine); }
+html.theme-invite.theme-plaid body.guest .lead, html.theme-invite.theme-plaid body.guest .muted { color: #5b4a45; }
+html.theme-invite.theme-plaid body.guest .action, html.theme-invite.theme-plaid body.guest button.full, html.theme-invite.theme-plaid body.guest .seg-btn.on { background: var(--pl-wine); color: #f8f2e8; }
+html.theme-invite.theme-plaid body.guest .action.outline { background: #fffcf6; color: var(--pl-wine); box-shadow: inset 0 0 0 1.5px var(--pl-wine); }
+html.theme-invite.theme-plaid body.guest .wide, html.theme-invite.theme-plaid body.guest .seg { background: rgba(111, 118, 82, .14); color: var(--pl-olive-ink); }
+html.theme-invite.theme-plaid body.guest input, html.theme-invite.theme-plaid body.guest textarea { border-color: rgba(107, 30, 42, .24); background: #fff; color: var(--pl-ink); }
+html.theme-invite.theme-plaid body.guest .link-btn { color: var(--pl-wine); }
+html.theme-invite.theme-plaid body.guest .foot { height: auto; min-height: 210px; margin-top: 30px; padding-top: 10px; }
+html.theme-invite.theme-plaid body.guest .foot-cta { color: #6a5a52; }
+
+/* entrance: the same cream card on plaid, bouquets on the corners */
+html.theme-plaid .entrance { background: #6b1e2a url("/themes/plaid/plaid.svg") 0 0 / 200px 200px repeat; }
+html.theme-invite.theme-plaid .ent-scene {
+  width: calc(100% - 32px); min-height: calc(100% - 44px); margin: 22px auto; border-radius: 28px 22px 30px 24px;
+  background: var(--pl-card, #f7f2e8) url("/site/grain.svg") 0 0 / 220px 220px;
+  box-shadow: 0 2px 3px rgba(30, 6, 10, .25), 0 18px 40px -8px rgba(30, 6, 10, .45); padding-top: 112px; padding-bottom: 96px;
+}
+html.theme-invite.theme-plaid .ent-flower { display: block !important; z-index: 2; opacity: 1; height: auto; max-height: none; background-size: contain; filter: drop-shadow(0 3px 4px rgba(40, 14, 10, .22)); }
+html.theme-invite.theme-plaid .ent-flower.tl { top: -24px; left: -26px; width: min(160px, 42vw); aspect-ratio: 712 / 704; background-image: url("/themes/plaid/bouquet-rose.webp"); transform: rotate(-6deg); }
+html.theme-invite.theme-plaid .ent-flower.tr { top: -28px; right: -24px; width: min(140px, 36vw); aspect-ratio: 614 / 631; background-image: url("/themes/plaid/bouquet-fern.webp"); transform: scaleX(-1) rotate(-8deg); }
+html.theme-invite.theme-plaid .ent-flower.bl { bottom: -26px; left: -24px; top: auto; width: min(140px, 36vw); aspect-ratio: 614 / 631; background-image: url("/themes/plaid/bouquet-fern.webp"); transform: rotate(196deg) scaleX(-1); }
+html.theme-invite.theme-plaid .ent-flower.br { bottom: -26px; right: -26px; top: auto; width: min(160px, 42vw); aspect-ratio: 712 / 704; background-image: url("/themes/plaid/bouquet-rose.webp"); transform: rotate(172deg) scaleX(-1); }
+html.theme-invite.theme-plaid .ent-pre { color: var(--pl-olive, #6f7652); }
+html.theme-invite.theme-plaid .ent-names { font-family: var(--caps); font-weight: 500; color: #6b1e2a; font-size: clamp(40px, 11.5vw, 52px); line-height: 1.05; }
+html.theme-invite.theme-plaid .ent-hint { color: #6b1e2a; }
+html.theme-invite.theme-plaid body.guest .ent-enter-wrap button.full { background: #6b1e2a; color: #f8f2e8; }
+html.theme-invite.theme-plaid .ent-skip { background: #f7f2e8 !important; }
+html.theme-invite.theme-plaid body.guest .foot { padding-bottom: 120px; }
+html.theme-invite.theme-plaid body.guest .seg-btn { font-size: 13px; letter-spacing: .1em !important; }
+html.theme-invite.theme-plaid body.guest .foot { min-height: 0; padding-bottom: 150px; }
+html.theme-invite.theme-plaid body.guest .foot-brand { position: relative; left: auto; bottom: auto; transform: none; margin: 0 auto; width: min(200px, 54vw); }

@@ -294,7 +294,7 @@
 
   function applyTheme(theme) {
     const t = theme === 'ivory' ? 'ivory' : 'ha-florals';
-    document.documentElement.className = t === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals theme-invite';
+    document.documentElement.className = t === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals theme-invite theme-plaid';
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = '#faf8f4';
     if (state.theme !== t) { state.theme = t; saveState(); }
@@ -331,6 +331,11 @@
     let when;
     try { when = d.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
     catch { when = d.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+    // the plaid look writes the date like the poster: 12.12.2026
+    if (document.documentElement.classList.contains('theme-plaid') && !isNaN(d)) {
+      const p2 = (n) => String(n).padStart(2, '0');
+      when = `${p2(d.getDate())}.${p2(d.getMonth() + 1)}.${d.getFullYear()}`;
+    }
     $('when').textContent = when;
     $('where').textContent = ev.venue || '';
     $('wish-title').textContent = `Leave a wish for ${ev.couple_names}`;
