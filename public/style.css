@@ -1004,3 +1004,119 @@ html.theme-invite.theme-plaid body.guest .foot { padding-bottom: 120px; }
 html.theme-invite.theme-plaid body.guest .seg-btn { font-size: 13px; letter-spacing: .1em !important; }
 html.theme-invite.theme-plaid body.guest .foot { min-height: 0; padding-bottom: 150px; }
 html.theme-invite.theme-plaid body.guest .foot-brand { position: relative; left: auto; bottom: auto; transform: none; margin: 0 auto; width: min(200px, 54vw); }
+
+/* =====================================================================
+   Harris & Aqilah: the "table setting" poster look. Deep burgundy, the
+   poster's watercolour keepsakes, the cover photo served on the plate.
+   ===================================================================== */
+html.theme-feast body.guest, html.theme-feast body.admin {
+  --fe-bg: #640706; --fe-bg-2: #7a1513; --fe-card: #f6efe3; --fe-ink: #4a0d0c; --fe-wine: #640706; --fe-gold: #d9b77a; --fe-cream: #f7f0e4;
+  background: #640706; background-image: none; color: var(--fe-cream);
+}
+html.theme-feast .fe-dk, html.theme-feast body.guest .hero .deco, html.theme-feast body.guest .foot .deco, html.theme-feast body.admin .admin-hero .deco {
+  display: block !important; position: absolute; pointer-events: none; background: center / contain no-repeat; aspect-ratio: auto; height: auto; opacity: 1; filter: none; z-index: 0;
+}
+/* keepsakes around the top of the page */
+html.theme-invite.theme-feast body.guest .hero .deco.top.left, html.theme-invite.theme-feast body.admin .admin-hero .deco.top.left {
+  top: 0; left: -16px !important; width: min(140px, 36vw); aspect-ratio: 280 / 380; background-image: url("/themes/feast/berries.webp"); transform: none !important; }
+html.theme-invite.theme-feast body.guest .hero .deco.top.right, html.theme-invite.theme-feast body.admin .admin-hero .deco.top.right {
+  top: 0; right: -16px !important; width: min(118px, 30vw); aspect-ratio: 255 / 285; background-image: url("/themes/feast/dried.webp"); transform: none !important; }
+html.theme-invite.theme-feast body.guest .hero .deco.bottom { display: none !important; }
+html.theme-invite.theme-feast body.guest .hero::before, html.theme-invite.theme-feast body.admin .admin-hero::before {
+  content: ""; position: absolute; top: 0; left: 50%; width: 74px; aspect-ratio: 210 / 220; margin-left: -37px;
+  background: url("/themes/feast/locket.webp") center / contain no-repeat; pointer-events: none;
+}
+html.theme-feast body.guest .hero, html.theme-feast body.admin .admin-hero { position: relative; }
+
+/* title: white script names, small Cinzel capitals */
+html.theme-invite.theme-feast body.guest .hero .pre {
+  display: block; padding-top: 112px; font-family: "Cinzel", var(--caps); font-weight: 500; font-size: 13px; letter-spacing: .2em; color: var(--fe-cream); text-transform: uppercase; }
+html.theme-invite.theme-feast body.guest .occasion { display: none; }
+html.theme-invite.theme-feast body.guest .names-mono { display: none; }
+html.theme-invite.theme-feast body.guest .names {
+  margin: 10px 0 4px; padding: 0; font-family: var(--script); font-weight: 400; font-size: clamp(50px, 15vw, 70px); line-height: 1.1; color: #fff;
+  text-shadow: 2px 3px 0 rgba(30, 0, 0, .55), 0 0 18px rgba(0, 0, 0, .15);
+}
+html.theme-invite.theme-feast body.guest .names .amp { color: #fff; font-size: .7em; }
+html.theme-invite.theme-feast body.guest .when, html.theme-invite.theme-feast body.guest .where {
+  font-family: "Cinzel", var(--caps); font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--fe-cream); }
+html.theme-invite.theme-feast body.guest .when { font-size: 14px; margin-top: 10px; }
+html.theme-invite.theme-feast body.guest .where { font-size: 14px; }
+html.theme-invite.theme-feast body.guest .hero.compact .pre { padding-top: 104px; }
+html.theme-invite.theme-feast body.guest .hero.compact .names { font-size: clamp(44px, 13vw, 58px); }
+
+/* the cover photo, served on the plate of the table setting */
+html.theme-invite.theme-feast body.guest .hero::after { content: none; }
+html.theme-invite.theme-feast body.guest .arch {
+  --a: min(42vw, 210px);
+  position: relative; isolation: isolate; width: var(--a); height: var(--a); aspect-ratio: 1; border-radius: 50%;
+  margin: calc(var(--a) * .78) auto calc(var(--a) * .38); outline: 0; background-color: #ece3d2; background-size: cover; background-position: center;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .55), inset 0 2px 10px rgba(60, 30, 10, .28);
+}
+html.theme-invite.theme-feast body.guest .arch::before {
+  content: ""; position: absolute; z-index: -1; left: -65.4%; top: -74.8%; width: 219.8%; height: 207.3%;
+  background: url("/themes/feast/setting.webp") center / 100% 100% no-repeat;
+}
+html.theme-invite.theme-feast body.guest .arch::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; border-radius: 50%; background: inherit; background-size: cover; background-position: center;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .55), inset 0 2px 10px rgba(60, 30, 10, .28);
+}
+html.theme-invite.theme-feast body.guest .arch .monogram { position: relative; z-index: 1; }
+html.theme-invite.theme-feast body.guest .arch .monogram { font-family: var(--script); color: var(--fe-wine); }
+
+/* cream cards on the burgundy */
+html.theme-invite.theme-feast body.guest .panel, html.theme-invite.theme-feast body.guest .gallery-head, html.theme-invite.theme-feast body.guest .quality-tip,
+html.theme-invite.theme-feast body.guest .who, html.theme-invite.theme-feast body.guest #status:not(.hidden), html.theme-invite.theme-feast body.guest #privacy-note:not(.hidden), html.theme-invite.theme-feast body.guest #empty,
+html.theme-invite.theme-feast body.admin .card {
+  position: relative; z-index: 1; background-color: var(--fe-card); background-image: none; border-color: rgba(217, 183, 122, .55); color: var(--fe-ink);
+  box-shadow: 0 2px 3px rgba(20, 0, 0, .3), 0 18px 34px -12px rgba(20, 0, 0, .55);
+}
+html.theme-invite.theme-feast body.guest .panel, html.theme-invite.theme-feast body.guest .gallery-head, html.theme-invite.theme-feast body.admin .card { border-radius: 18px; }
+html.theme-invite.theme-feast body.guest .panel h2, html.theme-invite.theme-feast body.guest .gallery-head h2, html.theme-invite.theme-feast body.guest .wish h2,
+html.theme-invite.theme-feast body.admin .card h2 { font-family: var(--script); font-weight: 400; font-size: 40px; line-height: 1.15; letter-spacing: 0; color: var(--fe-wine); }
+html.theme-invite.theme-feast body.guest .lead, html.theme-invite.theme-feast body.guest .muted, html.theme-invite.theme-feast body.guest .hint,
+html.theme-invite.theme-feast body.admin .hint, html.theme-invite.theme-feast body.admin .muted, html.theme-invite.theme-feast body.admin .stats span { color: #6a3a33; }
+/* buttons: cream on the burgundy page, burgundy inside the cream cards */
+html.theme-invite.theme-feast body.guest .action, html.theme-invite.theme-feast body.guest .ent-enter-wrap button.full { background: var(--fe-cream); color: var(--fe-wine); box-shadow: 0 1px 1px rgba(20, 0, 0, .3), 0 10px 20px -8px rgba(0, 0, 0, .55); }
+html.theme-invite.theme-feast body.guest .action.outline { background: var(--fe-bg-2); color: var(--fe-cream); box-shadow: inset 0 0 0 1.5px rgba(247, 240, 228, .75); }
+html.theme-invite.theme-feast body.guest .wide { background: var(--fe-bg-2); color: var(--fe-cream); box-shadow: inset 0 0 0 1px rgba(217, 183, 122, .45); }
+html.theme-invite.theme-feast body.guest .panel button.full, html.theme-invite.theme-feast body.guest .seg-btn.on,
+html.theme-invite.theme-feast body.admin button:not(.ghost):not(.link-btn):not(.strip-pick) { background: var(--fe-wine); color: var(--fe-cream); }
+html.theme-invite.theme-feast body.guest .seg { background: #ebe0cc; color: var(--fe-ink); }
+html.theme-invite.theme-feast body.guest input, html.theme-invite.theme-feast body.guest textarea,
+html.theme-invite.theme-feast body.admin input, html.theme-invite.theme-feast body.admin select, html.theme-invite.theme-feast body.admin textarea { background: #fffaf2; border-color: rgba(100, 7, 6, .25); color: var(--fe-ink); }
+html.theme-invite.theme-feast body.guest .link-btn, html.theme-invite.theme-feast body.admin .link-btn { color: var(--fe-wine); }
+html.theme-invite.theme-feast body.guest .demo-note { color: var(--fe-cream); }
+html.theme-invite.theme-feast body.guest .tile { box-shadow: 0 2px 4px rgba(20, 0, 0, .35), 0 10px 18px -6px rgba(0, 0, 0, .5); }
+
+/* footer: peony, postcards and grapes, the mark on the cloth */
+html.theme-invite.theme-feast body.guest .foot { position: relative; min-height: 0; height: auto; margin-top: 30px; padding: 10px 0 190px; }
+html.theme-invite.theme-feast body.guest .foot-brand { position: relative; left: auto; bottom: auto; transform: none; margin: 0 auto; width: min(190px, 52vw); z-index: 1; }
+html.theme-invite.theme-feast body.guest .foot-cta { color: var(--fe-cream); }
+html.theme-invite.theme-feast body.guest .foot .deco.bottom.left { bottom: 0; left: -16px !important; width: min(150px, 40vw); aspect-ratio: 240 / 188; background-image: url("/themes/feast/peony.webp"); transform: none !important; top: auto; }
+html.theme-invite.theme-feast body.guest .foot .deco.bottom.right { bottom: 0; right: -16px !important; width: min(110px, 28vw); aspect-ratio: 286 / 598; background-image: url("/themes/feast/grapes.webp"); transform: none !important; top: auto; }
+html.theme-invite.theme-feast body.guest .foot::before {
+  content: ""; position: absolute; left: 30%; bottom: 6px; width: min(130px, 33vw); aspect-ratio: 300 / 190; background: url("/themes/feast/postcards.webp") center / contain no-repeat; pointer-events: none; transform: rotate(-4deg);
+}
+
+/* entrance: the same burgundy, keepsakes in the corners */
+html.theme-feast .entrance { background: #640706; color: var(--fe-cream, #f7f0e4); }
+html.theme-invite.theme-feast .ent-scene { padding-top: 120px; padding-bottom: 130px; }
+html.theme-invite.theme-feast .ent-flower { display: block !important; opacity: 1; height: auto; max-height: none; background-size: contain; filter: none; z-index: 0; }
+html.theme-invite.theme-feast .ent-flower.tl { top: 0; left: -16px; width: min(140px, 36vw); aspect-ratio: 280 / 380; background-image: url("/themes/feast/berries.webp"); transform: none; }
+html.theme-invite.theme-feast .ent-flower.tr { top: 0; right: -16px; left: auto; width: min(118px, 30vw); aspect-ratio: 255 / 285; background-image: url("/themes/feast/dried.webp"); transform: none; }
+html.theme-invite.theme-feast .ent-flower.bl { bottom: 0; top: auto; left: -16px; width: min(150px, 40vw); aspect-ratio: 240 / 188; background-image: url("/themes/feast/peony.webp"); transform: none; }
+html.theme-invite.theme-feast .ent-flower.br { bottom: 0; top: auto; right: -16px; width: min(104px, 26vw); aspect-ratio: 286 / 598; background-image: url("/themes/feast/grapes.webp"); transform: none; }
+html.theme-invite.theme-feast .ent-pre { font-family: "Cinzel", var(--caps); color: var(--fe-cream, #f7f0e4); font-size: 13px; letter-spacing: .2em; }
+html.theme-invite.theme-feast .ent-names { font-family: var(--script); color: #fff; font-size: clamp(46px, 13vw, 60px); text-shadow: 2px 3px 0 rgba(30, 0, 0, .55); }
+html.theme-invite.theme-feast .ent-hint { font-family: "Cinzel", var(--caps); color: var(--fe-cream, #f7f0e4); }
+html.theme-invite.theme-feast .ent-skip { background: #f7f0e4 !important; color: #640706 !important; }
+
+/* admin: same page, cream cards */
+html.theme-invite.theme-feast body.admin .admin-hero { padding-top: 112px; }
+html.theme-invite.theme-feast body.admin .admin-label, html.theme-invite.theme-feast body.admin .sub { font-family: "Cinzel", var(--caps); color: var(--fe-cream); }
+html.theme-invite.theme-feast body.admin h1 { font-family: var(--script); color: #fff; text-shadow: 2px 3px 0 rgba(30, 0, 0, .55); }
+html.theme-invite.theme-feast body.admin h1::before { content: none; }
+html.theme-invite.theme-feast body.admin .foot-brand .foot-cta, html.theme-invite.theme-feast body.admin > .wrap > p { color: var(--fe-cream); }
+
+html.theme-feast, html.theme-feast body { overflow-x: clip; }
