@@ -1316,3 +1316,10 @@ html.theme-feast .env-back { filter: drop-shadow(0 12px 22px rgba(69, 28, 32, .2
 html.theme-invite.theme-feast body.guest .names .amp { color: #4f5f4a; }
 html.theme-invite.theme-feast .env-letter { color: #451c20; }
 html.theme-invite.theme-feast .env-letter .l-names { color: #590b19; }
+
+/* script with clear capitals (Pinyon's G reads like a small g) */
+html.theme-feast, html.theme-feast body, html.theme-feast body.guest, html.theme-feast body.admin { --script: "Great Vibes", "Pinyon Script", cursive; }
+html.theme-invite.theme-feast body.guest .names .amp { margin: 0 .12em; }
+html.theme-invite.theme-feast body.admin h1, html.theme-invite.theme-feast body.guest .panel h2, html.theme-invite.theme-feast body.guest .gallery-head h2,
+html.theme-invite.theme-feast body.guest .wish h2, html.theme-invite.theme-feast body.admin .card h2, html.theme-invite.theme-feast .env-letter .l-names,
+html.theme-invite.theme-feast .ent-names { word-spacing: .18em; }
