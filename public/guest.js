@@ -347,6 +347,10 @@
     if (ev.cover_url) {
       arch.style.backgroundImage = `url("${ev.cover_url}")`;
       arch.classList.add('has-photo');
+      // let the frame take the photo's own shape, so the whole picture shows
+      const probe = new Image();
+      probe.onload = () => { if (probe.naturalWidth && probe.naturalHeight) arch.style.setProperty('--photo-ar', `${probe.naturalWidth} / ${probe.naturalHeight}`); };
+      probe.src = ev.cover_url;
     }
     arch.setAttribute('aria-label', `${ev.couple_names}${ev.cover_url ? '' : ' monogram'}`);
     show(arch);

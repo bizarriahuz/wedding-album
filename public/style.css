@@ -1177,3 +1177,13 @@ html.theme-invite.theme-feast body.guest .action.outline, html.theme-invite.them
 html.theme-invite.theme-feast body.guest .foot-cta, html.theme-invite.theme-feast body.guest .demo-note,
 html.theme-invite.theme-feast body.admin .foot-brand .foot-cta, html.theme-invite.theme-feast body.admin > .wrap > p { color: #7a2a30; }
 html.theme-invite.theme-feast body.guest .tile { box-shadow: 0 1px 2px rgba(100, 7, 6, .15), 0 8px 16px -8px rgba(100, 7, 6, .35); }
+
+/* the couple's cover photo shown whole, in its own shape */
+html.theme-invite.theme-feast body.guest .arch.has-photo {
+  width: min(100%, 440px); height: auto; aspect-ratio: var(--photo-ar, 4 / 5); border-radius: 14px; margin: 26px auto 10px;
+  background-size: contain; background-repeat: no-repeat; background-color: transparent; box-shadow: none;
+}
+html.theme-invite.theme-feast body.guest .arch.has-photo::after {
+  border-radius: 14px; background-size: contain; background-repeat: no-repeat;
+  box-shadow: 0 0 0 5px #fffaf7, 0 14px 30px -12px rgba(100, 7, 6, .4);
+}
