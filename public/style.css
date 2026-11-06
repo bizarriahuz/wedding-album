@@ -1138,3 +1138,21 @@ html.theme-invite.theme-feast .ent-flower.br { display: none !important; }
 html.theme-feast .entrance::before { content: ""; position: absolute; top: 0; left: 50%; width: 70px; aspect-ratio: 210 / 220; margin-left: -35px; background: url("/themes/feast/locket-lt.webp") center / contain no-repeat; pointer-events: none; z-index: 0; }
 html.theme-feast .env-back { filter: drop-shadow(0 12px 22px rgba(100, 7, 6, .25)); }
 html.theme-feast .env-front { filter: drop-shadow(0 -3px 4px rgba(60, 0, 0, .25)); }
+
+/* ---------- plain for now (redesign planned): no ornaments on Harris & Aqilah's pages ---------- */
+html.theme-feast body.guest .hero .deco, html.theme-feast body.guest .foot .deco, html.theme-feast body.admin .admin-hero .deco,
+html.theme-feast .ent-flower { display: none !important; }
+html.theme-feast body.guest .hero::before, html.theme-feast body.admin .admin-hero::before, html.theme-feast body.guest .foot::before,
+html.theme-feast .entrance::before { content: none !important; }
+html.theme-invite.theme-feast body.guest .hero .pre { padding-top: 44px; }
+html.theme-invite.theme-feast body.guest .hero.compact .pre { padding-top: 36px; }
+html.theme-invite.theme-feast body.admin .admin-hero { padding-top: 44px; }
+html.theme-invite.theme-feast .ent-scene { padding-top: 56px; padding-bottom: 72px; }
+/* the cover photo as a plain circle, no table setting */
+html.theme-invite.theme-feast body.guest .arch { --a: min(56vw, 240px); margin: 24px auto 8px; }
+html.theme-invite.theme-feast body.guest .arch::before { content: none; }
+html.theme-invite.theme-feast body.guest .arch::after { box-shadow: inset 0 0 0 3px rgba(247, 240, 228, .8), 0 10px 24px -8px rgba(0, 0, 0, .5); }
+html.theme-invite.theme-feast body.guest .foot { padding-bottom: 40px; }
+html.theme-invite.theme-feast body .entrance .ent-flower, html.theme-invite.theme-feast body.admin .admin-hero .deco,
+html.theme-invite.theme-feast body.guest .hero .deco, html.theme-invite.theme-feast body.guest .foot .deco { display: none !important; }
+html.theme-invite.theme-feast body.admin .admin-hero .deco.top.left, html.theme-invite.theme-feast body.admin .admin-hero .deco.top.right { display: none !important; }
