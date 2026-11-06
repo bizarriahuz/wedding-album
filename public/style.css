@@ -1410,3 +1410,13 @@ html.theme-invite.theme-feast.theme-doodle body.guest .hero { min-height: 620px;
 html.theme-invite.theme-feast.theme-doodle body.guest .arch.has-photo { margin-top: 128px; }
 html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head { flex-direction: column; align-items: flex-start; gap: 0; }
 html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 42px; }
+
+/* Monsieur La Doulaise only for the couple's names; every other heading in Great Vibes */
+html.theme-feast, html.theme-feast body, html.theme-feast body.guest, html.theme-feast body.admin { --script: "Great Vibes", "Pinyon Script", cursive; --names-script: "Monsieur La Doulaise", "Great Vibes", cursive; }
+html.theme-invite.theme-feast body.guest .names, html.theme-invite.theme-feast body.admin h1, html.theme-invite.theme-feast .ent-names,
+html.theme-invite.theme-feast .env-letter .l-names { font-family: var(--names-script); }
+html.theme-invite.theme-feast body.guest .panel h2, html.theme-invite.theme-feast body.guest .gallery-head h2, html.theme-invite.theme-feast body.guest .wish h2,
+html.theme-invite.theme-feast body.admin .card h2 { -webkit-text-stroke: 0; word-spacing: .18em; }
+html.theme-invite.theme-feast.theme-doodle body.guest .panel h2, html.theme-invite.theme-feast.theme-doodle body.guest .wish h2,
+html.theme-invite.theme-feast.theme-doodle body.admin .card h2 { font-size: 36px; line-height: 1.15; }
+html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 36px; }
