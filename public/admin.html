@@ -67,11 +67,29 @@
 
       <section class="card">
         <h2>QR cards to print</h2>
-        <p class="hint" style="margin:0 0 14px">Ready-to-print cards in the same look as the album. Each opens as a page you can print or save as a PDF.</p>
-        <div class="print-links">
-          <a class="btn ghost" data-print="poster" href="#" target="_blank" rel="noopener">Poster (A4)</a>
-          <a class="btn ghost" data-print="card" href="#" target="_blank" rel="noopener">Table card (A6)</a>
+        <div id="poster-own" class="hidden">
+          <p class="hint" style="margin:0 0 14px">Your own poster, ready to print. Download it and send it to your printer or planner.</p>
+          <a id="poster-open" class="poster-preview" href="#" target="_blank" rel="noopener" aria-label="Open the poster full size">
+            <img id="poster-img" alt="Your poster" decoding="async">
+            <span id="poster-pdf" class="poster-pdf hidden">PDF poster</span>
+          </a>
+          <a class="btn" id="poster-download" href="#" download>Download poster</a>
+          <div class="poster-actions">
+            <button type="button" class="ghost" id="poster-replace">Replace poster</button>
+            <span id="poster-remove-slot"></span>
+          </div>
         </div>
+        <div id="poster-generated">
+          <p class="hint" style="margin:0 0 14px">Ready-to-print cards in the same look as the album. Each opens as a page you can print or save as a PDF.</p>
+          <div class="print-links">
+            <a class="btn ghost" data-print="poster" href="#" target="_blank" rel="noopener">Poster (A4)</a>
+            <a class="btn ghost" data-print="card" href="#" target="_blank" rel="noopener">Table card (A6)</a>
+          </div>
+          <p class="hint" style="margin:16px 0 10px">Designed your own poster? Upload it here (PNG, JPEG or PDF) and it replaces these cards.</p>
+          <button type="button" class="ghost" id="poster-upload" style="width:100%">Upload your own poster</button>
+        </div>
+        <input id="poster-file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" class="hidden">
+        <p class="msg" id="poster-msg" role="status"></p>
       </section>
 
       <section class="card">
@@ -188,10 +206,10 @@
     }
 
     // Delete buttons: the first tap arms, a second tap within 4 seconds deletes
-    function deleteButton(onDelete) {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'del-btn'; b.textContent = 'Delete';
+    function deleteButton(onDelete, label = 'Delete') {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'del-btn'; b.textContent = label;
       let armed = null;
-      const disarm = () => { clearTimeout(armed); armed = null; b.classList.remove('armed'); b.textContent = 'Delete'; };
+      const disarm = () => { clearTimeout(armed); armed = null; b.classList.remove('armed'); b.textContent = label; };
       b.onclick = async () => {
         if (!armed) { b.classList.add('armed'); b.textContent = 'Tap again to delete'; armed = setTimeout(disarm, 4000); return; }
         disarm(); b.disabled = true; b.textContent = 'Deleting…';
@@ -286,6 +304,7 @@
       $('title').textContent = ev.couple_names;
       const date = new Date(ev.event_date + 'T00:00:00');
       $('subtitle').textContent = `${TYPES[ev.event_type]}, ${date.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}` + (ev.venue ? `\n${ev.venue}` : '');
+      setPoster(ev.poster_url || null);
       $('n-guests').textContent = ev.counts.guests;
       $('n-media').textContent = ev.counts.media;
       $('n-wishes').textContent = ev.counts.wishes;
@@ -439,6 +458,39 @@
 
     if (!slug || !token) showError('This admin link is incomplete. Use the full link you were given.');
     else api('').then((ev) => { render(ev); loadWishes(); loadMedia(); }).catch((e) => showError(e.message));
+
+    // The couple's own poster: shown with a download button in place of the generated cards
+    function setPoster(url) {
+      const has = !!url;
+      $('poster-own').classList.toggle('hidden', !has);
+      $('poster-generated').classList.toggle('hidden', has);
+      if (!has) return;
+      const isPdf = /\.pdf$/i.test(url);
+      $('poster-img').classList.toggle('hidden', isPdf);
+      $('poster-pdf').classList.toggle('hidden', !isPdf);
+      if (!isPdf) $('poster-img').src = url;
+      $('poster-open').href = url;
+      const name = (($('title').textContent || 'Poster').replace(/[^\w ]+/g, '').trim().replace(/\s+/g, '-') || 'Poster') + '-poster.' + url.split('.').pop();
+      $('poster-download').href = `${url}?download=${encodeURIComponent(name)}`;
+      $('poster-remove-slot').replaceChildren(deleteButton(async () => {
+        await api('/poster', { method: 'DELETE' });
+        setPoster(null); $('poster-msg').className = 'msg ok'; $('poster-msg').textContent = 'Poster removed';
+      }, 'Remove poster'));
+    }
+    $('poster-upload').onclick = $('poster-replace').onclick = () => $('poster-file').click();
+    $('poster-file').onchange = async () => {
+      const file = $('poster-file').files[0];
+      if (!file) return;
+      const msg = $('poster-msg');
+      if (file.size > 25 * 1024 * 1024) { msg.className = 'msg err'; msg.textContent = 'That file is over 25 MB. Export a smaller PNG or PDF.'; return; }
+      msg.className = 'msg'; msg.textContent = 'Uploading poster…';
+      try {
+        const data = await api('/poster', { method: 'PUT', headers: { 'Content-Type': file.type || 'application/octet-stream' }, body: file });
+        setPoster(data.poster_url);
+        msg.className = 'msg ok'; msg.textContent = 'Poster uploaded';
+      } catch (err) { msg.className = 'msg err'; msg.textContent = err.message; }
+      $('poster-file').value = '';
+    };
 
     $('pick-cover').onclick = () => $('cover-file').click();
     $('cover-file').onchange = async () => {

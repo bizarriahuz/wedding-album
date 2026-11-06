@@ -1427,3 +1427,16 @@ html.theme-invite.theme-feast body.admin .card h2 {
   font-family: "Sorts Mill Goudy", "Cormorant Garamond", Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: 0; word-spacing: 0; -webkit-text-stroke: 0; }
 html.theme-invite.theme-feast.theme-doodle body.guest .panel h2, html.theme-invite.theme-feast.theme-doodle body.guest .wish h2,
 html.theme-invite.theme-feast.theme-doodle body.admin .card h2, html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 29px; line-height: 1.2; }
+
+/* admin: the couple's own poster */
+.poster-preview { display: block; margin: 0 auto 14px; max-width: 260px; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 4px rgba(69, 28, 32, .12), 0 14px 28px -12px rgba(69, 28, 32, .35); }
+.poster-preview img { display: block; width: 100%; height: auto; }
+.poster-pdf { display: grid; place-items: center; aspect-ratio: 13 / 18; background: #efe6d0; font-size: 18px; color: #451c20; }
+#poster-own .btn { width: 100%; justify-content: center; }
+.poster-actions { display: flex; gap: 10px; margin-top: 10px; }
+.poster-actions > * { flex: 1; }
+.poster-actions .del-btn { width: 100%; }
+body.admin .poster-actions button.ghost { width: 100%; }
+.poster-actions { align-items: stretch; }
+html.theme-invite.theme-feast body.admin .poster-actions button, body.admin .poster-actions button { min-height: 48px !important; height: 100%; border-radius: 999px !important; padding: 6px 10px; line-height: 1.2; font-size: 16px !important; }
+body.admin #poster-own .btn { border-radius: 999px !important; min-height: 50px; display: flex; align-items: center; }

@@ -6,6 +6,7 @@
 //   GET  /api/admin/:slug            full event info (needs X-Admin-Token)
 //   PATCH /api/admin/:slug           edit names, date, venue, type (needs X-Admin-Token)
 //   PUT  /api/admin/:slug/cover      upload cover photo, raw image body (needs X-Admin-Token)
+//   PUT|DELETE /api/admin/:slug/poster  the couple's own print poster (image or PDF)
 //   PUT  /api/admin/:slug/strip/:n   photo-booth strip photo n (0-2), raw image body; DELETE removes it
 //   POST /api/events/:slug/guests    guest joins with a name (needs X-Guest-Token)
 //   PUT  /api/events/:slug/thumbs/:id  small preview image, sent before its media (needs X-Guest-Token)
@@ -41,6 +42,7 @@ const MIGRATIONS = [
      id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, wedding_date TEXT, guests TEXT,
      package TEXT, message TEXT, ip_hash TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')))`,
   "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
+  "ALTER TABLE events ADD COLUMN poster_key TEXT",
 ];
 let schemaReady = false;
 async function ensureSchema(env) {
@@ -82,7 +84,7 @@ export default {
       if (path.startsWith('/print/')) return env.ASSETS.fetch(new URL('/print', url));
       if (path === '/demo') return demoRedirect(env, url);
 
-      if (path.startsWith('/media/')) return serveMedia(path.slice(7), env);
+      if (path.startsWith('/media/')) return serveMedia(path.slice(7), env, url);
 
       if (path.startsWith('/api/')) await ensureSchema(env);
 
@@ -97,6 +99,10 @@ export default {
 
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/cover$/);
       if (m && request.method === 'PUT') return uploadCover(m[1], request, env);
+
+      m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/poster$/);
+      if (m && request.method === 'PUT') return uploadPoster(m[1], request, env);
+      if (m && request.method === 'DELETE') return deletePoster(m[1], request, env);
 
       if (path === '/api/enquiries' && request.method === 'POST') return postEnquiry(request, env);
       if (path === '/api/enquiries' && request.method === 'GET') return listEnquiries(request, env);
@@ -262,6 +268,33 @@ async function deleteStrip(slug, n, request, env) {
   await env.DB.prepare('UPDATE events SET strip_keys = ? WHERE id = ?').bind(JSON.stringify(keys), ev.id).run();
   if (old) await env.MEDIA.delete(old);
   return json({ strip_urls: keys.map((k) => (k ? `/media/${k}` : null)) });
+}
+
+// The couple's own designed poster for printing: an image or a PDF, kept at full quality
+const POSTER_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+const MAX_POSTER_BYTES = 25 * 1024 * 1024; // 25 MB
+
+async function uploadPoster(slug, request, env) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+  const type = (request.headers.get('Content-Type') || '').split(';')[0];
+  if (!POSTER_TYPES.includes(type)) return json({ error: 'Poster must be a PNG, JPEG, WebP or PDF file' }, 400);
+  const size = Number(request.headers.get('Content-Length') || 0);
+  if (size > MAX_POSTER_BYTES) return json({ error: 'Poster is over 25 MB' }, 413);
+  const ext = type === 'application/pdf' ? 'pdf' : type.split('/')[1].replace('jpeg', 'jpg');
+  const key = `events/${ev.id}/poster-${Date.now()}.${ext}`;
+  await env.MEDIA.put(key, request.body, { httpMetadata: { contentType: type } });
+  if (ev.poster_key) await env.MEDIA.delete(ev.poster_key);
+  await env.DB.prepare('UPDATE events SET poster_key = ? WHERE id = ?').bind(key, ev.id).run();
+  return json({ poster_url: `/media/${key}` });
+}
+
+async function deletePoster(slug, request, env) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+  if (ev.poster_key) await env.MEDIA.delete(ev.poster_key);
+  await env.DB.prepare('UPDATE events SET poster_key = NULL WHERE id = ?').bind(ev.id).run();
+  return json({ ok: true });
 }
 
 async function uploadCover(slug, request, env) {
@@ -545,7 +578,7 @@ async function feed(slug, request, env, url) {
   });
 }
 
-async function serveMedia(key, env) {
+async function serveMedia(key, env, url) {
   if (!key || key.includes('..')) return new Response('Not found', { status: 404 });
   const obj = await env.MEDIA.get(key);
   if (!obj) return new Response('Not found', { status: 404 });
@@ -554,6 +587,9 @@ async function serveMedia(key, env) {
   obj.writeHttpMetadata(headers);
   headers.set('ETag', obj.httpEtag);
   headers.set('Cache-Control', 'public, max-age=31536000, immutable'); // keys never change
+  // ?download=<name> saves the file instead of opening it (the couple's poster)
+  const dl = url && url.searchParams.get('download');
+  if (dl) headers.set('Content-Disposition', `attachment; filename="${dl.replace(/[^\w .()-]/g, '').slice(0, 80) || 'download'}"`);
   return new Response(obj.body, { headers });
 }
 
@@ -614,10 +650,11 @@ function stripKeys(ev) {
 }
 
 function withCoverUrl(ev) {
-  const { cover_key, strip_keys, ...rest } = ev;
+  const { cover_key, strip_keys, poster_key, ...rest } = ev;
   return {
     ...rest,
     cover_url: cover_key ? `/media/${cover_key}` : null,
+    ...(poster_key !== undefined ? { poster_url: poster_key ? `/media/${poster_key}` : null } : {}),
     strip_urls: stripKeys({ strip_keys }).map((k) => (k ? `/media/${k}` : null)),
   };
 }
