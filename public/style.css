@@ -1203,3 +1203,42 @@ body.admin .del-btn {
 body.admin .del-btn.armed { background: #8a1c1c !important; color: #fff !important; }
 body.admin .wish-item .del-btn { margin-top: 10px; }
 @media (max-width: 360px) { .admin-media { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* =====================================================================
+   Practical pass (Harris & Aqilah): sentence case, 15px+ text, 44px taps,
+   no scroll fade on working pages
+   ===================================================================== */
+/* hero and admin header: regular serif in sentence case instead of Cinzel capitals */
+html.theme-invite.theme-feast body.guest .hero .pre, html.theme-invite.theme-feast body.admin .admin-label {
+  font-family: var(--caps); font-weight: 500; font-size: 17px; letter-spacing: .04em; text-transform: none; }
+html.theme-invite.theme-feast body.guest .when, html.theme-invite.theme-feast body.guest .where {
+  font-family: var(--caps); font-weight: 500; font-size: 19px; letter-spacing: .02em; text-transform: none; }
+html.theme-invite.theme-feast body.guest .when { margin-top: 14px; }
+html.theme-invite.theme-feast body.admin .sub { font-family: var(--caps); font-weight: 500; font-size: 18px; letter-spacing: .02em; text-transform: none; line-height: 1.5; }
+html.theme-invite.theme-feast .ent-pre, html.theme-invite.theme-feast .ent-hint { font-family: var(--caps); font-weight: 500; letter-spacing: .04em; text-transform: none; font-size: 19px; }
+
+/* buttons and tabs: sentence case, 17px */
+html.theme-invite.theme-feast body.guest button, html.theme-invite.theme-feast body.guest .btn, html.theme-invite.theme-feast body.guest .action,
+html.theme-invite.theme-feast body.guest .wide, html.theme-invite.theme-feast body.admin .btn, html.theme-invite.theme-feast body.admin button,
+html.theme-invite.theme-feast .ent-enter-wrap button.full, html.theme-invite.theme-feast .ent-skip {
+  text-transform: none !important; letter-spacing: .01em !important; font-size: 17px; font-weight: 600 !important; }
+html.theme-invite.theme-feast body.guest .action { font-size: 17.5px; }
+html.theme-invite.theme-feast body.guest .seg-btn { font-size: 16.5px !important; min-height: 46px; }
+html.theme-invite.theme-feast body.guest .link-btn, html.theme-invite.theme-feast body.admin .link-btn {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px; font-size: 17px !important; font-weight: 500 !important; }
+html.theme-invite.theme-feast body.guest .gallery-head .count, html.theme-invite.theme-feast body.guest .gallery-head span { font-size: 16px; }
+
+/* admin: readable small print and comfortable taps */
+html.theme-invite.theme-feast body.admin .stats span { font-size: 15.5px; }
+html.theme-invite.theme-feast body.admin .wish-head { font-size: 16.5px; }
+html.theme-invite.theme-feast body.admin .wish-head time { font-size: 15px; }
+html.theme-invite.theme-feast body.admin .am-tile figcaption { font-size: 15px; }
+html.theme-invite.theme-feast body.admin .del-btn { min-height: 44px; width: 100%; font-size: 16px !important; }
+html.theme-invite.theme-feast body.admin .wish-item .del-btn { width: auto; padding: 4px 16px; }
+html.theme-invite.theme-feast body.admin .linkbox input.link { min-height: 44px; font-size: 15px; }
+html.theme-invite.theme-feast body.admin .linkbox button { min-height: 44px; }
+html.theme-invite.theme-feast body.admin .btn, html.theme-invite.theme-feast body.admin button.ghost { min-height: 46px; }
+
+/* working pages show everything at once: no fade as you scroll */
+html.theme-feast .rv, html.theme-feast .rv:not(.in) { opacity: 1 !important; transform: none !important; transition: none !important; }
+html.theme-invite.theme-feast .ent-skip { min-height: 44px; min-width: 76px; padding: 0 18px; font-size: 16.5px !important; }
