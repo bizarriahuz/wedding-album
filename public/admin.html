@@ -13,8 +13,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Ephesis&family=Figtree:wght@400;500;600&family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Pinyon+Script&family=Cinzel:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <script>
-    // Same look as the album's guest page, applied before paint when this phone has seen it
-    document.documentElement.className = 'theme-ha-florals';
+    // Same look as the album's guest page, applied before paint when this phone has seen it;
+    // until then no decorations, so nothing flashes while the album loads
+    (() => {
+      let t = null;
+      try { t = localStorage.getItem('ga-admin-theme:' + location.pathname.split('/')[2]); } catch {}
+      document.documentElement.className = t === 'ivory' ? 'theme-ha-florals theme-ivory'
+        : t === 'ha-florals' ? 'theme-ha-florals theme-invite theme-feast' : 'theme-ha-florals theme-pending';
+    })();
   </script>
 </head>
 <body class="admin">
@@ -163,6 +169,7 @@
     }
 
     function applyTheme(theme) {
+      try { localStorage.setItem('ga-admin-theme:' + slug, theme === 'ivory' ? 'ivory' : 'ha-florals'); } catch {}
       document.documentElement.className = theme === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals theme-invite theme-feast';
     }
 

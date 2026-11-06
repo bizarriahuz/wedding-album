@@ -20,7 +20,8 @@
       const saved = JSON.parse(localStorage.getItem('ga:' + location.pathname.split('/')[2]) || '{}');
       if (saved.theme === 'ivory') document.documentElement.className += ' theme-ivory';
       else if (saved.theme === 'ha-florals') document.documentElement.className += ' theme-invite theme-feast';
-    } catch {}
+      else document.documentElement.className += ' theme-pending';
+    } catch { document.documentElement.className += ' theme-pending'; }
   </script>
 </head>
 <body class="guest">

@@ -1242,3 +1242,10 @@ html.theme-invite.theme-feast body.admin .btn, html.theme-invite.theme-feast bod
 /* working pages show everything at once: no fade as you scroll */
 html.theme-feast .rv, html.theme-feast .rv:not(.in) { opacity: 1 !important; transform: none !important; transition: none !important; }
 html.theme-invite.theme-feast .ent-skip { min-height: 44px; min-width: 76px; padding: 0 18px; font-size: 16.5px !important; }
+
+/* while an album's look is still loading: plain page, no decorations at all */
+html.theme-pending body { background: #f7f1ec !important; background-image: none !important; }
+html.theme-pending body::before, html.theme-pending body::after,
+html.theme-pending .hero::before, html.theme-pending .hero::after, html.theme-pending .admin-hero::before, html.theme-pending .admin-hero::after,
+html.theme-pending .foot::before, html.theme-pending .entrance::before { content: none !important; display: none !important; }
+html.theme-pending .deco, html.theme-pending .ent-flower, html.theme-pending .names-mono { display: none !important; }
