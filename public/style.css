@@ -1387,3 +1387,26 @@ html.theme-invite.theme-feast.theme-doodle body.guest .arch.has-photo { margin-t
 html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 34px; white-space: nowrap; }
 html.theme-invite.theme-feast.theme-doodle body.guest .panel h2, html.theme-invite.theme-feast.theme-doodle body.guest .wish h2 { font-size: 36px; }
 html.theme-invite.theme-feast.theme-doodle .ent-names { font-size: clamp(36px, 10vw, 46px); max-width: calc(100vw - 2 * var(--bw) - 24px); margin-left: auto; margin-right: auto; }
+
+/* script: Monsieur La Doulaise, set larger with slightly firmer strokes so the fine copperplate reads on a phone */
+html.theme-feast, html.theme-feast body, html.theme-feast body.guest, html.theme-feast body.admin { --script: "Monsieur La Doulaise", "Great Vibes", cursive; }
+html.theme-invite.theme-feast.theme-doodle body.guest .names, html.theme-invite.theme-feast.theme-doodle body.guest .hero.compact .names { font-size: 60px; line-height: 1; max-width: 200px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .names .amp { font-size: .6em; margin: 4px 0 0; }
+html.theme-invite.theme-feast.theme-doodle body.guest .panel h2, html.theme-invite.theme-feast.theme-doodle body.guest .wish h2,
+html.theme-invite.theme-feast.theme-doodle body.admin .card h2 { font-size: 44px; line-height: 1.1; }
+html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 40px; }
+html.theme-invite.theme-feast.theme-doodle body.admin h1 { font-size: clamp(46px, 13vw, 60px); }
+html.theme-invite.theme-feast.theme-doodle .ent-names { font-size: clamp(44px, 12vw, 54px); }
+html.theme-invite.theme-feast .env-letter .l-names { font-size: 38px; }
+html.theme-invite.theme-feast body.guest .names, html.theme-invite.theme-feast body.admin h1, html.theme-invite.theme-feast .ent-names,
+html.theme-invite.theme-feast body.guest .panel h2, html.theme-invite.theme-feast body.guest .gallery-head h2, html.theme-invite.theme-feast body.guest .wish h2,
+html.theme-invite.theme-feast body.admin .card h2, html.theme-invite.theme-feast .env-letter .l-names { -webkit-text-stroke: .5px currentColor; word-spacing: .08em; }
+html.theme-invite.theme-feast.theme-doodle body.guest .hero::after { width: 304px; height: 470px; margin-left: -152px; top: 124px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .hero .pre, html.theme-invite.theme-feast.theme-doodle body.guest .hero.compact .pre { padding-top: 236px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .names, html.theme-invite.theme-feast.theme-doodle body.guest .hero.compact .names { font-size: 54px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .when { font-size: 16px; margin-top: 12px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .where { font-size: 16px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .hero { min-height: 620px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .arch.has-photo { margin-top: 128px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head { flex-direction: column; align-items: flex-start; gap: 0; }
+html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 42px; }
