@@ -10,6 +10,7 @@
 //   POST /api/events/:slug/guests    guest joins with a name (needs X-Guest-Token)
 //   PUT  /api/events/:slug/thumbs/:id  small preview image, sent before its media (needs X-Guest-Token)
 //   PUT  /api/events/:slug/media/:id   a photo or video, raw body; safe to retry (needs X-Guest-Token)
+//   GET  /api/admin/:slug/media         every upload for the couple; DELETE /api/admin/:slug/media/:id and /wishes/:id remove one
 //   DELETE /api/events/:slug/media/:id remove an upload: the guest who shared it (X-Guest-Id) or the couple (X-Admin-Token)
 //   GET  /api/events/:slug/feed      gallery items, ?since= newer or ?before= older (needs X-Guest-Token)
 //   PUT  /api/events/:slug/wishes/:id  a wish: JSON {body} for written, raw audio for voice; safe to retry (needs X-Guest-Token)
@@ -123,6 +124,14 @@ export default {
 
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/wishes$/);
       if (m && request.method === 'GET') return listWishes(m[1], request, env);
+
+      m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/wishes\/([0-9a-f-]{36})$/);
+      if (m && request.method === 'DELETE') return adminDeleteWish(m[1], m[2], request, env);
+
+      m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/media$/);
+      if (m && request.method === 'GET') return adminMedia(m[1], request, env, url);
+      m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})$/);
+      if (m && request.method === 'DELETE') return adminDeleteMedia(m[1], m[2], request, env);
 
       if (path.startsWith('/api/')) return json({ error: 'Not found' }, 404);
       return env.ASSETS.fetch(request);
@@ -339,6 +348,48 @@ async function listWishes(slug, request, env) {
       created_at: r.created_at,
     })),
   });
+}
+
+// The couple's own list of every upload, newest first, for removing anything from admin
+async function adminMedia(slug, request, env, url) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+  const before = url.searchParams.get('before');
+  const args = [ev.id];
+  let where = 'm.event_id = ?';
+  if (before) { where += ' AND m.created_at < ?'; args.push(before); }
+  const rows = await env.DB.prepare(
+    `SELECT m.id, m.kind, m.r2_key, m.created_at, g.display_name AS guest_name
+       FROM media m LEFT JOIN guests g ON g.id = m.guest_id
+      WHERE ${where} ORDER BY m.created_at DESC LIMIT ${FEED_PAGE}`
+  ).bind(...args).all();
+  return json({
+    has_more: rows.results.length === FEED_PAGE,
+    items: rows.results.map((r) => ({
+      id: r.id, kind: r.kind, url: `/media/${r.r2_key}`, thumb_url: `/media/${thumbKey(ev.id, r.id)}`,
+      guest_name: r.guest_name || 'A guest', created_at: r.created_at,
+    })),
+  });
+}
+
+async function adminDeleteMedia(slug, id, request, env) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+  const row = await env.DB.prepare('SELECT id, r2_key FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
+  if (!row) return json({ ok: true, gone: true });
+  await env.DB.prepare('DELETE FROM media WHERE id = ?').bind(id).run();
+  await env.MEDIA.delete([row.r2_key, thumbKey(ev.id, id)]);
+  return json({ ok: true });
+}
+
+async function adminDeleteWish(slug, id, request, env) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+  const row = await env.DB.prepare('SELECT id, r2_key FROM wishes WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
+  if (!row) return json({ ok: true, gone: true });
+  await env.DB.prepare('DELETE FROM wishes WHERE id = ?').bind(id).run();
+  if (row.r2_key) await env.MEDIA.delete(row.r2_key);
+  return json({ ok: true });
 }
 
 // ---------- guest handlers ----------

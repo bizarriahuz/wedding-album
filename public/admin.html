@@ -45,6 +45,13 @@
         <div id="wishes-list" class="wishes"><p class="muted">Loading…</p></div>
       </section>
 
+      <section class="card" id="media-card">
+        <div class="card-head"><h2>Photos &amp; videos</h2><button type="button" class="link-btn" id="media-refresh">Refresh</button></div>
+        <p class="hint" style="margin:-6px 0 14px">Everything guests have shared. Tap a photo to open it full size. Tap Delete, then tap again to confirm.</p>
+        <div id="media-list" class="admin-media"><p class="muted">Loading…</p></div>
+        <button type="button" class="ghost hidden" id="media-more" style="margin-top:12px;width:100%">Show more</button>
+      </section>
+
       <section class="card">
         <h2>Guest link</h2>
         <div class="linkbox"><input id="guest-url" class="link" readonly><button type="button" data-copy>Copy</button><button type="button" data-share>Share</button></div>
@@ -173,6 +180,21 @@
       });
     }
 
+    // Delete buttons: the first tap arms, a second tap within 4 seconds deletes
+    function deleteButton(onDelete) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'del-btn'; b.textContent = 'Delete';
+      let armed = null;
+      const disarm = () => { clearTimeout(armed); armed = null; b.classList.remove('armed'); b.textContent = 'Delete'; };
+      b.onclick = async () => {
+        if (!armed) { b.classList.add('armed'); b.textContent = 'Tap again to delete'; armed = setTimeout(disarm, 4000); return; }
+        disarm(); b.disabled = true; b.textContent = 'Deleting…';
+        try { await onDelete(); }
+        catch (e) { b.disabled = false; b.textContent = 'Could not delete, try again'; }
+      };
+      return b;
+    }
+    const bump = (id, d) => { const el = $(id); el.textContent = Math.max(0, Number(el.textContent || 0) + d); };
+
     async function loadWishes() {
       const box = $('wishes-list');
       try {
@@ -193,6 +215,7 @@
           when.textContent = new Date(w.created_at).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
           head.append(who, when);
           el.append(head);
+          el.dataset.id = w.id;
           if (w.kind === 'voice' && w.audio_url) {
             const a = document.createElement('audio'); a.controls = true; a.preload = 'metadata'; fixAudioDuration(a); a.src = w.audio_url;
             el.append(a);
@@ -200,6 +223,12 @@
             const p = document.createElement('p'); p.className = 'wish-body'; p.textContent = w.body || '';
             el.append(p);
           }
+          const del = deleteButton(async () => {
+            await api(`/wishes/${w.id}`, { method: 'DELETE' });
+            el.remove(); bump('n-wishes', -1);
+            if (!box.querySelector('.wish-item')) loadWishes();
+          });
+          el.append(del);
           box.append(el);
         }
       } catch (e) {
@@ -207,6 +236,43 @@
       }
     }
     $('wishes-refresh').onclick = loadWishes;
+
+    let mediaBefore = null;
+    async function loadMedia(more = false) {
+      const box = $('media-list');
+      try {
+        const { items, has_more } = await api('/media' + (more && mediaBefore ? `?before=${encodeURIComponent(mediaBefore)}` : ''));
+        if (!more) box.replaceChildren();
+        if (!more && !items.length) {
+          const p = document.createElement('p'); p.className = 'muted';
+          p.textContent = 'No photos or videos yet. They appear here as guests share them.';
+          box.append(p);
+        }
+        for (const m of items) {
+          const tile = document.createElement('figure'); tile.className = 'am-tile';
+          const a = document.createElement('a'); a.href = m.url; a.target = '_blank'; a.rel = 'noopener'; a.className = 'am-thumb';
+          a.setAttribute('aria-label', `${m.kind === 'video' ? 'Video' : 'Photo'} from ${m.guest_name}, open full size`);
+          const img = document.createElement('img'); img.alt = ''; img.loading = 'lazy'; img.src = m.thumb_url;
+          img.onerror = () => { if (m.kind !== 'video' && img.src.indexOf(m.url) < 0) img.src = m.url; else img.remove(); };
+          a.append(img);
+          if (m.kind === 'video') { const v = document.createElement('span'); v.className = 'am-video'; v.textContent = '▶'; a.append(v); }
+          const cap = document.createElement('figcaption'); cap.textContent = m.guest_name;
+          const del = deleteButton(async () => {
+            await api(`/media/${m.id}`, { method: 'DELETE' });
+            tile.remove(); bump('n-media', -1);
+            if (!box.querySelector('.am-tile')) loadMedia();
+          });
+          tile.append(a, cap, del);
+          box.append(tile);
+        }
+        if (items.length) mediaBefore = items[items.length - 1].created_at;
+        $('media-more').classList.toggle('hidden', !has_more);
+      } catch (e) {
+        if (!more) box.textContent = 'Could not load photos. Check your connection and tap Refresh.';
+      }
+    }
+    $('media-refresh').onclick = () => { mediaBefore = null; loadMedia(); };
+    $('media-more').onclick = () => loadMedia(true);
 
     function render(ev) {
       applyTheme(ev.theme);
@@ -365,7 +431,7 @@
     }
 
     if (!slug || !token) showError('This admin link is incomplete. Use the full link you were given.');
-    else api('').then((ev) => { render(ev); loadWishes(); }).catch((e) => showError(e.message));
+    else api('').then((ev) => { render(ev); loadWishes(); loadMedia(); }).catch((e) => showError(e.message));
 
     $('pick-cover').onclick = () => $('cover-file').click();
     $('cover-file').onchange = async () => {
