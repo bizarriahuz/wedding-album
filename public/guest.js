@@ -788,12 +788,12 @@
     ownOnly = data.privacy === 'private' && !data.couple_view;
     const note = $('privacy-note');
     if (data.couple_view) {
-      $('gallery-title').textContent = "All guests' photos";
+      $('gallery-title').textContent = "All Guests' Photos";
       note.textContent = data.privacy === 'private'
         ? 'Guests only see their own photos. You two see everything.'
         : 'You are viewing as the couple.';
     } else if (ownOnly) {
-      $('gallery-title').textContent = 'Your photos';
+      $('gallery-title').textContent = 'Your Photos';
       note.textContent = 'Only you and the couple can see the photos you share.';
       $('empty').textContent = 'Photos you share will appear here.';
     }
