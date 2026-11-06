@@ -1120,3 +1120,21 @@ html.theme-invite.theme-feast body.admin h1::before { content: none; }
 html.theme-invite.theme-feast body.admin .foot-brand .foot-cta, html.theme-invite.theme-feast body.admin > .wrap > p { color: var(--fe-cream); }
 
 html.theme-feast, html.theme-feast body { overflow-x: clip; }
+
+/* envelope in burgundy lace for the table-setting look */
+html.theme-feast .env-back { content: url("/themes/feast/env-back.webp"); filter: drop-shadow(0 0 1px rgba(247, 240, 228, .4)) drop-shadow(0 12px 22px rgba(20, 0, 0, .5)); }
+html.theme-feast .env-front { content: url("/themes/feast/env-front.webp"); filter: drop-shadow(0 0 1px rgba(247, 240, 228, .35)) drop-shadow(0 -3px 4px rgba(20, 0, 0, .4)); }
+
+/* welcome and envelope screens: soft cream-pink instead of burgundy */
+html.theme-feast .entrance { background: radial-gradient(120% 80% at 50% 30%, #fbf4f0 0%, #f5e6e1 60%, #efdcd6 100%); color: #640706; }
+html.theme-invite.theme-feast .ent-pre, html.theme-invite.theme-feast .ent-hint { color: #7a2a30; }
+html.theme-invite.theme-feast .ent-names { color: #640706; text-shadow: 0 1px 0 rgba(255, 255, 255, .6), 0 6px 18px rgba(100, 7, 6, .12); }
+html.theme-invite.theme-feast body.guest .ent-enter-wrap button.full { background: #640706; color: #f7f0e4; box-shadow: 0 1px 1px rgba(60, 0, 0, .2), 0 10px 20px -8px rgba(100, 7, 6, .45); }
+html.theme-invite.theme-feast .ent-skip { background: #fffaf6 !important; color: #640706 !important; box-shadow: inset 0 0 0 1.5px rgba(100, 7, 6, .55) !important; }
+html.theme-invite.theme-feast .ent-flower.tl { width: min(122px, 32vw); aspect-ratio: 255 / 285; background-image: url("/themes/feast/dried-lt.webp"); transform: scaleX(-1); left: -10px; }
+html.theme-invite.theme-feast .ent-flower.tr { width: min(122px, 32vw); background-image: url("/themes/feast/dried-lt.webp"); right: -10px; }
+html.theme-invite.theme-feast .ent-flower.bl { width: min(140px, 36vw); aspect-ratio: 300 / 190; background-image: url("/themes/feast/postcards-lt.webp"); left: -8px; bottom: 6px; transform: rotate(-4deg); }
+html.theme-invite.theme-feast .ent-flower.br { display: none !important; }
+html.theme-feast .entrance::before { content: ""; position: absolute; top: 0; left: 50%; width: 70px; aspect-ratio: 210 / 220; margin-left: -35px; background: url("/themes/feast/locket-lt.webp") center / contain no-repeat; pointer-events: none; z-index: 0; }
+html.theme-feast .env-back { filter: drop-shadow(0 12px 22px rgba(100, 7, 6, .25)); }
+html.theme-feast .env-front { filter: drop-shadow(0 -3px 4px rgba(60, 0, 0, .25)); }
