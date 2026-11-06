@@ -1420,3 +1420,10 @@ html.theme-invite.theme-feast body.admin .card h2 { -webkit-text-stroke: 0; word
 html.theme-invite.theme-feast.theme-doodle body.guest .panel h2, html.theme-invite.theme-feast.theme-doodle body.guest .wish h2,
 html.theme-invite.theme-feast.theme-doodle body.admin .card h2 { font-size: 36px; line-height: 1.15; }
 html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 36px; }
+
+/* headings in Sorts Mill Goudy italic (the couple's names stay in Monsieur La Doulaise) */
+html.theme-invite.theme-feast body.guest .panel h2, html.theme-invite.theme-feast body.guest .gallery-head h2, html.theme-invite.theme-feast body.guest .wish h2,
+html.theme-invite.theme-feast body.admin .card h2 {
+  font-family: "Sorts Mill Goudy", "Cormorant Garamond", Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: 0; word-spacing: 0; -webkit-text-stroke: 0; }
+html.theme-invite.theme-feast.theme-doodle body.guest .panel h2, html.theme-invite.theme-feast.theme-doodle body.guest .wish h2,
+html.theme-invite.theme-feast.theme-doodle body.admin .card h2, html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 29px; line-height: 1.2; }
