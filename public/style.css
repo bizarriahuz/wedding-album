@@ -1323,3 +1323,67 @@ html.theme-invite.theme-feast body.guest .names .amp { margin: 0 .12em; }
 html.theme-invite.theme-feast body.admin h1, html.theme-invite.theme-feast body.guest .panel h2, html.theme-invite.theme-feast body.guest .gallery-head h2,
 html.theme-invite.theme-feast body.guest .wish h2, html.theme-invite.theme-feast body.admin .card h2, html.theme-invite.theme-feast .env-letter .l-names,
 html.theme-invite.theme-feast .ent-names { word-spacing: .18em; }
+
+/* =====================================================================
+   Harris & Aqilah: hand-drawn border. Doodles run down both edges and
+   scroll with the page; the ornate oval frames the names; chandelier on top,
+   the venue at the foot.
+   ===================================================================== */
+html.theme-doodle { --bw: 50px; }
+@media (min-width: 600px) { html.theme-doodle { --bw: 104px; } }
+html.theme-invite.theme-feast.theme-doodle body.guest, html.theme-invite.theme-feast.theme-doodle body.admin {
+  background-color: #f8f4ef;
+  background-image: url("/themes/doodle/strip-l.webp"), url("/themes/doodle/strip-r.webp");
+  background-repeat: repeat-y, repeat-y;
+  background-position: left 4px top 10px, right 4px top 170px;
+  background-size: var(--bw) auto, var(--bw) auto;
+}
+html.theme-invite.theme-feast.theme-doodle body.guest .wrap, html.theme-invite.theme-feast.theme-doodle body.admin .wrap {
+  max-width: 520px; padding-left: 0; padding-right: 0;
+  margin-left: max(calc(var(--bw) + 10px), calc((100% - 520px) / 2)); margin-right: max(calc(var(--bw) + 10px), calc((100% - 520px) / 2));
+}
+/* chandelier hanging over the top, oval frame around the names */
+html.theme-invite.theme-feast.theme-doodle body.guest .hero { position: relative; min-height: 600px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .hero::before, html.theme-invite.theme-feast.theme-doodle body.admin .admin-hero::before {
+  content: "" !important; display: block !important; position: absolute; top: 0; left: 50%; width: 104px; aspect-ratio: 302 / 390; margin-left: -52px;
+  background: url("/themes/doodle/chandelier.webp") center top / contain no-repeat; pointer-events: none; z-index: 0;
+}
+html.theme-invite.theme-feast.theme-doodle body.guest .hero::after {
+  content: "" !important; display: block; position: absolute; top: 126px; left: 50%; width: 284px; height: 438px; margin-left: -142px;
+  background: url("/themes/doodle/frame.webp") center / 100% 100% no-repeat; pointer-events: none; z-index: 0;
+}
+html.theme-invite.theme-feast.theme-doodle body.guest .hero > * { position: relative; z-index: 1; }
+html.theme-invite.theme-feast.theme-doodle body.guest .hero .pre, html.theme-invite.theme-feast.theme-doodle body.guest .hero.compact .pre { padding-top: 232px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .names, html.theme-invite.theme-feast.theme-doodle body.guest .hero.compact .names {
+  font-size: 50px; line-height: 1.05; margin: 8px auto 2px; max-width: 190px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .names .amp { display: block; font-size: .62em; margin: 2px 0; }
+html.theme-invite.theme-feast.theme-doodle body.guest .when { font-size: 17px; margin-top: 10px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .where { font-size: 17px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .arch.has-photo { margin-top: 90px; }
+/* admin: chandelier above the names */
+html.theme-invite.theme-feast.theme-doodle body.admin .admin-hero { position: relative; padding-top: 142px; }
+html.theme-invite.theme-feast.theme-doodle body.admin .admin-hero > * { position: relative; z-index: 1; }
+html.theme-invite.theme-feast.theme-doodle body.admin h1 { font-size: clamp(40px, 11vw, 52px); }
+/* the venue drawn at the foot of the page */
+html.theme-invite.theme-feast.theme-doodle body.guest .foot, html.theme-invite.theme-feast.theme-doodle body.admin .foot-brand { position: relative; padding-bottom: 150px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .foot::before, html.theme-invite.theme-feast.theme-doodle body.admin .foot-brand::after {
+  content: "" !important; display: block !important; position: absolute; left: 50%; bottom: 0; width: min(250px, 100%); aspect-ratio: 550 / 265; transform: translateX(-50%);
+  background: url("/themes/doodle/building.webp") center bottom / contain no-repeat; pointer-events: none;
+}
+/* welcome screens: the same border, fixed to the screen */
+html.theme-doodle .entrance {
+  background-color: #f8f4ef !important;
+  background-image: url("/themes/doodle/strip-l.webp"), url("/themes/doodle/strip-r.webp") !important;
+  background-repeat: repeat-y, repeat-y !important; background-position: left 4px top 10px, right 4px top 170px !important;
+  background-size: var(--bw) auto, var(--bw) auto !important;
+}
+html.theme-doodle .entrance::before {
+  content: "" !important; display: block !important; position: absolute; top: 0; left: 50%; width: 92px; aspect-ratio: 302 / 390; margin-left: -46px;
+  background: url("/themes/doodle/chandelier.webp") center top / contain no-repeat; pointer-events: none; z-index: 0;
+}
+html.theme-invite.theme-feast.theme-doodle .ent-scene { padding-top: 124px; }
+html.theme-doodle body.guest .panel, html.theme-doodle body.guest .gallery-head { margin-left: 0; margin-right: 0; }
+html.theme-invite.theme-feast.theme-doodle body.guest .arch.has-photo { margin-top: 132px; }
+html.theme-invite.theme-feast.theme-doodle body.guest .gallery-head h2 { font-size: 34px; white-space: nowrap; }
+html.theme-invite.theme-feast.theme-doodle body.guest .panel h2, html.theme-invite.theme-feast.theme-doodle body.guest .wish h2 { font-size: 36px; }
+html.theme-invite.theme-feast.theme-doodle .ent-names { font-size: clamp(36px, 10vw, 46px); max-width: calc(100vw - 2 * var(--bw) - 24px); margin-left: auto; margin-right: auto; }

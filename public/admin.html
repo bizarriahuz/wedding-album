@@ -19,7 +19,7 @@
       let t = null;
       try { t = localStorage.getItem('ga-admin-theme:' + location.pathname.split('/')[2]); } catch {}
       document.documentElement.className = t === 'ivory' ? 'theme-ha-florals theme-ivory'
-        : t === 'ha-florals' ? 'theme-ha-florals theme-invite theme-feast' : 'theme-ha-florals theme-pending';
+        : t === 'ha-florals' ? 'theme-ha-florals theme-invite theme-feast theme-doodle' : 'theme-ha-florals theme-pending';
     })();
   </script>
 </head>
@@ -170,7 +170,7 @@
 
     function applyTheme(theme) {
       try { localStorage.setItem('ga-admin-theme:' + slug, theme === 'ivory' ? 'ivory' : 'ha-florals'); } catch {}
-      document.documentElement.className = theme === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals theme-invite theme-feast';
+      document.documentElement.className = theme === 'ivory' ? 'theme-ha-florals theme-ivory' : 'theme-ha-florals theme-invite theme-feast theme-doodle';
     }
 
     // Chrome's own voice recordings carry no length, so players show 0:00. Seeking to the end makes the browser work it out.
