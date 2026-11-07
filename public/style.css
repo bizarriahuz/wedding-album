@@ -1440,3 +1440,25 @@ body.admin .poster-actions button.ghost { width: 100%; }
 .poster-actions { align-items: stretch; }
 html.theme-invite.theme-feast body.admin .poster-actions button, body.admin .poster-actions button { min-height: 48px !important; height: 100%; border-radius: 999px !important; padding: 6px 10px; line-height: 1.2; font-size: 16px !important; }
 body.admin #poster-own .btn { border-radius: 999px !important; min-height: 50px; display: flex; align-items: center; }
+
+/* ---------- Montserrat for all regular text on Harris & Aqilah's pages ---------- */
+html.theme-feast, html.theme-feast body, html.theme-feast body.guest, html.theme-feast body.admin { --caps: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif; }
+html.theme-feast body.guest, html.theme-feast body.admin, html.theme-feast .entrance { font-family: var(--caps); }
+/* Montserrat runs larger than the serif: tighter, calmer sizes */
+html.theme-invite.theme-feast body.guest, html.theme-invite.theme-feast body.admin { font-size: 16px; line-height: 1.6; letter-spacing: 0; }
+html.theme-invite.theme-feast body.guest p, html.theme-invite.theme-feast body.guest .hint, html.theme-invite.theme-feast body.guest .lead, html.theme-invite.theme-feast body.guest .quality-tip,
+html.theme-invite.theme-feast body.admin p, html.theme-invite.theme-feast body.admin label, html.theme-invite.theme-feast body.admin .hint { font-size: 15.5px; font-weight: 400; line-height: 1.6; }
+html.theme-invite.theme-feast body.guest .hero .pre, html.theme-invite.theme-feast body.admin .admin-label, html.theme-invite.theme-feast .ent-pre { font-size: 15px; font-weight: 500; letter-spacing: .02em; }
+html.theme-invite.theme-feast.theme-doodle body.guest .when, html.theme-invite.theme-feast.theme-doodle body.guest .where,
+html.theme-invite.theme-feast body.admin .sub, html.theme-invite.theme-feast .ent-hint { font-size: 15px; font-weight: 500; letter-spacing: 0; }
+html.theme-invite.theme-feast body.guest button, html.theme-invite.theme-feast body.guest .btn, html.theme-invite.theme-feast body.guest .action,
+html.theme-invite.theme-feast body.guest .wide, html.theme-invite.theme-feast body.admin .btn, html.theme-invite.theme-feast body.admin button,
+html.theme-invite.theme-feast .ent-enter-wrap button.full, html.theme-invite.theme-feast .ent-skip { font-size: 15.5px; font-weight: 600 !important; letter-spacing: 0 !important; }
+html.theme-invite.theme-feast body.guest .seg-btn { font-size: 15px !important; }
+html.theme-invite.theme-feast body.guest .link-btn, html.theme-invite.theme-feast body.admin .link-btn { font-size: 15.5px !important; }
+html.theme-invite.theme-feast body.guest input, html.theme-invite.theme-feast body.guest textarea { font-size: 16px; }
+html.theme-invite.theme-feast body.admin input, html.theme-invite.theme-feast body.admin select, html.theme-invite.theme-feast body.admin textarea { font-size: 16px; }
+html.theme-invite.theme-feast body.admin .stats span, html.theme-invite.theme-feast body.admin .am-tile figcaption, html.theme-invite.theme-feast body.admin .wish-head time { font-size: 15px; }
+html.theme-invite.theme-feast body.admin .stats b { font-family: var(--caps); font-weight: 500; }
+html.theme-invite.theme-feast .env-letter { font-family: var(--caps); font-size: 15.5px; line-height: 1.6; font-weight: 400; }
+html.theme-invite.theme-feast .env-letter .l-greet, html.theme-invite.theme-feast .env-letter .l-sign { font-weight: 600; }
