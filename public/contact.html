@@ -17,6 +17,7 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="stylesheet" href="/site/site.css">
+  <script>if(!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('motion');setTimeout(function(){document.documentElement.classList.remove('motion')},2500)}</script>
 </head>
 <body>
 <div class="page">
@@ -95,7 +96,10 @@
       } finally { btn.disabled = false; }
     });
   </script>
+  <script src="/site/vendor/gsap.min.js" defer></script>
+  <script src="/site/vendor/SplitText.min.js" defer></script>
   <script src="/site/scatter.js" defer></script>
+  <script src="/site/motion.js" defer></script>
   <script src="/site/nav.js" defer></script>
 </body>
 </html>

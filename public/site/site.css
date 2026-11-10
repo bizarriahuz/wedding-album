@@ -465,3 +465,16 @@ label { font-size: 16px; font-weight: 600; letter-spacing: .01em; text-transform
 .fc-italic, .ir-item p, details p, .next-copy, .about-lede { font-style: normal; }
 .ir-item p { font-size: 17px; color: #4c4a41; }
 details p { font-size: 17.5px; line-height: 1.7; }
+
+/* ---------- motion (GSAP, /site/motion.js) ---------- */
+/* flowers take an extra offset/turn while they settle; zero when still */
+.st { translate: 0 var(--in-y, 0px); rotate: var(--in-r, 0deg); scale: var(--in-s, 1); }
+/* the Signature card's tape presses on */
+.plan.featured::after { transform: rotate(-3deg) scale(var(--tape-s, 1)); opacity: var(--tape-o, 1); }
+/* until the opening plays, keep what's about to animate out of sight (falls back to visible after 2.5 s) */
+html.motion .top .brand, html.motion .hero h1, html.motion .sec-title h1, html.motion .hero .lede,
+html.motion .sec-title .sub-caps, html.motion .st, html.motion .plan { visibility: hidden; }
+/* GSAP drives the card tilt, so the CSS hover lift steps aside */
+html.gsap-on .plan { transition: box-shadow .3s ease; will-change: transform; }
+html.gsap-on .plan:hover, html.gsap-on .plan.featured:hover { transform: none; }
+.faq details p { will-change: height; }

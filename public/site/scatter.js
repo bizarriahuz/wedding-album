@@ -1,15 +1,4 @@
-// Sections settle in softly as they come into view
-(() => {
-  if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const els = document.querySelectorAll('main .plan'); // one moment: the packages settle in
-  if (!els.length) return;
-  document.documentElement.classList.add('js-reveal');
-  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
-    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-  }), { rootMargin: '0px 0px -8% 0px' });
-  els.forEach((el, i) => { el.classList.add('reveal'); el.style.transitionDelay = el.classList.contains('plan') ? `${(i % 3) * 90}ms` : '0ms'; io.observe(el); });
-  setTimeout(() => els.forEach((el) => el.classList.add('in')), 2500); // never leave anything hidden
-})();
+// Scroll and load motion now lives in /site/motion.js (GSAP)
 // Scrapbook scatter: every visit the pressed flowers land a little differently
 (() => {
   const rnd = (a, b) => a + Math.random() * (b - a);
