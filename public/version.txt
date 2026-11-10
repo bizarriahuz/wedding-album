@@ -1,1 +1,1 @@
-deployed-from-github 2026-11-10 faq-gallery
+deployed-from-github 2026-11-10 gallery-wording
