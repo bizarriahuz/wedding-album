@@ -1470,3 +1470,8 @@ body.admin .sharing-row .hint.paused { color: #590b19 !important; font-weight: 6
 body.admin #sharing-slot .del-btn, body.admin #sharing-slot .btn { width: auto !important; min-height: 44px; padding: 6px 16px; white-space: nowrap; border-radius: 999px !important; }
 .paused-note { margin: 0 0 12px; padding: 12px 14px; border-radius: 12px; background: #fff7e6; border: 1px solid #cfb88c; color: #451c20; font-size: 15.5px; line-height: 1.5; text-align: center; }
 body.guest #share .actions button:disabled, body.guest #share .wide:disabled { opacity: .45; cursor: not-allowed; }
+
+/* owner page: tick boxes in the reset card */
+#reset-card label.check { display: flex; align-items: flex-start; gap: 10px; margin: 12px 0 0; font-weight: 500; line-height: 1.4; cursor: pointer; }
+#reset-card label.check input { width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: currentColor; }
+#reset-card label.check .hint { display: block; font-weight: 400; margin: 2px 0 0; }

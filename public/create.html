@@ -56,6 +56,30 @@
       <p class="hint" style="margin-top:12px"><a href="/enquiries">Read website enquiries</a></p>
     </section>
 
+    <section class="card" id="reset-card">
+      <h2>Get an album ready for the event</h2>
+      <p class="hint">Uses the creator key above. The cover, photo strip, poster, letter and look are kept.</p>
+      <label for="reset-slug">Album address</label>
+      <input id="reset-slug" placeholder="harris-aqilah-a697" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <label class="check"><input type="checkbox" id="reset-clear" checked> Clear all guests, photos, videos and wishes</label>
+      <label class="check"><input type="checkbox" id="reset-guest"> <span>New guest link<span class="hint">Old QR codes and posters stop working</span></span></label>
+      <label class="check"><input type="checkbox" id="reset-admin" checked> <span>New admin link<span class="hint">The old admin link stops working</span></span></label>
+      <label for="reset-confirm">Type the album address again to confirm</label>
+      <input id="reset-confirm" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <p class="hint">This can't be undone.</p>
+      <button type="button" class="full" id="reset-go">Get album ready</button>
+      <div id="reset-msg" class="msg" role="status"></div>
+      <div id="reset-links" class="hidden">
+        <p class="hint" style="margin-top:14px"><b>Guest link</b> (goes in the QR code)</p>
+        <div class="linkbox"><input class="link" id="reset-guest-url" readonly><button type="button" data-copy="reset-guest-url">Copy</button></div>
+        <div id="reset-admin-box" class="hidden">
+          <p class="hint" style="margin-top:14px"><b>Admin link</b> (for the couple only, keep it private)</p>
+          <div class="linkbox"><input class="link" id="reset-admin-url" readonly><button type="button" data-copy="reset-admin-url">Copy</button></div>
+        </div>
+        <p class="hint" style="margin-top:12px">Copy these somewhere safe now: the admin link is only shown once.</p>
+      </div>
+    </section>
+
     <section id="done" class="card hidden">
       <h2>Album created</h2>
 
@@ -128,6 +152,38 @@
         msg.innerHTML = 'Demo is ready. <a href="/demo" target="_blank" rel="noopener">Open it</a> · <a href="' + data.admin_url + '" target="_blank" rel="noopener">Demo admin</a>';
       } catch (err) { msg.className = 'msg err'; msg.textContent = err.message; }
     };
+  </script>
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+      $('reset-go').onclick = async () => {
+        const msg = $('reset-msg');
+        const key = $('key').value;
+        if (!key) { msg.className = 'msg err'; msg.textContent = 'Enter your creator key above first.'; return; }
+        const body = { slug: $('reset-slug').value, confirm: $('reset-confirm').value,
+          clear: $('reset-clear').checked, renew_guest: $('reset-guest').checked, renew_admin: $('reset-admin').checked };
+        if (!body.clear && !body.renew_guest && !body.renew_admin) { msg.className = 'msg err'; msg.textContent = 'Tick at least one box.'; return; }
+        $('reset-go').disabled = true; msg.className = 'msg'; msg.textContent = 'Working…';
+        try {
+          const res = await fetch('/api/owner/reset', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Create-Key': key }, body: JSON.stringify(body) });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.error || 'Something went wrong');
+          const done = [data.cleared && 'cleared everything', data.guest_renewed && 'new guest link', data.admin_url && 'new admin link'].filter(Boolean).join(', ');
+          msg.className = 'msg ok'; msg.textContent = `Done: ${done}.`;
+          $('reset-guest-url').value = data.guest_url;
+          $('reset-admin-url').value = data.admin_url || '';
+          $('reset-admin-box').classList.toggle('hidden', !data.admin_url);
+          $('reset-links').classList.remove('hidden');
+          $('reset-confirm').value = '';
+        } catch (e) { msg.className = 'msg err'; msg.textContent = e.message; }
+        $('reset-go').disabled = false;
+      };
+      document.querySelectorAll('#reset-card [data-copy]').forEach((b) => (b.onclick = async () => {
+        const v = $(b.dataset.copy).value;
+        try { await navigator.clipboard.writeText(v); } catch { $(b.dataset.copy).select(); document.execCommand('copy'); }
+        b.textContent = 'Copied'; setTimeout(() => (b.textContent = 'Copy'), 1500);
+      }));
+    })();
   </script>
   <script src="/links.js"></script>
 </body>

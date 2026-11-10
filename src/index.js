@@ -24,6 +24,7 @@
 //   POST /api/enquiries              website enquiry form (public, rate limited)
 //   GET  /api/enquiries              list enquiries (needs X-Create-Key)
 //   POST /api/demo/setup             create or reset the demo album (needs X-Create-Key)
+//   POST /api/owner/reset            before an event: clear guests, uploads and wishes; renew guest and/or admin link (needs X-Create-Key)
 //   GET  /demo                       redirect to the live demo album
 //   cron                             clears demo uploads older than a day
 
@@ -110,6 +111,8 @@ export default {
       if (m && request.method === 'PUT') return uploadPoster(m[1], request, env);
       if (m && request.method === 'DELETE') return deletePoster(m[1], request, env);
 
+      if (path === '/api/owner/reset' && request.method === 'POST') return ownerReset(request, env, url);
+
       if (path === '/api/enquiries' && request.method === 'POST') return postEnquiry(request, env);
       if (path === '/api/enquiries' && request.method === 'GET') return listEnquiries(request, env);
       if (path === '/api/demo/setup' && request.method === 'POST') return setupDemo(request, env, url);
@@ -167,6 +170,52 @@ export default {
 };
 
 // ---------- handlers ----------
+
+// Owner only. Gets an album ready for the real event: optionally clears every guest, photo, video and wish
+// (cover, photo strip, poster, letter and look are kept) and issues fresh guest and/or admin links.
+async function ownerReset(request, env, url) {
+  const key = request.headers.get('X-Create-Key') || '';
+  if (!env.CREATE_KEY || !(await safeEqual(key, env.CREATE_KEY))) return json({ error: 'Wrong creator key' }, 401);
+  const body = await readJson(request);
+  const slug = String(body.slug || '').trim().toLowerCase().replace(/^.*\/e\//, '').replace(/[?#].*$/, '');
+  const ev = await env.DB.prepare('SELECT id, slug, guest_token FROM events WHERE slug = ?').bind(slug).first();
+  if (!ev) return json({ error: 'No album at that address' }, 404);
+  if (String(body.confirm || '').trim().toLowerCase() !== ev.slug) return json({ error: `Type the album address (${ev.slug}) to confirm` }, 400);
+
+  const out = { slug: ev.slug };
+  if (body.clear) {
+    // delete stored files for uploads, previews and voice wishes, in pages of up to 1000
+    let removed = 0;
+    for (const prefix of [`events/${ev.id}/media/`, `events/${ev.id}/thumbs/`, `events/${ev.id}/wishes/`]) {
+      let cursor;
+      do {
+        const page = await env.MEDIA.list({ prefix, cursor, limit: 1000 });
+        const keys = page.objects.map((o) => o.key);
+        if (keys.length) { await env.MEDIA.delete(keys); removed += keys.length; }
+        cursor = page.truncated ? page.cursor : undefined;
+      } while (cursor);
+    }
+    await env.DB.batch([
+      env.DB.prepare('DELETE FROM media WHERE event_id = ?').bind(ev.id),
+      env.DB.prepare('DELETE FROM wishes WHERE event_id = ?').bind(ev.id),
+      env.DB.prepare('DELETE FROM guests WHERE event_id = ?').bind(ev.id),
+    ]);
+    out.cleared = true; out.files_removed = removed;
+  }
+  let guestToken = ev.guest_token;
+  if (body.renew_guest) {
+    guestToken = randomString(16);
+    await env.DB.prepare('UPDATE events SET guest_token = ? WHERE id = ?').bind(guestToken, ev.id).run();
+    out.guest_renewed = true;
+  }
+  if (body.renew_admin) {
+    const adminToken = randomString(32);
+    await env.DB.prepare('UPDATE events SET admin_token_hash = ? WHERE id = ?').bind(await sha256(adminToken), ev.id).run();
+    out.admin_url = `${url.origin}/admin/${ev.slug}#${adminToken}`;
+  }
+  out.guest_url = `${url.origin}/e/${ev.slug}?t=${guestToken}`;
+  return json(out);
+}
 
 async function createEvent(request, env, url) {
   const key = request.headers.get('X-Create-Key') || '';
