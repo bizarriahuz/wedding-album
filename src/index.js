@@ -7,6 +7,7 @@
 //   PATCH /api/admin/:slug           edit names, date, venue, type (needs X-Admin-Token)
 //   PUT  /api/admin/:slug/cover      upload cover photo, raw image body (needs X-Admin-Token)
 //   PUT|DELETE /api/admin/:slug/poster  the couple's own print poster (image or PDF)
+//   PUT  /api/admin/:slug/status     {status: 'live' | 'closed'} pause or resume guest sharing
 //   PUT  /api/admin/:slug/strip/:n   photo-booth strip photo n (0-2), raw image body; DELETE removes it
 //   POST /api/events/:slug/guests    guest joins with a name (needs X-Guest-Token)
 //   PUT  /api/events/:slug/thumbs/:id  small preview image, sent before its media (needs X-Guest-Token)
@@ -56,6 +57,8 @@ async function ensureSchema(env) {
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_COVER_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_MEDIA_BYTES = 95 * 1024 * 1024; // free Workers plan accepts up to 100 MB per request
+const PART_BYTES = 10 * 1024 * 1024;        // big videos go up in 10 MB pieces (R2 multipart), so a dropped connection only re-sends one piece
+const MAX_LARGE_BYTES = 1024 * 1024 * 1024; // 1 GB: several minutes of 4K video
 const MAX_THUMB_BYTES = 1024 * 1024;
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
 const VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm'];
@@ -100,6 +103,9 @@ export default {
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/cover$/);
       if (m && request.method === 'PUT') return uploadCover(m[1], request, env);
 
+      m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/status$/);
+      if (m && request.method === 'PUT') return setStatus(m[1], request, env);
+
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/poster$/);
       if (m && request.method === 'PUT') return uploadPoster(m[1], request, env);
       if (m && request.method === 'DELETE') return deletePoster(m[1], request, env);
@@ -133,6 +139,13 @@ export default {
 
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/wishes\/([0-9a-f-]{36})$/);
       if (m && request.method === 'DELETE') return adminDeleteWish(m[1], m[2], request, env);
+
+      m = path.match(/^\/api\/events\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})\/parts$/);
+      if (m && request.method === 'POST') return startParts(m[1], m[2], request, env, url);
+      m = path.match(/^\/api\/events\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})\/parts\/(\d{1,4})$/);
+      if (m && request.method === 'PUT') return putPart(m[1], m[2], Number(m[3]), request, env, url);
+      m = path.match(/^\/api\/events\/([a-z0-9-]+)\/media\/([0-9a-f-]{36})\/parts\/complete$/);
+      if (m && request.method === 'POST') return completeParts(m[1], m[2], request, env);
 
       m = path.match(/^\/api\/admin\/([a-z0-9-]+)\/media$/);
       if (m && request.method === 'GET') return adminMedia(m[1], request, env, url);
@@ -268,6 +281,17 @@ async function deleteStrip(slug, n, request, env) {
   await env.DB.prepare('UPDATE events SET strip_keys = ? WHERE id = ?').bind(JSON.stringify(keys), ev.id).run();
   if (old) await env.MEDIA.delete(old);
   return json({ strip_urls: keys.map((k) => (k ? `/media/${k}` : null)) });
+}
+
+// Pause or resume guest sharing (e.g. if the guest link ends up somewhere public)
+async function setStatus(slug, request, env) {
+  const ev = await authorizeAdmin(slug, request, env);
+  if (ev instanceof Response) return ev;
+  const body = await readJson(request);
+  const status = body.status === 'closed' ? 'closed' : body.status === 'live' ? 'live' : null;
+  if (!status) return json({ error: 'Unknown status' }, 400);
+  await env.DB.prepare('UPDATE events SET status = ? WHERE id = ?').bind(status, ev.id).run();
+  return json({ status });
 }
 
 // The couple's own designed poster for printing: an image or a PDF, kept at full quality
@@ -503,6 +527,73 @@ async function uploadMedia(slug, id, request, env, url) {
   return json({ ok: true }, 201);
 }
 
+// ---------- large videos in pieces (R2 multipart) ----------
+// start -> one PUT per 10 MB piece (each retried on its own) -> complete. Safe to resume with the same upload id.
+async function largeUploadContext(slug, id, request, env, guestId) {
+  const ev = await authorizeGuest(slug, request, env, true);
+  if (ev instanceof Response) return { res: ev };
+  if (ev.is_demo) return { res: json({ error: 'The demo takes videos up to 25 MB', code: 'too_large' }, 413) };
+  const done = await env.DB.prepare('SELECT id FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
+  if (done) return { res: json({ ok: true, duplicate: true }) };
+  const guest = await env.DB.prepare('SELECT id FROM guests WHERE id = ? AND event_id = ?').bind(guestId, ev.id).first();
+  if (!guest) return { res: json({ error: 'Please enter your name again', code: 'no_guest' }, 403) };
+  return { ev, guest };
+}
+
+function largeKey(ev, id, type) { return `events/${ev.id}/media/${id}.${EXT[type]}`; }
+
+async function startParts(slug, id, request, env, url) {
+  const c = await largeUploadContext(slug, id, request, env, url.searchParams.get('guest') || '');
+  if (c.res) return c.res;
+  const type = (url.searchParams.get('type') || '').toLowerCase();
+  if (!VIDEO_TYPES.includes(type) && !PHOTO_TYPES.includes(type)) return json({ error: 'Only photos and videos can be shared' }, 400);
+  const bytes = Math.max(0, Number(url.searchParams.get('bytes')) || 0);
+  if (bytes > MAX_LARGE_BYTES) return json({ error: 'That video is over 1 GB. Trim it to a few minutes and try again.', code: 'too_large' }, 413);
+  const up = await env.MEDIA.createMultipartUpload(largeKey(c.ev, id, type), { httpMetadata: { contentType: type } });
+  return json({ upload_id: up.uploadId, part_bytes: PART_BYTES }, 201);
+}
+
+async function putPart(slug, id, n, request, env, url) {
+  const c = await largeUploadContext(slug, id, request, env, url.searchParams.get('guest') || '');
+  if (c.res) return c.res;
+  const type = (url.searchParams.get('type') || '').toLowerCase();
+  const uploadId = url.searchParams.get('upload') || '';
+  if (!EXT[type] || !uploadId || n < 1 || n > 10000) return json({ error: 'Bad piece' }, 400);
+  const size = Number(request.headers.get('Content-Length') || 0);
+  if (!size || size > PART_BYTES) return json({ error: 'Bad piece size' }, 400);
+  try {
+    const up = env.MEDIA.resumeMultipartUpload(largeKey(c.ev, id, type), uploadId);
+    const part = await up.uploadPart(n, request.body);
+    return json({ part_number: part.partNumber, etag: part.etag });
+  } catch (e) {
+    // the upload expired or was never started: the page starts it again from the first piece
+    return json({ error: 'Upload expired, starting again', code: 'upload_gone' }, 409);
+  }
+}
+
+async function completeParts(slug, id, request, env) {
+  const body = await readJson(request);
+  const c = await largeUploadContext(slug, id, request, env, String(body.guest || ''));
+  if (c.res) return c.res;
+  const type = String(body.type || '').toLowerCase();
+  const kind = PHOTO_TYPES.includes(type) ? 'photo' : VIDEO_TYPES.includes(type) ? 'video' : null;
+  const parts = Array.isArray(body.parts) ? body.parts : [];
+  if (!kind || !body.upload_id || !parts.length) return json({ error: 'Bad upload' }, 400);
+  const key = largeKey(c.ev, id, type);
+  try {
+    const up = env.MEDIA.resumeMultipartUpload(key, String(body.upload_id));
+    await up.complete(parts.map((p) => ({ partNumber: Number(p.part_number), etag: String(p.etag) })).sort((a, b) => a.partNumber - b.partNumber));
+  } catch (e) {
+    return json({ error: 'Upload expired, starting again', code: 'upload_gone' }, 409);
+  }
+  const bytes = Math.max(0, Math.round(Number(body.bytes) || 0));
+  await env.DB.prepare(
+    `INSERT OR IGNORE INTO media (id, event_id, guest_id, r2_key, kind, mime, bytes, width, height, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`
+  ).bind(id, c.ev.id, c.guest.id, key, kind, type, bytes, toInt(body.w), toInt(body.h)).run();
+  return json({ ok: true }, 201);
+}
+
 async function isCoupleRequest(request, ev) {
   const t = request.headers.get('X-Admin-Token') || '';
   return !!t && (await safeEqual(await sha256(t), ev.admin_token_hash));
@@ -612,7 +703,7 @@ async function authorizeGuest(slug, request, env, forUpload = false) {
   if (!token || !(await safeEqual(token, ev.guest_token))) {
     return json({ error: 'Please scan the QR code again', code: 'bad_token' }, 401);
   }
-  if (forUpload && ev.status !== 'live') return json({ error: 'This album is closed to new photos', code: 'closed' }, 403);
+  if (forUpload && ev.status !== 'live') return json({ error: 'The couple has paused sharing for now', code: 'closed' }, 403);
   return ev;
 }
 

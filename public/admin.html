@@ -43,6 +43,11 @@
           <div><b id="n-media">0</b><span>photos &amp; videos</span></div>
           <div><b id="n-wishes">0</b><span>wishes</span></div>
         </div>
+        <div class="sharing-row">
+          <p id="sharing-text" class="hint">Guests can share photos, videos and wishes.</p>
+          <span id="sharing-slot"></span>
+        </div>
+        <p class="msg" id="sharing-msg" role="status"></p>
       </section>
 
       <section class="card" id="wishes-card">
@@ -231,6 +236,7 @@
           box.append(p);
           return;
         }
+        let voices = 0; // only the newest voice notes load straight away; the rest load when played
         for (const w of items) {
           const el = document.createElement('article'); el.className = 'wish-item';
           const head = document.createElement('div'); head.className = 'wish-head';
@@ -242,7 +248,7 @@
           el.append(head);
           el.dataset.id = w.id;
           if (w.kind === 'voice' && w.audio_url) {
-            const a = document.createElement('audio'); a.controls = true; a.preload = 'metadata'; fixAudioDuration(a); a.src = w.audio_url;
+            const a = document.createElement('audio'); a.controls = true; a.preload = ++voices <= 15 ? 'metadata' : 'none'; if (a.preload !== 'none') fixAudioDuration(a); a.src = w.audio_url;
             el.append(a);
           } else {
             const p = document.createElement('p'); p.className = 'wish-body'; p.textContent = w.body || '';
@@ -305,6 +311,7 @@
       const date = new Date(ev.event_date + 'T00:00:00');
       $('subtitle').textContent = `${TYPES[ev.event_type]}, ${date.toLocaleDateString('en-SG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}` + (ev.venue ? `\n${ev.venue}` : '');
       setPoster(ev.poster_url || null);
+      setSharing(ev.status);
       $('n-guests').textContent = ev.counts.guests;
       $('n-media').textContent = ev.counts.media;
       $('n-wishes').textContent = ev.counts.wishes;
@@ -477,6 +484,28 @@
         setPoster(null); $('poster-msg').className = 'msg ok'; $('poster-msg').textContent = 'Poster removed';
       }, 'Remove poster'));
     }
+    // Pause or resume guest sharing. Pausing asks for a second tap so it can't happen by accident.
+    function setSharing(status) {
+      const live = status !== 'closed';
+      $('sharing-text').textContent = live ? 'Guests can share photos, videos and wishes.'
+        : 'Sharing is paused. Guests can still view the album; anything they try to share waits on their phone until you resume.';
+      $('sharing-text').classList.toggle('paused', !live);
+      const msg = $('sharing-msg');
+      const change = async (next) => {
+        await api('/status', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: next }) });
+        setSharing(next);
+        msg.className = 'msg ok'; msg.textContent = next === 'closed' ? 'Sharing paused' : 'Sharing resumed';
+      };
+      if (live) {
+        const b = deleteButton(() => change('closed'), 'Pause sharing');
+        $('sharing-slot').replaceChildren(b);
+      } else {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = 'Resume sharing';
+        b.onclick = async () => { b.disabled = true; try { await change('live'); } catch (e) { b.disabled = false; msg.className = 'msg err'; msg.textContent = e.message; } };
+        $('sharing-slot').replaceChildren(b);
+      }
+    }
+
     $('poster-upload').onclick = $('poster-replace').onclick = () => $('poster-file').click();
     $('poster-file').onchange = async () => {
       const file = $('poster-file').files[0];

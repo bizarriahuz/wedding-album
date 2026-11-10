@@ -3,8 +3,9 @@
   const $ = (id) => document.getElementById(id);
   const slug = location.pathname.split('/')[2] || '';
   const API = `/api/events/${slug}`;
-  const MAX_BYTES = 95 * 1024 * 1024;
-  const POLL_MS = 12000;          // check for new photos every 12 s while the page is on screen
+  const MAX_BYTES = 1024 * 1024 * 1024; // 1 GB: several minutes of 4K video
+  const LARGE_FROM = 20 * 1024 * 1024;  // bigger files go up in 10 MB pieces, so a dropped signal only re-sends one piece
+  const POLL_MS = 20000;          // check for new photos every 20 s while the page is on screen
   const IDLE_MS = 10 * 60 * 1000;  // and pause after 10 min without a tap or scroll
   const STALL_MS = 45000; // abort an upload that makes no progress for this long
   const TYPES = { nikah: 'Solemnisation', sanding: '', tandang: '', other: '' }; // receptions: "The wedding of" already says it
@@ -339,6 +340,7 @@
     $('when').textContent = when;
     $('where').textContent = ev.venue || '';
     $('wish-title').textContent = `Leave a wish for ${ev.couple_names}`;
+    setPaused(ev.status && ev.status !== 'live');
     if (ev.privacy === 'private') {
       document.querySelector('#join .lead').textContent = "Share your photos and videos with the couple. Only they will see them. What's your name?";
     }
@@ -481,7 +483,7 @@
     const type = guessType(file);
     const kind = type.startsWith('image/') ? 'photo' : type.startsWith('video/') ? 'video' : null;
     if (!kind) return toast(`"${file.name}" isn't a photo or video.`);
-    if (kind === 'video' && file.size > MAX_BYTES) return toast('That video is too large. Try a clip under 45 seconds.');
+    if (file.size > MAX_BYTES) return toast('That video is over 1 GB. Trim it to a few minutes and try again.');
 
     preparing++;
     renderStatus();
@@ -578,10 +580,48 @@
       if (t.status >= 500) throw new Error('server');
       if (t.status >= 400 && t.status !== 413) return t; // let the media call report the real problem
     }
+    if (blob.size > LARGE_FROM) return uploadLarge(item, blob);
     const q = new URLSearchParams({ guest: state.guestId });
     if (item.w) q.set('w', item.w);
     if (item.h) q.set('h', item.h);
     return put(`${API}/media/${item.id}?${q}`, blob, (p) => { progress = p; renderStatus(); });
+  }
+
+  // Large files: start, then one 10 MB piece at a time, then complete. Finished pieces are remembered,
+  // so after a dropped signal or a reload only the unfinished piece is sent again.
+  async function postJson(url, body) {
+    const r = await fetch(url, { method: 'POST', headers: { 'X-Guest-Token': state.token || '', 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    const data = await r.json().catch(() => ({}));
+    return { status: r.status, data };
+  }
+  async function uploadLarge(item, blob) {
+    const base = `${API}/media/${item.id}/parts`;
+    const g = encodeURIComponent(state.guestId);
+    const type = encodeURIComponent(blob.type);
+    if (!item.mp) {
+      const r = await postJson(`${base}?guest=${g}&type=${type}&bytes=${blob.size}`);
+      if (r.status >= 500) throw new Error('server');
+      if (r.status >= 300 || r.data.duplicate) return r;
+      item.mp = { uploadId: r.data.upload_id, size: r.data.part_bytes, parts: [] };
+      await qPut(item);
+    }
+    const size = item.mp.size;
+    const total = Math.ceil(blob.size / size);
+    const reset = async () => { delete item.mp; await qPut(item); throw new Error('restart'); };
+    for (let n = item.mp.parts.length + 1; n <= total; n++) {
+      const piece = blob.slice((n - 1) * size, Math.min(blob.size, n * size), blob.type);
+      const r = await put(`${base}/${n}?guest=${g}&type=${type}&upload=${encodeURIComponent(item.mp.uploadId)}`, piece,
+        (p) => { progress = ((n - 1) * size + p * piece.size) / blob.size; renderStatus(); });
+      if (r.data.code === 'upload_gone') await reset();
+      if (r.status >= 500) throw new Error('server');
+      if (r.status >= 300 || r.data.duplicate) return r;
+      item.mp.parts.push({ part_number: r.data.part_number, etag: r.data.etag });
+      await qPut(item);
+    }
+    const r = await postJson(`${base}/complete`, { guest: state.guestId, type: blob.type, upload_id: item.mp.uploadId, parts: item.mp.parts, bytes: blob.size, w: item.w, h: item.h });
+    if (r.data.code === 'upload_gone') await reset();
+    if (r.status >= 500) throw new Error('server');
+    return r;
   }
 
   async function pump() {
@@ -597,7 +637,11 @@
         await done(item, true);
       } else if (res.data.code === 'no_guest') {
         await join(state.name); // device forgot by the server: re-register and retry
-      } else if (res.data.code === 'bad_token' || res.data.code === 'closed') {
+      } else if (res.data.code === 'closed') {
+        // The couple paused sharing: keep everything on this phone and try again every minute
+        setPaused(true);
+        throw new Error('paused');
+      } else if (res.data.code === 'bad_token') {
         queue = []; // nothing more can be sent
         toast(res.data.error);
       } else if (res.status >= 400 && res.status < 500) {
@@ -608,10 +652,11 @@
       }
       item.tries = 0;
       waitingUntil = 0;
+      if (res.status < 300 && paused) setPaused(false);
     } catch {
       // No signal, timeout or server hiccup: wait and try again, longer each time
       item.tries = (item.tries || 0) + 1;
-      const wait = Math.min(30000, 2000 * 2 ** Math.min(item.tries - 1, 4));
+      const wait = paused ? 60000 : Math.min(30000, 2000 * 2 ** Math.min(item.tries - 1, 4));
       waitingUntil = Date.now() + wait;
       clearTimeout(wakeTimer);
       wakeTimer = setTimeout(() => { waitingUntil = 0; pump(); }, wait);
@@ -620,6 +665,15 @@
       renderStatus();
       if (!waitingUntil) setTimeout(pump, 0);
     }
+  }
+
+  // Paused by the couple: say so above the buttons and in the status line
+  let paused = false;
+  function setPaused(on) {
+    paused = on;
+    show($('paused-note'), on);
+    document.querySelectorAll('#share .actions button, #share .wide').forEach((b) => { b.disabled = on; });
+    renderStatus();
   }
 
   async function done(item, ok) {
@@ -664,6 +718,11 @@
       $('status-main').textContent = 'Getting your photos ready…';
       $('status-sub').textContent = '';
       $('status-bar').style.width = '0%';
+    } else if (paused && !busy) {
+      box.className = 'status waiting';
+      $('status-main').textContent = 'Sharing is paused by the couple';
+      $('status-sub').textContent = `${pending} waiting on this phone, will send when it reopens`;
+      $('status-bar').style.width = '0%';
     } else if (waitingUntil && !busy) {
       box.className = 'status waiting';
       $('status-main').textContent = navigator.onLine === false ? 'No signal right now' : 'Connection is weak';
@@ -701,8 +760,8 @@
   $('wish-send-text').onclick = async () => {
     const body = $('wish-text').value.trim();
     if (!body) { wishMsg('Write a few words first.', 'err'); $('wish-text').focus(); return; }
+    $('wish-text').value = ''; // cleared before queueing, so a quick double tap can't send it twice
     await queueWish('wish-text', new Blob([JSON.stringify({ body })], { type: 'application/json' }));
-    $('wish-text').value = '';
     wishMsg('Thank you! Your wish is on its way to the couple.');
   };
 
@@ -773,7 +832,8 @@
   $('rec-again').onclick = () => { resetRecording(); startRecording(); };
   $('wish-send-voice').onclick = async () => {
     if (!recBlob) return;
-    await queueWish('wish-voice', recBlob);
+    const blob = recBlob; recBlob = null; // taken first, so a quick double tap can't send it twice
+    await queueWish('wish-voice', blob);
     resetRecording();
     wishMsg('Thank you! Your voice wish is on its way to the couple.');
   };

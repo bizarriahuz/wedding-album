@@ -1462,3 +1462,11 @@ html.theme-invite.theme-feast body.admin .stats span, html.theme-invite.theme-fe
 html.theme-invite.theme-feast body.admin .stats b { font-family: var(--caps); font-weight: 500; }
 html.theme-invite.theme-feast .env-letter { font-family: var(--caps); font-size: 15.5px; line-height: 1.6; font-weight: 400; }
 html.theme-invite.theme-feast .env-letter .l-greet, html.theme-invite.theme-feast .env-letter .l-sign { font-weight: 600; }
+
+/* admin: pause or resume guest sharing; guest: paused notice */
+body.admin .sharing-row { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(207, 184, 140, .6); }
+body.admin .sharing-row .hint { flex: 1; margin: 0; }
+body.admin .sharing-row .hint.paused { color: #590b19 !important; font-weight: 600; }
+body.admin #sharing-slot .del-btn, body.admin #sharing-slot .btn { width: auto !important; min-height: 44px; padding: 6px 16px; white-space: nowrap; border-radius: 999px !important; }
+.paused-note { margin: 0 0 12px; padding: 12px 14px; border-radius: 12px; background: #fff7e6; border: 1px solid #cfb88c; color: #451c20; font-size: 15.5px; line-height: 1.5; text-align: center; }
+body.guest #share .actions button:disabled, body.guest #share .wide:disabled { opacity: .45; cursor: not-allowed; }
