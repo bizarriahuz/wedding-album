@@ -895,7 +895,7 @@ async function setupDemo(request, env, url) {
   const res = await createEvent(new Request(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Create-Key': key },
-    body: JSON.stringify({ couple_names: 'Aina & Hakim', event_type: 'sanding', event_date: next.toISOString().slice(0, 10), venue: 'Your wedding venue', theme: 'ivory' }),
+    body: JSON.stringify({ couple_names: 'Aina & Hakim', event_type: 'sanding', event_date: next.toISOString().slice(0, 10), venue: 'Your wedding venue', theme: 'ha-florals' }),
   }), env, url);
   const made = await res.json();
   if (!res.ok) return json(made, res.status);
