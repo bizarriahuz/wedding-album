@@ -1475,3 +1475,50 @@ body.guest #share .actions button:disabled, body.guest #share .wide:disabled { o
 #reset-card label.check { display: flex; align-items: flex-start; gap: 10px; margin: 12px 0 0; font-weight: 500; line-height: 1.4; cursor: pointer; }
 #reset-card label.check input { width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: currentColor; }
 #reset-card label.check .hint { display: block; font-weight: 400; margin: 2px 0 0; }
+
+/* =====================================================================
+   Entrance: the 3D photo booth. The canvas fills the screen behind the
+   words; the booth is framed into .ent-stage, the free space between
+   the names and the hint.
+   ===================================================================== */
+.ent-3d { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.ent-scene.ent-booth { height: 100%; min-height: 0; justify-content: flex-start; padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 58px)); touch-action: none; user-select: none; -webkit-user-select: none; }
+.ent-booth .ent-head { flex: none; pointer-events: none; }
+.ent-booth .ent-names { margin-bottom: 0; }
+.ent-booth .ent-stage { flex: 1 1 0; min-height: 0; width: 100%; display: grid; place-items: center; }
+/* the hint doubles as the button for keyboards and screen readers; tapping anywhere works too */
+body.guest .ent-booth .ent-hint, html.theme-invite.theme-feast body.guest .ent-booth .ent-hint {
+  flex: none; margin: 10px 0 0; padding: 8px 14px; min-height: 0; background: none !important; box-shadow: none !important; border: 0; border-radius: 999px;
+  color: var(--iv-ink); font-family: var(--caps); cursor: pointer; width: auto;
+}
+body.guest .ent-booth .ent-hint:disabled { opacity: .7; cursor: default; }
+body.guest .ent-booth .ent-hint:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+html.theme-invite.theme-feast body.guest .ent-booth .ent-hint { color: #451c20; font-size: 15px; font-weight: 500 !important; letter-spacing: 0 !important; text-transform: none; }
+/* while the booth loads: a short row of bulbs lighting in turn */
+.ent-loading { grid-area: 1 / 1; display: flex; gap: 12px; }
+.ent-loading i { width: 9px; height: 9px; border-radius: 50%; background: #cfb88c; opacity: .28; animation: ent-bulb 1.25s ease-in-out infinite; }
+.ent-loading i:nth-child(2) { animation-delay: .15s; } .ent-loading i:nth-child(3) { animation-delay: .3s; }
+.ent-loading i:nth-child(4) { animation-delay: .45s; } .ent-loading i:nth-child(5) { animation-delay: .6s; }
+@keyframes ent-bulb { 0%, 60%, 100% { opacity: .28; transform: scale(.85); } 30% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 10px rgba(255, 196, 110, .9); } }
+@media (prefers-reduced-motion: reduce) { .ent-loading i { animation: none; opacity: .6; } }
+.ent-flat { grid-area: 1 / 1; }
+/* side decorations (lace, florals) sit behind the booth, and dim with the page */
+.ent-scene.ent-booth > .ent-flower { z-index: -1; }
+/* wide screens: give the booth the height */
+@media (min-width: 760px) and (min-height: 620px) {
+  .ent-scene.ent-booth { padding-bottom: 46px; }
+  html.theme-invite.theme-feast.theme-doodle .ent-scene.ent-booth { padding-top: 104px; }
+}
+/* no 3D on this phone: a flat strip and a plain button */
+.ent-flat { display: grid; place-items: center; }
+.ent-flat .ent-photo, .ent-flat .ent-photo.strip { transform: none; margin: 0; opacity: 0; zoom: 1.9; }
+.ent-flat .ent-photo.out { opacity: 1; }
+body.guest .ent-booth .ent-hint.as-button, html.theme-invite.theme-feast body.guest .ent-booth .ent-hint.as-button {
+  background: var(--iv-brown) !important; color: #fff; padding: 14px 28px; min-height: 50px; font-weight: 600 !important;
+}
+html.theme-invite.theme-feast body.guest .ent-booth .ent-hint.as-button { background: #590b19 !important; color: #f5ebd0; }
+/* short screens: the booth needs the room more than the chandelier does */
+@media (max-height: 700px) {
+  html.theme-doodle .entrance:has(#ent-a:not(.hidden))::before { display: none !important; }
+  html.theme-invite.theme-feast.theme-doodle .ent-scene.ent-booth { padding-top: max(18px, env(safe-area-inset-top)); }
+}

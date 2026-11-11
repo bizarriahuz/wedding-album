@@ -27,57 +27,25 @@
 <body class="guest">
   <!-- Entrance: shown once per visit before the album -->
   <div id="entrance" class="entrance hidden" role="dialog" aria-modal="true" aria-label="Welcome">
-    <section class="ent-scene" id="ent-a">
+    <!-- the 3D photo booth draws here, behind the words -->
+    <div class="ent-3d" id="ent-3d"></div>
+    <section class="ent-scene ent-booth" id="ent-a">
       <div class="ent-flower tl" aria-hidden="true"></div><div class="ent-flower tr" aria-hidden="true"></div><div class="ent-flower bl" aria-hidden="true"></div><div class="ent-flower br" aria-hidden="true"></div>
-      <p class="ent-pre">The wedding of</p>
-      <h1 class="ent-names" id="ent-names"></h1>
-      <div class="ent-frame-wrap" id="ent-frame">
-        <svg class="ent-frame" viewBox="0 0 260 360" aria-hidden="true">
-          <defs>
-            <linearGradient id="fr-carve" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#efe8dd"/><stop offset=".25" stop-color="#c9bcab"/><stop offset=".5" stop-color="#a29688"/>
-              <stop offset=".72" stop-color="#e4dccf"/><stop offset="1" stop-color="#8f8272"/>
-            </linearGradient>
-            <linearGradient id="fr-bevel" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#9a8d7c"/><stop offset=".5" stop-color="#c6b9a8"/><stop offset="1" stop-color="#8a7d6c"/>
-            </linearGradient>
-            <radialGradient id="fr-satin" cx=".42" cy=".36" r=".8">
-              <stop offset="0" stop-color="#d6c9b8"/><stop offset=".55" stop-color="#c0b2a2"/><stop offset="1" stop-color="#a79885"/>
-            </radialGradient>
-            <radialGradient id="fr-sheen" cx=".5" cy=".5" r=".5">
-              <stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
-            </radialGradient>
-          </defs>
-          <path d="M50 18H210Q214 18 216 22Q226 36 244 40Q248 42 248 46V314Q248 318 244 320Q226 324 216 338Q214 342 210 342H50Q46 342 44 338Q34 324 16 320Q12 318 12 314V46Q12 42 16 40Q34 36 44 22Q46 18 50 18Z" fill="url(#fr-carve)" stroke="#7d7062" stroke-width=".8"/>
-          <path d="M52 23H208Q211 23 213 26Q222 39 239 44Q243 45 243 49V311Q243 315 239 316Q222 321 213 334Q211 337 208 337H52Q49 337 47 334Q38 321 21 316Q17 315 17 311V49Q17 45 21 44Q38 39 47 26Q49 23 52 23Z" fill="none" stroke="#f4eee4" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="0 6.4"/>
-          <path d="M55 28H205Q208 28 210 31Q220 45 235 49Q238 50 238 53V307Q238 310 235 311Q220 315 210 329Q208 332 205 332H55Q52 332 50 329Q40 315 25 311Q22 310 22 307V53Q22 50 25 49Q40 45 50 31Q52 28 55 28Z" fill="url(#fr-bevel)"/>
-          <path d="M58 36H202Q205 36 207 39Q217 51 228 54Q231 55 231 58V302Q231 305 228 306Q217 309 207 321Q205 324 202 324H58Q55 324 53 321Q43 309 32 306Q29 305 29 302V58Q29 55 32 54Q43 51 53 39Q55 36 58 36Z" fill="url(#fr-satin)" stroke="#8a7d6c" stroke-width=".8"/>
-          <ellipse cx="100" cy="112" rx="72" ry="46" fill="url(#fr-sheen)"/>
-          <g fill="url(#fr-carve)" stroke="#8a7d6c" stroke-width=".7">
-            <path d="M106 24Q130-10 154 24Z"/>
-            <path d="M130 24L130 6M130 24L118 9M130 24L142 9M130 24L111 15M130 24L149 15" fill="none" stroke="#8f8272"/>
-            <path d="M106 23C94 23 89 13 97 8C103 5 108 12 102 15" fill="none" stroke="url(#fr-carve)" stroke-width="3.4" stroke-linecap="round"/>
-            <path d="M154 23C166 23 171 13 163 8C157 5 152 12 158 15" fill="none" stroke="url(#fr-carve)" stroke-width="3.4" stroke-linecap="round"/>
-            <path d="M106 336Q130 370 154 336Z"/>
-            <path d="M130 336L130 354M130 336L118 351M130 336L142 351M130 336L111 345M130 336L149 345" fill="none" stroke="#8f8272"/>
-            <path d="M106 337C94 337 89 347 97 352C103 355 108 348 102 345" fill="none" stroke="url(#fr-carve)" stroke-width="3.4" stroke-linecap="round"/>
-            <path d="M154 337C166 337 171 347 163 352C157 355 152 348 158 345" fill="none" stroke="url(#fr-carve)" stroke-width="3.4" stroke-linecap="round"/>
-            <circle cx="22" cy="30" r="5"/><circle cx="238" cy="30" r="5"/><circle cx="22" cy="330" r="5"/><circle cx="238" cy="330" r="5"/>
-          </g>
-          <rect x="70" y="60" width="120" height="8" rx="4" fill="#3e352f"/>
-          <path d="M72 70.5H188" stroke="#efe8dd" stroke-width=".9" opacity=".8"/>
-          <path d="M72 59.3H188" stroke="#7d7062" stroke-width=".8"/>
-        </svg>
-        <div class="ent-slot-clip">
+      <div class="ent-head" id="ent-head">
+        <p class="ent-pre">The wedding of</p>
+        <h1 class="ent-names" id="ent-names"></h1>
+      </div>
+      <div class="ent-stage" id="ent-stage">
+        <div class="ent-loading" id="ent-loading" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <!-- shown instead of the booth on phones that cannot draw 3D -->
+        <div class="ent-flat hidden" id="ent-flat">
           <div class="ent-photo" id="ent-photo">
             <div class="ent-photo-img" id="ent-photo-img"><div class="ent-chem" id="ent-chem"></div></div>
             <span class="ent-photo-date" id="ent-photo-date"></span>
           </div>
         </div>
-        <button type="button" class="ent-knob" id="ent-knob" aria-label="Press the button to see the couple's photo"></button>
       </div>
-      <p class="ent-hint" id="ent-hint">Tap the button</p>
-      <div class="ent-brand"><img class="mark-img" src="/brand/mark-640.webp" srcset="/brand/mark-640.webp 640w, /brand/mark-1236.webp 1236w" sizes="(max-width: 760px) 160px, 260px" width="1236" height="848" alt="made of memories.site" decoding="async"></div>
+      <button type="button" class="ent-hint" id="ent-knob" aria-label="Start the photo booth to see the couple's photos" disabled><span id="ent-hint">Setting up the photo booth…</span></button>
     </section>
 
     <section class="ent-scene hidden" id="ent-b">

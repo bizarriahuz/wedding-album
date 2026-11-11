@@ -67,13 +67,16 @@
     show($('share'), false);
   }
 
-  // ---------- entrance (once per visit): frame -> instant photo -> lace envelope letter ----------
+  // ---------- entrance (once per visit): photo booth prints the couple's strip -> envelope letter ----------
   const ENT_KEY = `ga-ent:${slug}`;
+  const BOOTH_SRC = '/booth/booth.js?v=1';
   let entranceOn = false;
   try {
     entranceOn = !!state.token && !state.coupleToken && !sessionStorage.getItem(ENT_KEY);
   } catch { entranceOn = !!state.token && !state.coupleToken; }
   if (entranceOn) { show($('entrance')); document.body.style.overflow = 'hidden'; }
+  // start fetching the 3D booth straight away, alongside the album details
+  const boothCode = entranceOn ? import(BOOTH_SRC).catch(() => null) : null;
 
   const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   const running = new Set();
@@ -87,26 +90,39 @@
     a.finished.finally(() => running.delete(a));
     return a.finished.catch(() => {});
   }
-  const fastForward = () => running.forEach((a) => { try { a.finish(); } catch {} });
   const pause = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
+  const within = (promise, ms) => Promise.race([promise, new Promise((_, no) => setTimeout(() => no(new Error('slow')), ms))]);
 
   let entStage = 'idle';
   let entEvent = null;
+  let booth = null;            // the 3D booth, once it is on screen
+  let boothMode = 'loading';   // loading -> 3d, or flat when this phone cannot draw it
+  let pressedAt = 0, endHold = null;
+
+  function fastForward() {
+    running.forEach((a) => { try { a.finish(); } catch {} });
+    if (performance.now() - pressedAt < 900) return;   // a double tap on the button should not rush the show
+    if (booth) booth.fastForward();
+    if (endHold) endHold();
+  }
+  function dropBooth() { if (booth) { booth.dispose(); booth = null; } boothMode = 'gone'; }
 
   function dropEntrance() {
     if (!entranceOn) return;
     entranceOn = false;
+    dropBooth();
     show($('entrance'), false);
     document.body.style.overflow = '';
   }
 
   function leaveEntrance() {
     try { sessionStorage.setItem(ENT_KEY, '1'); } catch {}
-    fastForward();
+    running.forEach((a) => { try { a.finish(); } catch {} });
+    if (endHold) endHold();
     const ent = $('entrance');
     ent.classList.add('leaving');
     document.body.style.overflow = '';
-    setTimeout(() => { show(ent, false); ent.classList.remove('leaving'); }, 500);
+    setTimeout(() => { show(ent, false); ent.classList.remove('leaving'); dropBooth(); }, 500);
     entranceOn = false;
     entStage = 'done';
     if (!$('join').classList.contains('hidden')) setTimeout(() => $('name').focus(), 520);
@@ -119,11 +135,12 @@
     const initials = parts.length === 2 ? [parts[0][0] || '', parts[1][0] || ''] : [ev.couple_names[0] || ''];
     $('ent-names').textContent = ev.couple_names;
     const d = new Date(ev.event_date + 'T00:00:00');
-    $('ent-photo-date').textContent = d.toLocaleDateString('en-SG', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+    const dateText = d.toLocaleDateString('en-SG', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.');
+    $('ent-photo-date').textContent = dateText;
     const img = $('ent-photo-img');
     const strip = (ev.strip_urls || []).filter(Boolean);
+    // the flat strip, kept ready for phones that cannot draw the 3D booth
     if (strip.length) {
-      // photo-booth strip: one cell per photo, stacked above the date
       const photo = $('ent-photo');
       photo.classList.add('strip');
       img.remove();
@@ -134,53 +151,106 @@
         const chem = document.createElement('div'); chem.className = 'ent-chem';
         cell.append(chem);
         photo.insertBefore(cell, $('ent-photo-date'));
-        new Image().src = url; // start loading now, while the frame is on screen
       });
     } else if (ev.cover_url) {
       img.classList.add('ent-cell');
       img.style.backgroundImage = `url("${ev.cover_url}")`;
-      new Image().src = ev.cover_url; // start loading now, while the frame is on screen
     } else {
       img.classList.add('ent-cell');
       img.classList.add('no-photo');
       img.dataset.initials = initials.join('');
     }
-    introFrame();
+    introWords();
+    startBooth({
+      theme: ev.theme === 'ivory' ? 'ivory' : 'ha-florals', names: ev.couple_names, dateText, initials,
+      photos: strip.length ? strip : (ev.cover_url ? [ev.cover_url] : []), portrait: !strip.length,
+    });
   }
 
-  async function introFrame() {
+  function introWords() {
     entStage = 'frame';
     const els = [$('ent-a').querySelector('.ent-pre'), $('ent-names')];
     els.forEach((el, n) => anim(el, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: n * 120 }));
-    anim($('ent-frame'), [{ opacity: 0, transform: 'scale(.94)' }, { opacity: 1, transform: 'none' }], { duration: 800, delay: 200 });
-    anim($('ent-hint'), [{ opacity: 0 }, { opacity: 1 }], { duration: 600, delay: 1200 });
-    setTimeout(() => { if (entStage === 'frame') $('ent-knob').classList.add('nudge'); }, reduceMotion ? 0 : 4500);
+    anim($('ent-knob'), [{ opacity: 0 }, { opacity: 1 }], { duration: 600, delay: 500 });
+  }
+
+  // The free space between the names and the hint, where the booth should stand
+  function boothFrame() {
+    const st = $('ent-stage').getBoundingClientRect(), W = window.innerWidth;
+    const side = W < 600 ? 26 : 110, w = Math.min(W - side * 2, 760);
+    return { left: (W - w) / 2, top: st.top, width: w, height: st.height };
+  }
+
+  function ready(text) {
+    const knob = $('ent-knob');
+    $('ent-hint').textContent = text;
+    knob.disabled = false;
+  }
+
+  function useFlat() {
+    if (boothMode === 'flat' || boothMode === 'gone') return;
+    if (booth) { booth.dispose(); booth = null; }
+    boothMode = 'flat';
+    show($('ent-loading'), false);
+    show($('ent-flat'));
+    $('ent-knob').classList.add('as-button');
+    if (entStage === 'frame') ready('See the photos');
+    else if (entStage === 'photo') toEnvelope();     // the 3D booth gave out mid-show: carry on to the letter
+  }
+
+  async function startBooth(cfg) {
+    if (!window.WebGL2RenderingContext) return useFlat();
+    try {
+      const mod = await within(boothCode, 12000);
+      if (!mod || !mod.supported()) throw new Error('no 3d');
+      const making = mod.create({
+        ...cfg, mount: $('ent-3d'), input: $('entrance'), frame: boothFrame, reduceMotion,
+        fonts: { script: getComputedStyle($('ent-names')).fontFamily, caps: getComputedStyle($('entrance')).fontFamily },
+        onFlash: () => { try { navigator.vibrate && navigator.vibrate(10); } catch {} },
+        onFail: () => useFlat(),
+      });
+      let b;
+      try { b = await within(making, 10000); }
+      catch (err) { making.then((late) => late && late.dispose(), () => {}); throw err; }
+      if (!b) throw new Error('no booth');
+      if (!entranceOn || entStage !== 'frame' || boothMode !== 'loading') { b.dispose(); return; }
+      booth = b; boothMode = '3d';
+      show($('ent-loading'), false);
+      // for checking frames by hand (not used by guests)
+      if (window.__boothDebug) window.__booth = { api: b, ready: true, show() { $('ent-head').style.opacity = 0; $('ent-knob').style.opacity = 0; } };
+      await booth.intro();
+      if (entStage === 'frame' && boothMode === '3d') ready('Tap the button');
+    } catch { useFlat(); }
   }
 
   async function ejectPhoto() {
-    if (entStage !== 'frame') return;
+    if (entStage !== 'frame' || boothMode === 'loading' || $('ent-knob').disabled) return;
     entStage = 'photo';
-    const knob = $('ent-knob');
-    knob.classList.remove('nudge');
-    knob.classList.add('pressed');
-    setTimeout(() => knob.classList.remove('pressed'), 180);
-    anim($('ent-hint'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300 });
-    const photoEl = $('ent-photo');
-    const strip = photoEl.classList.contains('strip');
-    const hidden = strip ? -(photoEl.offsetHeight + 6) : -172;
-    const photo = anim(photoEl, [{ transform: `translateY(${hidden}px)` }, { transform: 'translateY(8px)' }],
-      { duration: strip ? 2400 : 2000, delay: 200, easing: 'cubic-bezier(.4, .08, .25, 1)' });
-    // each photo develops in turn, top to bottom
-    const devs = [...photoEl.querySelectorAll('.ent-cell')].map((cell, i) => {
-      const delay = 900 + i * 550;
-      const chem = cell.querySelector('.ent-chem');
-      if (chem) anim(chem, [{ opacity: 1 }, { opacity: 0 }], { duration: 2800, delay, easing: 'ease-out' });
-      return anim(cell, [{ filter: 'sepia(1) brightness(.42) contrast(.7) blur(1.5px)' }, { filter: 'none' }], { duration: 2800, delay, easing: 'ease-out' });
-    });
-    await Promise.all([photo, ...devs]);
-    // developed: drop the filter animations so nothing lingers on the photos (end state equals the plain style)
-    photoEl.querySelectorAll('.ent-cell, .ent-chem').forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
-    await pause(1100);
+    pressedAt = performance.now();
+    anim($('ent-knob'), [{ opacity: 1 }, { opacity: 0 }], { duration: 300 });
+    if (boothMode === '3d' && booth) {
+      try { navigator.vibrate && navigator.vibrate(14); } catch {}
+      anim($('ent-head'), [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-14px)' }], { duration: 450, easing: 'ease-in' });
+      await booth.press();
+      // let the strip be admired for a moment; a tap moves on sooner
+      await new Promise((res) => { endHold = res; setTimeout(res, reduceMotion ? 1800 : 2600); });
+      endHold = null;
+    } else {
+      // flat strip: slides up and develops, one photo after another
+      const photoEl = $('ent-photo');
+      const slide = anim(photoEl, [{ opacity: 0, transform: 'translateY(26px) scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: 900, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+      photoEl.classList.add('out');
+      const devs = [...photoEl.querySelectorAll('.ent-cell')].map((cell, i) => {
+        const delay = 400 + i * 550;
+        const chem = cell.querySelector('.ent-chem');
+        if (chem) anim(chem, [{ opacity: 1 }, { opacity: 0 }], { duration: 2400, delay, easing: 'ease-out' });
+        return anim(cell, [{ filter: 'sepia(1) brightness(.42) contrast(.7) blur(1.5px)' }, { filter: 'none' }], { duration: 2400, delay, easing: 'ease-out' });
+      });
+      await Promise.all([slide, ...devs]);
+      // developed: drop the filter animations so nothing lingers on the photos (end state equals the plain style)
+      photoEl.querySelectorAll('.ent-cell, .ent-chem').forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
+      await pause(1300);
+    }
     if (entStage === 'photo') toEnvelope();
   }
 
@@ -212,9 +282,11 @@
   async function toEnvelope() {
     if (entStage === 'envelope' || entStage === 'done') return;
     entStage = 'envelope';
-    fastForward();
+    running.forEach((a) => { try { a.finish(); } catch {} });
+    if (booth) booth.leave(reduceMotion ? 0.01 : 0.6);
     await anim($('ent-a'), [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.96)' }], { duration: 600, easing: 'ease-in' });
     show($('ent-a'), false);
+    dropBooth();
     writeLetter();
     show($('ent-b'));
     $('entrance').scrollTop = 0;
@@ -239,8 +311,10 @@
   }
 
   $('ent-knob').addEventListener('click', (e) => { e.stopPropagation(); ejectPhoto(); });
-  $('ent-a').addEventListener('click', (e) => {
-    if (entStage === 'frame' && e.target.closest('#ent-frame')) ejectPhoto();
+  $('entrance').addEventListener('click', (e) => {
+    if (e.target.closest('#ent-skip, #ent-b')) return;
+    if (booth && booth.wasDragged()) return;           // that was a look around, not a tap
+    if (entStage === 'frame') ejectPhoto();
     else if (entStage === 'photo') fastForward();
   });
   $('ent-b').addEventListener('click', (e) => { if (!e.target.closest('#ent-go')) fastForward(); });

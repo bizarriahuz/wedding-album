@@ -1,1 +1,1 @@
-deployed-from-github 2026-11-10 gallery-wording
+deployed-from-github 2026-11-11 booth3d
