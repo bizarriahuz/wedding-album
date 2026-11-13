@@ -1553,3 +1553,6 @@ html.theme-invite.theme-feast body.guest .ent-booth .ent-hint.as-button { backgr
 html.theme-invite body.guest #empty,
 html.theme-invite body.guest .quality-tip, html.theme-invite body.guest .who, html.theme-invite body.guest .demo-note,
 html.theme-invite body.guest .tile { border-radius: var(--r-surface); }
+
+/* the brand mark sits in a <picture> (AVIF with a WebP fallback); the wrapper takes no space of its own */
+picture.mark-pic { display: contents; }

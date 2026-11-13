@@ -478,3 +478,6 @@ html.motion .sec-title .sub-caps, html.motion .st, html.motion .plan { visibilit
 html.gsap-on .plan { transition: box-shadow .3s ease; will-change: transform; }
 html.gsap-on .plan:hover, html.gsap-on .plan.featured:hover { transform: none; }
 .faq details p { will-change: height; }
+
+/* the brand mark sits in a <picture> (AVIF with a WebP fallback); the wrapper takes no space of its own */
+picture.mark-pic { display: contents; }
