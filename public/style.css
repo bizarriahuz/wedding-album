@@ -1522,3 +1522,13 @@ html.theme-invite.theme-feast body.guest .ent-booth .ent-hint.as-button { backgr
   html.theme-doodle .entrance:has(#ent-a:not(.hidden))::before { display: none !important; }
   html.theme-invite.theme-feast.theme-doodle .ent-scene.ent-booth { padding-top: max(18px, env(safe-area-inset-top)); }
 }
+
+/* Narrow phones (under 400px), guest album only: the doodle border would take ~60px each side and
+   squeeze the cards to ~270px. Here it fades to a faint texture behind the cards and no longer
+   holds the column in. Tablet and desktop are untouched. */
+@media (max-width: 399.98px) {
+  html.theme-invite.theme-feast.theme-doodle body.guest {
+    background-image: url("/themes/doodle/strip-l-faint.webp"), url("/themes/doodle/strip-r-faint.webp");
+  }
+  html.theme-invite.theme-feast.theme-doodle body.guest .wrap { margin-left: 16px; margin-right: 16px; }
+}
