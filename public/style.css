@@ -752,6 +752,15 @@ html.theme-invite body.guest, html.theme-invite body.admin {
   background: #efeeec url("/themes/ha-florals/linen.webp") repeat; background-size: 256px;
   color: #430011; font-family: var(--caps); font-size: 16px; font-variant-numeric: lining-nums;
 }
+/* Corner-radius scale for the invite look.
+   Surfaces (cards, panels, photo frames, empty states) take a small radius so they read as
+   printed card laid against the hand-drawn border. Buttons stay pill-shaped: they are the tap
+   targets, and a full round shape is the clearest "press me" for older guests. */
+html.theme-invite {
+  --r-surface: 5px;    /* cards, panels, photo frames, empty states */
+  --r-control: 5px;    /* inputs, textareas */
+  --r-pill: 999px;     /* primary buttons and segmented controls */
+}
 /* swap the long garlands for the invitation's corner bouquets */
 html.theme-invite body.guest::before, html.theme-invite body.guest::after,
 html.theme-invite body.admin::before, html.theme-invite body.admin::after { display: none; }
@@ -798,10 +807,13 @@ html.theme-invite body.guest p, html.theme-invite body.guest .hint, html.theme-i
 html.theme-invite body.guest button, html.theme-invite body.guest .btn, html.theme-invite body.guest .action, html.theme-invite body.guest .wide {
   font-family: var(--caps); text-transform: none; letter-spacing: .01em; font-weight: 500; font-size: 15.5px; border-radius: 12px;
 }
+html.theme-invite body.guest .action, html.theme-invite body.guest .wide, html.theme-invite body.guest .rec { border-radius: var(--r-surface); }
+/* the chosen segment sits inside a pill track, so it takes the pill too; a 5px chip pokes out past the track's round ends */
+html.theme-invite body.guest .seg-btn { border-radius: var(--r-pill); }
 html.theme-invite body.guest .action, html.theme-invite body.guest button.full, html.theme-invite body.guest .seg-btn.on { background: #4a0c1d; color: #f6f4f1; }
 html.theme-invite body.guest .action.outline { background: #fff; color: #4a0c1d; box-shadow: inset 0 0 0 1.5px #4a0c1d; }
 html.theme-invite body.guest .wide, html.theme-invite body.guest .seg { background: rgba(74, 12, 29, .06); color: #430011; }
-html.theme-invite body.guest input, html.theme-invite body.guest textarea { font-family: var(--caps); font-size: 16px; border-radius: 10px; border-color: rgba(67, 0, 17, .22); color: #430011; }
+html.theme-invite body.guest input, html.theme-invite body.guest textarea { font-family: var(--caps); font-size: 16px; border-radius: var(--r-control); border-color: rgba(67, 0, 17, .22); color: #430011; }
 html.theme-invite body.guest .link-btn { color: #8c3a57; }
 html.theme-invite body.guest .foot { position: relative; height: 230px; margin-top: 40px; }
 html.theme-invite body.guest .foot .deco.bottom { bottom: 0; width: min(104px, 27vw); }
@@ -860,9 +872,10 @@ html.theme-invite body.guest button, html.theme-invite body.guest .btn, html.the
 html.theme-invite body.admin .btn, html.theme-invite body.admin button {
   font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: .16em !important; font-size: 14px;
 }
-html.theme-invite body.guest button.full, html.theme-invite body.admin button:not(.strip-pick):not(.link-btn) { border-radius: 999px; }
+html.theme-invite body.guest button.full, html.theme-invite body.guest #wish-send-voice { border-radius: var(--r-pill); }
+html.theme-invite body.admin button:not(.strip-pick):not(.link-btn) { border-radius: 999px; }
 html.theme-invite body.guest .link-btn, html.theme-invite body.admin .link-btn, html.theme-invite .ent-skip { text-transform: none !important; letter-spacing: .02em !important; font-size: 16px; }
-html.theme-invite body.guest .seg { border-radius: 999px; }
+html.theme-invite body.guest .seg { border-radius: var(--r-pill); }
 html.theme-invite body.guest .seg-btn { font-size: 13px; }
 html.theme-invite body.guest input, html.theme-invite body.guest textarea { font-size: 18px; font-weight: 500; }
 html.theme-invite body.admin input, html.theme-invite body.admin select, html.theme-invite body.admin textarea { font-size: 17px; font-weight: 500; }
@@ -1071,7 +1084,8 @@ html.theme-invite.theme-feast body.admin .card {
   position: relative; z-index: 1; background-color: var(--fe-card); background-image: none; border-color: rgba(217, 183, 122, .55); color: var(--fe-ink);
   box-shadow: 0 2px 3px rgba(20, 0, 0, .3), 0 18px 34px -12px rgba(20, 0, 0, .55);
 }
-html.theme-invite.theme-feast body.guest .panel, html.theme-invite.theme-feast body.guest .gallery-head, html.theme-invite.theme-feast body.admin .card { border-radius: 18px; }
+html.theme-invite.theme-feast body.guest .panel, html.theme-invite.theme-feast body.guest .gallery-head { border-radius: var(--r-surface); }
+html.theme-invite.theme-feast body.admin .card { border-radius: 18px; }
 html.theme-invite.theme-feast body.guest .panel h2, html.theme-invite.theme-feast body.guest .gallery-head h2, html.theme-invite.theme-feast body.guest .wish h2,
 html.theme-invite.theme-feast body.admin .card h2 { font-family: var(--script); font-weight: 400; font-size: 40px; line-height: 1.15; letter-spacing: 0; color: var(--fe-wine); }
 html.theme-invite.theme-feast body.guest .lead, html.theme-invite.theme-feast body.guest .muted, html.theme-invite.theme-feast body.guest .hint,
@@ -1180,11 +1194,11 @@ html.theme-invite.theme-feast body.guest .tile { box-shadow: 0 1px 2px rgba(100,
 
 /* the couple's cover photo shown whole, in its own shape */
 html.theme-invite.theme-feast body.guest .arch.has-photo {
-  width: min(100%, 440px); height: auto; aspect-ratio: var(--photo-ar, 4 / 5); border-radius: 14px; margin: 26px auto 10px;
+  width: min(100%, 440px); height: auto; aspect-ratio: var(--photo-ar, 4 / 5); border-radius: var(--r-surface); margin: 26px auto 10px;
   background-size: contain; background-repeat: no-repeat; background-color: transparent; box-shadow: none;
 }
 html.theme-invite.theme-feast body.guest .arch.has-photo::after {
-  border-radius: 14px; background-size: contain; background-repeat: no-repeat;
+  border-radius: var(--r-surface); background-size: contain; background-repeat: no-repeat;
   box-shadow: 0 0 0 5px #fffaf7, 0 14px 30px -12px rgba(100, 7, 6, .4);
 }
 
@@ -1532,3 +1546,8 @@ html.theme-invite.theme-feast body.guest .ent-booth .ent-hint.as-button { backgr
   }
   html.theme-invite.theme-feast.theme-doodle body.guest .wrap { margin-left: 16px; margin-right: 16px; }
 }
+
+/* invite look: the rest of the surfaces on the radius scale (empty state, small cards, photo tiles) */
+html.theme-invite body.guest #empty,
+html.theme-invite body.guest .quality-tip, html.theme-invite body.guest .who, html.theme-invite body.guest .demo-note,
+html.theme-invite body.guest .tile { border-radius: var(--r-surface); }
