@@ -760,6 +760,7 @@ html.theme-invite {
   --r-surface: 5px;    /* cards, panels, photo frames, empty states */
   --r-control: 5px;    /* inputs, textareas */
   --r-pill: 999px;     /* primary buttons and segmented controls */
+  --r-action: 10px;    /* primary upload buttons */
 }
 /* swap the long garlands for the invitation's corner bouquets */
 html.theme-invite body.guest::before, html.theme-invite body.guest::after,
@@ -807,7 +808,8 @@ html.theme-invite body.guest p, html.theme-invite body.guest .hint, html.theme-i
 html.theme-invite body.guest button, html.theme-invite body.guest .btn, html.theme-invite body.guest .action, html.theme-invite body.guest .wide {
   font-family: var(--caps); text-transform: none; letter-spacing: .01em; font-weight: 500; font-size: 15.5px; border-radius: 12px;
 }
-html.theme-invite body.guest .action, html.theme-invite body.guest .wide, html.theme-invite body.guest .rec { border-radius: var(--r-surface); }
+html.theme-invite body.guest .wide, html.theme-invite body.guest .rec { border-radius: var(--r-surface); }
+html.theme-invite body.guest .action { border-radius: var(--r-action); }
 /* the chosen segment sits inside a pill track, so it takes the pill too; a 5px chip pokes out past the track's round ends */
 html.theme-invite body.guest .seg-btn { border-radius: var(--r-pill); }
 html.theme-invite body.guest .action, html.theme-invite body.guest button.full, html.theme-invite body.guest .seg-btn.on { background: #4a0c1d; color: #f6f4f1; }
