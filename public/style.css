@@ -1590,3 +1590,9 @@ body.guest .vp .vp-btn, html.theme-invite body.guest .vp .vp-btn { border-radius
 body.guest .vp input.vp-bar, html.theme-invite body.guest .vp input.vp-bar { border: 0; background: transparent; box-shadow: none; padding: 0; height: 28px; border-radius: 0; }
 .wish-item .wish-private { font-weight: 400; font-size: 13px; color: var(--ink-soft, #7d5a63); }
 html.theme-invite.theme-feast body.guest .wish-item .wish-private { color: #7d5a63; }
+
+/* a photo this phone can't show (an iPhone HEIC opened on Android): a plain tile rather than a broken image */
+.tile.no-preview { display: grid; place-items: center; background: #efe7da; }
+.tile.no-preview .no-preview-label { font-size: 14px; color: #5a4a3e; }
+html.theme-invite.theme-feast body.guest .tile.no-preview { background: #f2e6dc; }
+html.theme-invite.theme-feast body.guest .tile.no-preview .no-preview-label { color: #590b19; }

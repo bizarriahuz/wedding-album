@@ -46,6 +46,9 @@ const MIGRATIONS = [
      package TEXT, message TEXT, ip_hash TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')))`,
   "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
   "ALTER TABLE events ADD COLUMN poster_key TEXT",
+  // ids of deleted uploads, so a phone still retrying one can't bring it back
+  `CREATE TABLE IF NOT EXISTS media_tombstones (
+     id TEXT PRIMARY KEY, event_id TEXT NOT NULL, deleted_at TEXT NOT NULL DEFAULT (datetime('now')))`,
 ];
 let schemaReady = false;
 async function ensureSchema(env) {
@@ -201,6 +204,7 @@ async function ownerReset(request, env, url) {
     }
     await env.DB.batch([
       env.DB.prepare('DELETE FROM media WHERE event_id = ?').bind(ev.id),
+      env.DB.prepare('DELETE FROM media_tombstones WHERE event_id = ?').bind(ev.id),
       env.DB.prepare('DELETE FROM wishes WHERE event_id = ?').bind(ev.id),
       env.DB.prepare('DELETE FROM guests WHERE event_id = ?').bind(ev.id),
     ]);
@@ -518,7 +522,7 @@ async function adminDeleteMedia(slug, id, request, env) {
   if (ev instanceof Response) return ev;
   const row = await env.DB.prepare('SELECT id, r2_key FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
   if (!row) return json({ ok: true, gone: true });
-  await env.DB.prepare('DELETE FROM media WHERE id = ?').bind(id).run();
+  await env.DB.batch(deleteWithTombstone(env, ev.id, id));
   await env.MEDIA.delete([row.r2_key, thumbKey(ev.id, id)]);
   return json({ ok: true });
 }
@@ -566,6 +570,7 @@ async function uploadThumb(slug, id, request, env) {
   const type = (request.headers.get('Content-Type') || '').split(';')[0];
   if (type !== 'image/jpeg') return json({ error: 'Preview must be JPEG' }, 400);
   if (Number(request.headers.get('Content-Length') || 0) > MAX_THUMB_BYTES) return json({ error: 'Preview too large' }, 413);
+  if (await isTombstoned(env, ev.id, id)) return json({ ok: true, deleted: true });
 
   await env.MEDIA.put(thumbKey(ev.id, id), request.body, { httpMetadata: { contentType: 'image/jpeg' } });
   return json({ ok: true });
@@ -579,6 +584,8 @@ async function uploadMedia(slug, id, request, env, url) {
   // A retry of something that already arrived: nothing to do
   const done = await env.DB.prepare('SELECT id FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
   if (done) return json({ ok: true, duplicate: true });
+  // Deleted while this phone was still sending it: say it's done so the phone stops, but keep nothing
+  if (await isTombstoned(env, ev.id, id)) return json({ ok: true, deleted: true });
 
   const guestId = url.searchParams.get('guest') || '';
   const guest = await env.DB.prepare('SELECT id FROM guests WHERE id = ? AND event_id = ?').bind(guestId, ev.id).first();
@@ -619,6 +626,7 @@ async function largeUploadContext(slug, id, request, env, guestId) {
   if (ev.is_demo) return { res: json({ error: 'The demo takes videos up to 25 MB', code: 'too_large' }, 413) };
   const done = await env.DB.prepare('SELECT id FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
   if (done) return { res: json({ ok: true, duplicate: true }) };
+  if (await isTombstoned(env, ev.id, id)) return { res: json({ ok: true, deleted: true }) };
   const guest = await env.DB.prepare('SELECT id FROM guests WHERE id = ? AND event_id = ?').bind(guestId, ev.id).first();
   if (!guest) return { res: json({ error: 'Please enter your name again', code: 'no_guest' }, 403) };
   return { ev, guest };
@@ -693,7 +701,7 @@ async function deleteMedia(slug, id, request, env) {
   if (!isCouple && (!guestId || row.guest_id !== guestId)) {
     return json({ error: 'You can only delete photos you shared' }, 403);
   }
-  await env.DB.prepare('DELETE FROM media WHERE id = ?').bind(id).run();
+  await env.DB.batch(deleteWithTombstone(env, ev.id, id));
   await env.MEDIA.delete([row.r2_key, thumbKey(ev.id, id)]);
   return json({ ok: true });
 }
@@ -789,6 +797,17 @@ async function authorizeGuest(slug, request, env, forUpload = false) {
   }
   if (forUpload && ev.status !== 'live') return json({ error: 'The couple has paused sharing for now', code: 'closed' }, 403);
   return ev;
+}
+
+// Remove an upload's row and remember its id, in one step
+function deleteWithTombstone(env, eventId, id) {
+  return [
+    env.DB.prepare('DELETE FROM media WHERE id = ?').bind(id),
+    env.DB.prepare('INSERT OR IGNORE INTO media_tombstones (id, event_id) VALUES (?, ?)').bind(id, eventId),
+  ];
+}
+async function isTombstoned(env, eventId, id) {
+  return !!(await env.DB.prepare('SELECT 1 FROM media_tombstones WHERE id = ? AND event_id = ?').bind(id, eventId).first());
 }
 
 function thumbKey(eventId, mediaId) {

@@ -677,7 +677,7 @@
     if (!item.mp) {
       const r = await postJson(`${base}?guest=${g}&type=${type}&bytes=${blob.size}`);
       if (r.status >= 500) throw new Error('server');
-      if (r.status >= 300 || r.data.duplicate) return r;
+      if (r.status >= 300 || r.data.duplicate || r.data.deleted) return r;
       item.mp = { uploadId: r.data.upload_id, size: r.data.part_bytes, parts: [] };
       await qPut(item);
     }
@@ -690,7 +690,7 @@
         (p) => { progress = ((n - 1) * size + p * piece.size) / blob.size; renderStatus(); });
       if (r.data.code === 'upload_gone') await reset();
       if (r.status >= 500) throw new Error('server');
-      if (r.status >= 300 || r.data.duplicate) return r;
+      if (r.status >= 300 || r.data.duplicate || r.data.deleted) return r;
       item.mp.parts.push({ part_number: r.data.part_number, etag: r.data.etag });
       await qPut(item);
     }
@@ -718,8 +718,9 @@
         setPaused(true);
         throw new Error('paused');
       } else if (res.data.code === 'bad_token') {
-        queue = []; // nothing more can be sent
-        toast(res.data.error);
+        // The album link was renewed: keep everything on this phone; it sends once they scan the new QR
+        setPaused(true, 'link');
+        throw new Error('paused');
       } else if (res.status >= 400 && res.status < 500) {
         await done(item, false);
         toast(res.data.error || 'That file could not be shared.');
@@ -744,9 +745,11 @@
   }
 
   // Paused by the couple: say so above the buttons and in the status line
-  let paused = false;
-  function setPaused(on) {
-    paused = on;
+  let paused = false; // false, true (the couple paused sharing) or 'link' (this phone has an old link)
+  const PAUSED_NOTE = $('paused-note').textContent;
+  function setPaused(on, why) {
+    paused = on ? (why || true) : false;
+    $('paused-note').textContent = paused === 'link' ? 'Please scan the QR code again to keep sharing.' : PAUSED_NOTE;
     show($('paused-note'), on);
     document.querySelectorAll('#share .actions button, #share .wide').forEach((b) => { b.disabled = on; });
     renderStatus();
@@ -797,8 +800,8 @@
       $('status-bar').style.width = '0%';
     } else if (paused && !busy) {
       box.className = 'status waiting';
-      $('status-main').textContent = 'Sharing is paused by the couple';
-      $('status-sub').textContent = `${pending} waiting on this phone, will send when it reopens`;
+      $('status-main').textContent = paused === 'link' ? 'Please scan the QR code again' : 'Sharing is paused by the couple';
+      $('status-sub').textContent = paused === 'link' ? `${pending} waiting on this phone, will send after you scan` : `${pending} waiting on this phone, will send when it reopens`;
       $('status-bar').style.width = '0%';
     } else if (waitingUntil && !busy) {
       box.className = 'status waiting';
@@ -1146,9 +1149,11 @@
     img.alt = '';
     img.src = it.thumb_url;
     img.onerror = () => {
+      if (it.kind === 'photo' && img.src !== new URL(it.url, location.href).href) { img.src = it.url; return; } // no preview made: use the photo itself
+      // a video without a preview, or a photo this phone can't show (an iPhone HEIC on Android): plain tile
       img.onerror = null;
-      if (it.kind === 'photo') img.src = it.url; // no preview made: use the photo itself
-      else img.remove();                         // video without preview: plain tile with play badge
+      img.remove();
+      if (it.kind === 'photo') { b.classList.add('no-preview'); b.insertAdjacentHTML('beforeend', '<span class="no-preview-label">Photo</span>'); }
     };
     b.append(img);
     if (it.kind === 'video') b.insertAdjacentHTML('beforeend', '<span class="play" aria-hidden="true"></span>');
