@@ -710,7 +710,7 @@
     try {
       const res = await uploadOne(item);
       if (res.status < 300) {
-        await done(item, true);
+        await done(item, !res.data.removed); // removed by the couple meanwhile: drop it quietly, don't count it
       } else if (res.data.code === 'no_guest') {
         await join(state.name); // device forgot by the server: re-register and retry
       } else if (res.data.code === 'closed') {

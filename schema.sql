@@ -78,3 +78,10 @@ CREATE TABLE IF NOT EXISTS enquiries (
 
 -- Small key/value settings (e.g. which album is the demo)
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+
+-- Uploads that were removed: a late or retried upload of the same id is dropped instead of reappearing
+CREATE TABLE IF NOT EXISTS removed_media (
+  id         TEXT PRIMARY KEY,
+  event_id   TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

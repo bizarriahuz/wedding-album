@@ -13,7 +13,8 @@
 //   PUT  /api/events/:slug/thumbs/:id  small preview image, sent before its media (needs X-Guest-Token)
 //   PUT  /api/events/:slug/media/:id   a photo or video, raw body; safe to retry (needs X-Guest-Token)
 //   GET  /api/admin/:slug/media         every upload for the couple; DELETE /api/admin/:slug/media/:id and /wishes/:id remove one
-//   DELETE /api/events/:slug/media/:id remove an upload: the guest who shared it (X-Guest-Id) or the couple (X-Admin-Token)
+//   DELETE /api/events/:slug/media/:id remove an upload: the guest who shared it (X-Guest-Id) or the couple (X-Admin-Token);
+//                                    a removed id stays removed, even if its upload is still arriving or is sent again
 //   GET  /api/events/:slug/feed      gallery items, ?since= newer or ?before= older (needs X-Guest-Token)
 //   PUT  /api/events/:slug/wishes/:id  a wish: JSON {body} for written, raw audio for voice; safe to retry (needs X-Guest-Token)
 //   GET  /api/events/:slug/wishes    wishes for guests to read, newest first; voice wishes only to whoever recorded them, and a private album gives each guest only their own (needs X-Guest-Token)
@@ -46,6 +47,9 @@ const MIGRATIONS = [
      package TEXT, message TEXT, ip_hash TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')))`,
   "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
   "ALTER TABLE events ADD COLUMN poster_key TEXT",
+  // Uploads the couple or guest removed: a retry or a still-arriving upload of the same id must not bring them back
+  `CREATE TABLE IF NOT EXISTS removed_media (
+     id TEXT PRIMARY KEY, event_id TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')))`,
 ];
 let schemaReady = false;
 async function ensureSchema(env) {
@@ -203,6 +207,7 @@ async function ownerReset(request, env, url) {
       env.DB.prepare('DELETE FROM media WHERE event_id = ?').bind(ev.id),
       env.DB.prepare('DELETE FROM wishes WHERE event_id = ?').bind(ev.id),
       env.DB.prepare('DELETE FROM guests WHERE event_id = ?').bind(ev.id),
+      env.DB.prepare('DELETE FROM removed_media WHERE event_id = ?').bind(ev.id),
     ]);
     out.cleared = true; out.files_removed = removed;
   }
@@ -516,6 +521,8 @@ async function adminMedia(slug, request, env, url) {
 async function adminDeleteMedia(slug, id, request, env) {
   const ev = await authorizeAdmin(slug, request, env);
   if (ev instanceof Response) return ev;
+  // Remember the removal even if the upload hasn't landed yet, so it can't arrive afterwards
+  await rememberRemoved(env, ev.id, id);
   const row = await env.DB.prepare('SELECT id, r2_key FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
   if (!row) return json({ ok: true, gone: true });
   await env.DB.prepare('DELETE FROM media WHERE id = ?').bind(id).run();
@@ -576,9 +583,9 @@ async function uploadMedia(slug, id, request, env, url) {
   if (ev instanceof Response) return ev;
   if (!UUID.test(id)) return json({ error: 'Bad id' }, 400);
 
-  // A retry of something that already arrived: nothing to do
-  const done = await env.DB.prepare('SELECT id FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
-  if (done) return json({ ok: true, duplicate: true });
+  // A retry of something that already arrived, or that was removed since: nothing to do
+  const prior = await priorState(env, ev.id, id);
+  if (prior) return prior;
 
   const guestId = url.searchParams.get('guest') || '';
   const guest = await env.DB.prepare('SELECT id FROM guests WHERE id = ? AND event_id = ?').bind(guestId, ev.id).first();
@@ -603,12 +610,42 @@ async function uploadMedia(slug, id, request, env, url) {
   const key = `events/${ev.id}/media/${id}.${EXT[type]}`;
 
   await env.MEDIA.put(key, request.body, { httpMetadata: { contentType: type } });
-  await env.DB.prepare(
-    `INSERT OR IGNORE INTO media (id, event_id, guest_id, r2_key, kind, mime, bytes, width, height, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`
-  ).bind(id, ev.id, guest.id, key, kind, type, bytes, width, height).run();
+  if (!(await insertMedia(env, [id, ev.id, guest.id, key, kind, type, bytes, width, height]))) {
+    return json({ ok: true, removed: true }); // removed while it was uploading
+  }
 
   return json({ ok: true }, 201);
+}
+
+// Removal tombstones: deleting an upload records its id here, and uploads check it before and after storing
+async function rememberRemoved(env, eventId, id) {
+  await env.DB.prepare('INSERT OR IGNORE INTO removed_media (id, event_id) VALUES (?, ?)').bind(id, eventId).run();
+}
+
+// For an upload id: a response if it already landed or was removed, otherwise null
+async function priorState(env, eventId, id) {
+  const s = await env.DB.prepare(
+    `SELECT EXISTS (SELECT 1 FROM media WHERE id = ?1 AND event_id = ?2) AS done,
+            EXISTS (SELECT 1 FROM removed_media WHERE id = ?1) AS removed`
+  ).bind(id, eventId).first();
+  if (s.removed) return json({ ok: true, removed: true });
+  if (s.done) return json({ ok: true, duplicate: true });
+  return null;
+}
+
+// Adds the media row unless the id was removed meanwhile; then the stored file and preview are deleted.
+// Returns false when it was removed.
+async function insertMedia(env, [id, eventId, guestId, key, kind, mime, bytes, width, height]) {
+  const res = await env.DB.prepare(
+    `INSERT OR IGNORE INTO media (id, event_id, guest_id, r2_key, kind, mime, bytes, width, height, created_at)
+     SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+      WHERE NOT EXISTS (SELECT 1 FROM removed_media WHERE id = ?1)`
+  ).bind(id, eventId, guestId, key, kind, mime, bytes, width, height).run();
+  if (res.meta.changes) return true;
+  const removed = await env.DB.prepare('SELECT 1 FROM removed_media WHERE id = ?').bind(id).first();
+  if (!removed) return true; // a parallel copy of the same upload got there first
+  await env.MEDIA.delete([key, thumbKey(eventId, id)]);
+  return false;
 }
 
 // ---------- large videos in pieces (R2 multipart) ----------
@@ -617,8 +654,8 @@ async function largeUploadContext(slug, id, request, env, guestId) {
   const ev = await authorizeGuest(slug, request, env, true);
   if (ev instanceof Response) return { res: ev };
   if (ev.is_demo) return { res: json({ error: 'The demo takes videos up to 25 MB', code: 'too_large' }, 413) };
-  const done = await env.DB.prepare('SELECT id FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
-  if (done) return { res: json({ ok: true, duplicate: true }) };
+  const prior = await priorState(env, ev.id, id);
+  if (prior) return { res: prior };
   const guest = await env.DB.prepare('SELECT id FROM guests WHERE id = ? AND event_id = ?').bind(guestId, ev.id).first();
   if (!guest) return { res: json({ error: 'Please enter your name again', code: 'no_guest' }, 403) };
   return { ev, guest };
@@ -671,10 +708,9 @@ async function completeParts(slug, id, request, env) {
     return json({ error: 'Upload expired, starting again', code: 'upload_gone' }, 409);
   }
   const bytes = Math.max(0, Math.round(Number(body.bytes) || 0));
-  await env.DB.prepare(
-    `INSERT OR IGNORE INTO media (id, event_id, guest_id, r2_key, kind, mime, bytes, width, height, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`
-  ).bind(id, c.ev.id, c.guest.id, key, kind, type, bytes, toInt(body.w), toInt(body.h)).run();
+  if (!(await insertMedia(env, [id, c.ev.id, c.guest.id, key, kind, type, bytes, toInt(body.w), toInt(body.h)]))) {
+    return json({ ok: true, removed: true });
+  }
   return json({ ok: true }, 201);
 }
 
@@ -687,12 +723,17 @@ async function deleteMedia(slug, id, request, env) {
   const ev = await authorizeGuest(slug, request, env);
   if (ev instanceof Response) return ev;
   const row = await env.DB.prepare('SELECT id, guest_id, r2_key FROM media WHERE id = ? AND event_id = ?').bind(id, ev.id).first();
-  if (!row) return json({ ok: true, gone: true }); // already deleted: nothing to do
   const isCouple = await isCoupleRequest(request, ev);
+  if (!row) {
+    // The couple may be removing something that hasn't finished arriving: make sure it never does
+    if (isCouple) await rememberRemoved(env, ev.id, id);
+    return json({ ok: true, gone: true });
+  }
   const guestId = request.headers.get('X-Guest-Id') || '';
   if (!isCouple && (!guestId || row.guest_id !== guestId)) {
     return json({ error: 'You can only delete photos you shared' }, 403);
   }
+  await rememberRemoved(env, ev.id, id);
   await env.DB.prepare('DELETE FROM media WHERE id = ?').bind(id).run();
   await env.MEDIA.delete([row.r2_key, thumbKey(ev.id, id)]);
   return json({ ok: true });
@@ -977,6 +1018,7 @@ async function cleanDemo(env) {
       env.DB.prepare('DELETE FROM media WHERE event_id = ? AND created_at < ?').bind(ev.id, cutoff),
       env.DB.prepare('DELETE FROM wishes WHERE event_id = ? AND created_at < ?').bind(ev.id, cutoff),
       env.DB.prepare("DELETE FROM guests WHERE event_id = ? AND created_at < datetime('now', ?)").bind(ev.id, `-${DEMO_KEEP_HOURS} hours`),
+      env.DB.prepare("DELETE FROM removed_media WHERE event_id = ? AND created_at < datetime('now', ?)").bind(ev.id, `-${DEMO_KEEP_HOURS} hours`),
     ]);
   }
 }
