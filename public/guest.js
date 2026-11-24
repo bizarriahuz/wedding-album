@@ -701,7 +701,7 @@
   }
 
   async function pump() {
-    if (busy || !queue.length || !state.guestId) return;
+    if (busy || linkExpired || !queue.length || !state.guestId) return;
     if (Date.now() < waitingUntil) return;
     busy = true;
     const item = queue[0];
@@ -718,8 +718,10 @@
         setPaused(true);
         throw new Error('paused');
       } else if (res.data.code === 'bad_token') {
-        queue = []; // nothing more can be sent
-        toast(res.data.error);
+        // The guest link was renewed: keep everything on this phone (it is also saved in IndexedDB) and stop
+        // sending until the guest scans the QR code again, which reloads the page with the new link
+        linkExpired = true;
+        toast('This link has expired. Scan the QR code on your table again; your photos are saved on this phone.');
       } else if (res.status >= 400 && res.status < 500) {
         await done(item, false);
         toast(res.data.error || 'That file could not be shared.');
@@ -745,6 +747,7 @@
 
   // Paused by the couple: say so above the buttons and in the status line
   let paused = false;
+  let linkExpired = false; // guest link renewed while files were queued: hold them until the QR code is scanned again
   function setPaused(on) {
     paused = on;
     show($('paused-note'), on);
@@ -794,6 +797,11 @@
       box.className = 'status';
       $('status-main').textContent = 'Getting your photos ready…';
       $('status-sub').textContent = '';
+      $('status-bar').style.width = '0%';
+    } else if (linkExpired && !busy) {
+      box.className = 'status waiting';
+      $('status-main').textContent = 'Scan the QR code on your table again';
+      $('status-sub').textContent = `${pending} saved on this phone, will send once you do`;
       $('status-bar').style.width = '0%';
     } else if (paused && !busy) {
       box.className = 'status waiting';
@@ -1135,6 +1143,8 @@
     });
   }
 
+  function isHeic(url) { return /\.hei[cf]$/i.test(url); }
+
   function tile(it) {
     const b = document.createElement('button');
     b.type = 'button';
@@ -1147,8 +1157,10 @@
     img.src = it.thumb_url;
     img.onerror = () => {
       img.onerror = null;
-      if (it.kind === 'photo') img.src = it.url; // no preview made: use the photo itself
-      else img.remove();                         // video without preview: plain tile with play badge
+      if (it.kind === 'photo' && !isHeic(it.url)) { img.src = it.url; return; } // no preview made: use the photo itself
+      img.remove();                              // video without preview: plain tile with play badge
+      // HEIC original with no preview: only Safari can draw it, and it's several MB, so show a label instead
+      if (it.kind === 'photo') b.insertAdjacentHTML('beforeend', '<span class="noprev">Photo<br>(open on iPhone)</span>');
     };
     b.append(img);
     if (it.kind === 'video') b.insertAdjacentHTML('beforeend', '<span class="play" aria-hidden="true"></span>');
@@ -1186,6 +1198,17 @@
     } else {
       media = document.createElement('img');
       media.alt = `Photo shared by ${it.guest_name}`;
+      // e.g. a HEIC photo outside Safari: say so and offer the file instead of a broken image
+      media.onerror = () => {
+        const note = document.createElement('p');
+        note.className = 'v-noprev';
+        note.append('This browser can\'t show this photo. ');
+        const a = document.createElement('a');
+        a.href = `${it.url}?download=photo.${isHeic(it.url) ? 'heic' : 'jpg'}`;
+        a.textContent = 'Download it';
+        note.append(a);
+        media.replaceWith(note);
+      };
     }
     media.src = it.url;
     stage.append(media);

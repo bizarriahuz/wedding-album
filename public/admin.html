@@ -284,7 +284,12 @@
           const a = document.createElement('a'); a.href = m.url; a.target = '_blank'; a.rel = 'noopener'; a.className = 'am-thumb';
           a.setAttribute('aria-label', `${m.kind === 'video' ? 'Video' : 'Photo'} from ${m.guest_name}, open full size`);
           const img = document.createElement('img'); img.alt = ''; img.loading = 'lazy'; img.src = m.thumb_url;
-          img.onerror = () => { if (m.kind !== 'video' && img.src.indexOf(m.url) < 0) img.src = m.url; else img.remove(); };
+          img.onerror = () => {
+            const heic = /\.hei[cf]$/i.test(m.url); // only Safari can draw these: label the tile instead of loading the original
+            if (m.kind !== 'video' && !heic && img.src.indexOf(m.url) < 0) { img.src = m.url; return; }
+            img.remove();
+            if (m.kind !== 'video') { const s = document.createElement('span'); s.className = 'am-noprev'; s.textContent = heic ? 'HEIC photo, tap to download' : 'Photo'; a.append(s); }
+          };
           a.append(img);
           if (m.kind === 'video') { const v = document.createElement('span'); v.className = 'am-video'; v.textContent = '▶'; a.append(v); }
           const cap = document.createElement('figcaption'); cap.textContent = m.guest_name;
