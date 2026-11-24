@@ -962,7 +962,7 @@
 
   // ---------- wishes wall ----------
   const WALL_FIRST = 6, WALL_STEP = 10, WALL_FRESH_MS = 60000;
-  let wall = [], wallShown = WALL_FIRST, wallLoadedAt = 0, wallLoading = false;
+  let wallCouple = false, wall = [], wallShown = WALL_FIRST, wallLoadedAt = 0, wallLoading = false;
 
   async function loadWall(force = false) {
     if (wallLoading || !state.guestId) return;
@@ -973,6 +973,7 @@
       wall = data.items || [];
       wallLoadedAt = Date.now();
       const own = data.privacy === 'private' && !data.couple_view;
+      wallCouple = !!data.couple_view;
       $('wall-title').textContent = data.couple_view ? "All Guests' Wishes" : own ? 'Your Wishes' : "Guests' Wishes";
       $('wall-empty').textContent = own ? 'Wishes you leave will appear here.' : 'No wishes yet. Be the first to leave one above.';
       $('wall-count').textContent = wall.length ? `${wall.length} ${wall.length === 1 ? 'wish' : 'wishes'}` : '';
@@ -1004,6 +1005,8 @@
     el.dataset.id = w.id;
     const head = document.createElement('div'); head.className = 'wish-head';
     const who = document.createElement('b'); who.textContent = w.mine ? `${w.guest_name} (you)` : w.guest_name;
+    // a guest's own voice wish is shown back to them only, so say so
+    if (w.kind === 'voice' && w.mine && !wallCouple) { const n = document.createElement('span'); n.className = 'wish-private'; n.textContent = 'Only you and the couple'; who.append(document.createElement('br'), n); }
     const when = document.createElement('time');
     when.dateTime = w.created_at;
     when.textContent = new Date(w.created_at).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });

@@ -16,7 +16,7 @@
 //   DELETE /api/events/:slug/media/:id remove an upload: the guest who shared it (X-Guest-Id) or the couple (X-Admin-Token)
 //   GET  /api/events/:slug/feed      gallery items, ?since= newer or ?before= older (needs X-Guest-Token)
 //   PUT  /api/events/:slug/wishes/:id  a wish: JSON {body} for written, raw audio for voice; safe to retry (needs X-Guest-Token)
-//   GET  /api/events/:slug/wishes    wishes for guests to read, newest first; a private album gives each guest only their own (needs X-Guest-Token)
+//   GET  /api/events/:slug/wishes    wishes for guests to read, newest first; voice wishes only to whoever recorded them, and a private album gives each guest only their own (needs X-Guest-Token)
 //   GET  /api/admin/:slug/wishes     every wish, for the couple (needs X-Admin-Token)
 //   GET  /media/<key>                serve a file from R2
 //   GET  /e/:slug                    guest page (static e.html)
@@ -460,20 +460,22 @@ async function listWishes(slug, request, env) {
   });
 }
 
-// Wishes for the guest page. Follows the album's privacy setting, like the photos do:
-// a public album shows every guest's wish; a private one shows a guest only their own.
+// Wishes for the guest page. Written wishes follow the album's privacy setting, like the photos do:
+// a public album shows every guest's written wish; a private one shows a guest only their own.
+// Voice wishes are always just for the couple: a guest only ever gets back the ones they recorded.
 async function guestWishes(slug, request, env) {
   const ev = await authorizeGuest(slug, request, env);
   if (ev instanceof Response) return ev;
   const isCouple = await isCoupleRequest(request, ev);
   const viewer = request.headers.get('X-Guest-Id') || '';
   const ownOnly = ev.privacy === 'private' && !isCouple;
+  const mineOnly = ownOnly ? ' AND w.guest_id = ?' : isCouple ? '' : " AND (w.kind = 'text' OR w.guest_id = ?)";
   const rows = await env.DB.prepare(
     `SELECT w.id, w.guest_id, w.kind, w.body, w.r2_key, w.created_at, g.display_name AS guest_name
        FROM wishes w LEFT JOIN guests g ON g.id = w.guest_id
-      WHERE w.event_id = ?${ownOnly ? ' AND w.guest_id = ?' : ''}
+      WHERE w.event_id = ?${mineOnly}
       ORDER BY w.created_at DESC LIMIT 500`
-  ).bind(...(ownOnly ? [ev.id, viewer || '-'] : [ev.id])).all();
+  ).bind(...(mineOnly ? [ev.id, viewer || '-'] : [ev.id])).all();
   return json({
     privacy: ev.privacy,
     couple_view: isCouple,

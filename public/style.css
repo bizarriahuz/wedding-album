@@ -1588,3 +1588,5 @@ html.theme-invite.theme-feast body.guest .vp-time { color: #451c20; }
 /* the album's general button and input rules would square the play button and box the bar */
 body.guest .vp .vp-btn, html.theme-invite body.guest .vp .vp-btn { border-radius: 50%; width: 44px; height: 44px; min-height: 0; padding: 0; }
 body.guest .vp input.vp-bar, html.theme-invite body.guest .vp input.vp-bar { border: 0; background: transparent; box-shadow: none; padding: 0; height: 28px; border-radius: 0; }
+.wish-item .wish-private { font-weight: 400; font-size: 13px; color: var(--ink-soft, #7d5a63); }
+html.theme-invite.theme-feast body.guest .wish-item .wish-private { color: #7d5a63; }
