@@ -857,6 +857,50 @@
   }
   fixAudioDuration($('rec-audio'));
 
+  /* Voice player in the album's own colours. The phone's built-in player is grey on grey on
+     iPhones and hard to read, so the <audio> is kept hidden and driven from here. */
+  const fmtTime = (t) => { t = Math.max(0, Math.floor(t || 0)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+  const PLAY_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+  const PAUSE_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>';
+  function voicePlayer(audio, label) {
+    audio.controls = false; audio.classList.add('vp-audio');
+    const wrap = document.createElement('div'); wrap.className = 'vp';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'vp-btn';
+    btn.innerHTML = PLAY_SVG; btn.setAttribute('aria-label', `Play ${label}`);
+    const bar = document.createElement('input'); bar.type = 'range'; bar.className = 'vp-bar';
+    bar.min = 0; bar.max = 1000; bar.step = 1; bar.value = 0; bar.setAttribute('aria-label', `Position in ${label}`);
+    const time = document.createElement('span'); time.className = 'vp-time'; time.textContent = '0:00';
+    wrap.append(btn, bar, time);
+    const len = () => (isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0);
+    const paint = () => {
+      const d = len(), t = audio.currentTime || 0;
+      const f = d ? Math.min(1, t / d) : 0;
+      if (!bar.matches(':active')) bar.value = Math.round(f * 1000);
+      bar.style.setProperty('--vp-fill', `${f * 100}%`);
+      time.textContent = d ? `${fmtTime(t)} / ${fmtTime(d)}` : fmtTime(t);
+    };
+    const playing = (on) => {
+      btn.innerHTML = on ? PAUSE_SVG : PLAY_SVG;
+      btn.setAttribute('aria-label', `${on ? 'Pause' : 'Play'} ${label}`);
+      wrap.classList.toggle('on', on);
+    };
+    btn.onclick = () => {
+      if (audio.paused) {
+        // only one voice note plays at a time
+        document.querySelectorAll('audio.vp-audio').forEach((o) => { if (o !== audio) o.pause(); });
+        audio.play().catch(() => {});
+      } else audio.pause();
+    };
+    bar.oninput = () => { const d = len(); if (d) { audio.currentTime = (bar.value / 1000) * d; paint(); } };
+    audio.addEventListener('play', () => playing(true));
+    audio.addEventListener('pause', () => playing(false));
+    audio.addEventListener('ended', () => { playing(false); audio.currentTime = 0; paint(); });
+    ['timeupdate', 'durationchange', 'loadedmetadata', 'emptied'].forEach((e) => audio.addEventListener(e, paint));
+    audio.after(wrap);
+    return { reset() { audio.pause(); playing(false); paint(); } };
+  }
+  const recPlayer = voicePlayer($('rec-audio'), 'your recording');
+
   const MAX_REC_MS = 60000;
   let recorder = null, recBlob = null, recStart = 0, recTick = null;
   function pickAudioType() {
@@ -904,6 +948,7 @@
   function resetRecording() {
     recBlob = null;
     $('rec-audio').removeAttribute('src');
+    recPlayer.reset();
     show($('rec-review'), false); show($('rec-btn')); show($('rec-hint'));
   }
   $('rec-again').onclick = () => { resetRecording(); startRecording(); };
@@ -918,17 +963,6 @@
   // ---------- wishes wall ----------
   const WALL_FIRST = 6, WALL_STEP = 10, WALL_FRESH_MS = 60000;
   let wall = [], wallShown = WALL_FIRST, wallLoadedAt = 0, wallLoading = false;
-
-  // Voice notes recorded in Chrome report no length until played through; this makes the bar work
-  function fixAudioDuration(audio) {
-    audio.addEventListener('loadedmetadata', function once() {
-      audio.removeEventListener('loadedmetadata', once);
-      if (audio.duration === Infinity || isNaN(audio.duration)) {
-        audio.currentTime = 1e101;
-        audio.addEventListener('timeupdate', function reset() { audio.removeEventListener('timeupdate', reset); audio.currentTime = 0; });
-      }
-    });
-  }
 
   async function loadWall(force = false) {
     if (wallLoading || !state.guestId) return;
@@ -978,9 +1012,9 @@
     if (w.kind === 'voice' && w.audio_url) {
       const a = document.createElement('audio');
       a.controls = true; a.preload = 'none';   // nothing downloads until someone presses play
-      a.setAttribute('aria-label', `Voice wish from ${w.guest_name}`);
       fixAudioDuration(a); a.src = w.audio_url;
       el.append(a);
+      voicePlayer(a, `voice wish from ${w.guest_name}`);
     } else {
       const p = document.createElement('p'); p.className = 'wish-body'; p.textContent = w.body || '';
       el.append(p);
