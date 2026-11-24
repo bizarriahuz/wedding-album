@@ -1005,8 +1005,6 @@
     el.dataset.id = w.id;
     const head = document.createElement('div'); head.className = 'wish-head';
     const who = document.createElement('b'); who.textContent = w.mine ? `${w.guest_name} (you)` : w.guest_name;
-    // a guest's own voice wish is shown back to them only, so say so
-    if (w.kind === 'voice' && w.mine && !wallCouple) { const n = document.createElement('span'); n.className = 'wish-private'; n.textContent = 'Only you and the couple'; who.append(document.createElement('br'), n); }
     const when = document.createElement('time');
     when.dateTime = w.created_at;
     when.textContent = new Date(w.created_at).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
