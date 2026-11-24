@@ -1,0 +1,6 @@
+{
+  "name": "walbum-loadtest",
+  "private": true,
+  "type": "module",
+  "dependencies": { "undici": "^7.16.0" }
+}
