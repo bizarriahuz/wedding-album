@@ -1556,3 +1556,10 @@ html.theme-invite body.guest .tile { border-radius: var(--r-surface); }
 
 /* the brand mark sits in a <picture> (AVIF with a WebP fallback); the wrapper takes no space of its own */
 picture.mark-pic { display: contents; }
+
+/* wishes wall on the guest page */
+.wall { margin-top: 26px; }
+.wall .wishes { margin-top: 12px; }
+html.theme-invite body.guest .wall .wish-item { border-radius: var(--r-surface); }
+html.theme-invite.theme-feast body.guest .wall .wish-item { background: #fffdf7; border-color: rgba(207, 184, 140, .6); }
+html.theme-invite.theme-feast body.guest .wall .wish-item.mine { border-color: rgba(102, 120, 95, .55); }

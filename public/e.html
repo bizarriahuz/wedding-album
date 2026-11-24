@@ -129,7 +129,7 @@
 
       <section class="panel wish" id="wish" aria-labelledby="wish-title">
         <h2 id="wish-title">Leave a wish</h2>
-        <p class="lead">Write a message or record one in your own voice. Only the couple will see it.</p>
+        <p class="lead" id="wish-lead">Write a message or record one in your own voice. The couple and their guests can read it below.</p>
         <div class="seg" role="tablist" aria-label="How to leave your wish">
           <button type="button" class="seg-btn on" data-tab="write" role="tab" aria-selected="true">Write</button>
           <button type="button" class="seg-btn" data-tab="record" role="tab" aria-selected="false" id="seg-record">Record voice</button>
@@ -160,6 +160,17 @@
       <div id="empty" class="center hidden">No photos yet. Be the first to share one.</div>
       <div id="grid" class="grid"></div>
       <p class="center"><button type="button" class="hidden" id="more">Show older photos</button></p>
+
+      <!-- wishes everyone has left (a private album shows each guest only their own) -->
+      <section class="wall" id="wall" aria-labelledby="wall-title">
+        <div class="gallery-head">
+          <h2 id="wall-title">Guests' Wishes</h2>
+          <span id="wall-count" class="muted"></span>
+        </div>
+        <div id="wall-empty" class="center hidden">No wishes yet. Be the first to leave one above.</div>
+        <div id="wall-list" class="wishes"></div>
+        <p class="center"><button type="button" class="hidden" id="wall-more">Show more wishes</button></p>
+      </section>
     </section>
 
     <footer class="foot">

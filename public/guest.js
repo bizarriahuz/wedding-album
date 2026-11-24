@@ -417,6 +417,7 @@
     setPaused(ev.status && ev.status !== 'live');
     if (ev.privacy === 'private') {
       document.querySelector('#join .lead').textContent = "Share your photos and videos with the couple. Only they will see them. What's your name?";
+      $('wish-lead').textContent = 'Write a message or record one in your own voice. Only the couple will see it.';
     }
 
     const arch = $('arch');
@@ -471,6 +472,7 @@
     show($('share'));
     $('who-name').textContent = state.name;
     loadGallery();
+    loadWall();
     resumeQueue();
   }
 
@@ -757,6 +759,7 @@
       state.wishCount = (state.wishCount || 0) + 1;
       saveState();
       toast('Your wish has been sent to the couple.');
+      loadWall(true);
       return;
     }
     if (ok) {
@@ -911,6 +914,85 @@
     resetRecording();
     wishMsg('Thank you! Your voice wish is on its way to the couple.');
   };
+
+  // ---------- wishes wall ----------
+  const WALL_FIRST = 6, WALL_STEP = 10, WALL_FRESH_MS = 60000;
+  let wall = [], wallShown = WALL_FIRST, wallLoadedAt = 0, wallLoading = false;
+
+  // Voice notes recorded in Chrome report no length until played through; this makes the bar work
+  function fixAudioDuration(audio) {
+    audio.addEventListener('loadedmetadata', function once() {
+      audio.removeEventListener('loadedmetadata', once);
+      if (audio.duration === Infinity || isNaN(audio.duration)) {
+        audio.currentTime = 1e101;
+        audio.addEventListener('timeupdate', function reset() { audio.removeEventListener('timeupdate', reset); audio.currentTime = 0; });
+      }
+    });
+  }
+
+  async function loadWall(force = false) {
+    if (wallLoading || !state.guestId) return;
+    if (!force && Date.now() - wallLoadedAt < WALL_FRESH_MS) return;
+    wallLoading = true;
+    try {
+      const data = await api('/wishes');
+      wall = data.items || [];
+      wallLoadedAt = Date.now();
+      const own = data.privacy === 'private' && !data.couple_view;
+      $('wall-title').textContent = data.couple_view ? "All Guests' Wishes" : own ? 'Your Wishes' : "Guests' Wishes";
+      $('wall-empty').textContent = own ? 'Wishes you leave will appear here.' : 'No wishes yet. Be the first to leave one above.';
+      $('wall-count').textContent = wall.length ? `${wall.length} ${wall.length === 1 ? 'wish' : 'wishes'}` : '';
+      renderWall();
+    } catch {} finally { wallLoading = false; }
+  }
+
+  function renderWall() {
+    const list = $('wall-list');
+    show($('wall-empty'), wall.length === 0);
+    const want = wall.slice(0, wallShown);
+    // keep cards that are already there (a voice note mid-play keeps playing); add new ones in order
+    const have = new Map([...list.children].map((el) => [el.dataset.id, el]));
+    let prev = null;
+    want.forEach((w) => {
+      let el = have.get(w.id);
+      if (!el) el = wishCard(w);
+      have.delete(w.id);
+      if (prev ? prev.nextSibling !== el : list.firstChild !== el) list.insertBefore(el, prev ? prev.nextSibling : list.firstChild);
+      prev = el;
+    });
+    have.forEach((el) => el.remove());
+    show($('wall-more'), wall.length > wallShown);
+  }
+
+  function wishCard(w) {
+    const el = document.createElement('article');
+    el.className = 'wish-item' + (w.mine ? ' mine' : '');
+    el.dataset.id = w.id;
+    const head = document.createElement('div'); head.className = 'wish-head';
+    const who = document.createElement('b'); who.textContent = w.mine ? `${w.guest_name} (you)` : w.guest_name;
+    const when = document.createElement('time');
+    when.dateTime = w.created_at;
+    when.textContent = new Date(w.created_at).toLocaleString('en-SG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+    head.append(who, when);
+    el.append(head);
+    if (w.kind === 'voice' && w.audio_url) {
+      const a = document.createElement('audio');
+      a.controls = true; a.preload = 'none';   // nothing downloads until someone presses play
+      a.setAttribute('aria-label', `Voice wish from ${w.guest_name}`);
+      fixAudioDuration(a); a.src = w.audio_url;
+      el.append(a);
+    } else {
+      const p = document.createElement('p'); p.className = 'wish-body'; p.textContent = w.body || '';
+      el.append(p);
+    }
+    return el;
+  }
+
+  $('wall-more').onclick = () => { wallShown += WALL_STEP; renderWall(); };
+  // check for new wishes when the wall comes into view, at most once a minute
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting) && entered) loadWall(); }).observe($('wall'));
+  }
 
   // ---------- gallery ----------
   const items = new Map(); // id -> item
