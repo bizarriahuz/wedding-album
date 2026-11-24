@@ -54,7 +54,7 @@ Local data lives in `.wrangler/` and never touches the live database.
 ## Notes
 
 - The admin token sits after `#` in the link, so browsers never send it to the server logs. Only its SHA-256 hash is stored. Lose the link and the admin page is lost too (you could reset it directly in D1).
-- Cover uploads go through the Worker (10 MB limit). Guest uploads in phase 2 will use the same route at first; Workers accept up to 100 MB per request on the free plan, which covers compressed photos and 60-second videos.
+- Cover uploads go through the Worker (10 MB limit). The largest request Cloudflare accepts depends on the **domain's** Cloudflare plan, not the Workers plan: 100 MB on Free and Pro, 200 MB on Business. Guest photos and videos up to 20 MB go up in one request (capped at 95 MB in `src/index.js`). Anything larger goes up in 10 MB pieces through R2 multipart, up to 1 GB.
 - Albums get an `expires_at` 30 days after the event date. Nothing deletes media yet; that's a later job.
 
 
